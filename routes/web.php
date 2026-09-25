@@ -1,10 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ArchiveController;
+use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
+Route::get('/', [ArchiveController::class, 'index']);
 Route::resource('archives', ArchiveController::class);

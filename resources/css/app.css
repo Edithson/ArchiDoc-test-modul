@@ -4,6 +4,48 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Figtree', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-brand-50: #eff9f9;
+    --color-brand-100: #dcf3f2;
+    --color-brand-200: #bee9e6;
+    --color-brand-300: #94dbd6;
+    --color-brand-400: #66cbc5;
+    --color-brand-500: #40beb7;
+    --color-brand-600: #339892;
+    --color-brand-700: #297a75;
+    --color-brand-800: #21635f;
+    --color-brand-900: #194c49;
+    --color-brand-950: #113533;
 }
+
+/* Barre de défilement discrète pour les listes déroulantes */
+.styled-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+.styled-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.styled-scroll::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 9999px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
