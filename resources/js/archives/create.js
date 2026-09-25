@@ -1,3 +1,5 @@
+import { parseFilename } from './parser.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     /* Données dynamiques injectées depuis le contrôleur */
     const ARCHIVE_TYPES = (window.ArchiDoc && window.ArchiDoc.archiveTypes) || [];
@@ -13,7 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnRemoveFile = document.getElementById('btn-remove-file');
     const fileError = document.getElementById('file-error');
 
+    const autofillNotice = document.getElementById('autofill-notice');
+    const autofillNoticeText = document.getElementById('autofill-notice-text');
+
     const formatSelect = document.getElementById('format');
+    const typeInput = document.getElementById('typearchive');
+    const typeListbox = document.getElementById('typearchive-listbox');
+    const typeHint = document.getElementById('typearchive-hint');
+    const descriptionInput = document.getElementById('description');
+    const descriptionCount = document.getElementById('description-count');
+    const dateInput = document.getElementById('date_doc');
 
     /* Aperçu DOMs */
     const previewEmptyState = document.getElementById('preview-empty-state');
@@ -64,9 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (dropzonePrompt) dropzonePrompt.classList.remove('hidden');
         if (selectedFileBadge) selectedFileBadge.classList.add('hidden');
+        if (autofillNotice) autofillNotice.classList.add('hidden');
     }
 
-    /* Mise à jour de l'aperçu lors du choix de fichier */
+    /* Traitement et pré-remplissage automatique lors de la sélection du fichier */
     function handleFileSelected(file) {
         if (!file) {
             clearPreview();
@@ -117,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (previewPdf) previewPdf.src = currentObjectURL;
 
             // Auto-sélection du format
-            if (formatSelect && !formatSelect.value) {
+            if (formatSelect) {
                 formatSelect.value = 'Document PDF';
             }
         } else if (isImage) {
@@ -139,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (previewImage) previewImage.src = currentObjectURL;
 
             // Auto-sélection du format
-            if (formatSelect && !formatSelect.value) {
+            if (formatSelect) {
                 formatSelect.value = 'Image';
             }
         } else {
@@ -160,6 +172,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (previewToolbar) previewToolbar.classList.remove('hidden');
+
+        /* ------------------------------------------------------------------ */
+        /* EXTRACTION ET PRE-REMPLISSAGE AUTOMATIQUE                          */
+        /* ------------------------------------------------------------------ */
+        const extracted = parseFilename(file.name, ARCHIVE_TYPES);
+        if (extracted) {
+            const autofillDetails = [];
+
+            if (extracted.typeArchive && typeInput) {
+                typeInput.value = extracted.typeArchive;
+                autofillDetails.push(`Type: "${extracted.typeArchive}"`);
+            }
+
+            if (extracted.dateDoc && dateInput) {
+                dateInput.value = extracted.dateDoc;
+                autofillDetails.push(`Date: "${extracted.dateDoc}"`);
+            }
+
+            if (extracted.description && descriptionInput) {
+                descriptionInput.value = extracted.description;
+                const len = descriptionInput.value.length;
+                if (descriptionCount) {
+                    descriptionCount.textContent = `${len}/30`;
+                    descriptionCount.classList.toggle('text-red-500', len >= 30);
+                    descriptionCount.classList.toggle('text-amber-600', len >= 25 && len < 30);
+                    descriptionCount.classList.toggle('text-gray-400', len < 25);
+                }
+                autofillDetails.push(`Objet: "${extracted.description}"`);
+            }
+
+            if (autofillDetails.length > 0 && autofillNotice && autofillNoticeText) {
+                const sepLabel = extracted.separator === ' ' ? 'espace' : `"${extracted.separator}"`;
+                autofillNoticeText.textContent = `Informations extraites du nom de fichier (séparateur ${sepLabel}) : ${autofillDetails.join(
+                    ', '
+                )}. Veuillez vérifier la concordance ci-dessous.`;
+                autofillNotice.classList.remove('hidden');
+            }
+        }
     }
 
     /* Evénements Dropzone et File Input */
@@ -214,9 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ------------------------------------------------------------------ */
     /* Combobox "Type d'archives" avec autocomplétion                     */
     /* ------------------------------------------------------------------ */
-    const typeInput = document.getElementById('typearchive');
-    const typeListbox = document.getElementById('typearchive-listbox');
-    const typeHint = document.getElementById('typearchive-hint');
     let activeIndex = -1;
     let currentMatches = [];
 
@@ -341,8 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* Compteur de caractères — Objet de l'archive */
-    const descriptionInput = document.getElementById('description');
-    const descriptionCount = document.getElementById('description-count');
     if (descriptionInput && descriptionCount) {
         descriptionInput.addEventListener('input', () => {
             const len = descriptionInput.value.length;
@@ -354,7 +399,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* Date signature : restriction max à aujourd'hui */
-    const dateInput = document.getElementById('date_doc');
     if (dateInput) {
         dateInput.max = new Date().toISOString().split('T')[0];
     }

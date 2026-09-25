@@ -98,6 +98,15 @@
                   </div>
 
                 </div>
+                
+                <!-- Notification de pré-remplissage automatique -->
+                <div id="autofill-notice" class="mt-2.5 hidden flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50/80 p-3 text-xs text-brand-900 shadow-sm transition-all">
+                  <svg class="h-4 w-4 shrink-0 text-brand-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                  <span id="autofill-notice-text">Informations détectées et pré-remplies automatiquement depuis le nom du fichier. Veuillez vérifier la concordance ci-dessous.</span>
+                </div>
+
                 <p id="file-error" class="mt-1.5 hidden text-sm text-red-600" role="alert"></p>
               </div>
 
