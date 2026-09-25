@@ -184,10 +184,10 @@ export function parseFilename(filename, availableTypes = []) {
         }
     }
 
-    // Formater la description (résumé de l'objet, limité à 30 chars)
+    // Formater la description (résumé de l'objet, limité à 250 chars)
     let description = nomSansExt.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
-    if (description.length > 30) {
-        description = description.substring(0, 30).trim();
+    if (description.length > 250) {
+        description = description.substring(0, 250).trim();
     }
 
     return {

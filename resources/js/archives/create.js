@@ -1,6 +1,32 @@
+import { Notyf } from 'notyf';
 import { parseFilename } from './parser.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    /* Initialisation de la bibliothèque Toast ultra-légère Notyf */
+    const notyf = new Notyf({
+        duration: 4000,
+        position: { x: 'right', y: 'top' },
+        dismissible: true,
+        types: [
+            {
+                type: 'success',
+                background: '#297a75',
+                icon: {
+                    className: 'notyf__icon--success',
+                    tagName: 'i',
+                },
+            },
+            {
+                type: 'error',
+                background: '#e11d48',
+                icon: {
+                    className: 'notyf__icon--error',
+                    tagName: 'i',
+                },
+            },
+        ],
+    });
+
     /* Données dynamiques injectées depuis le contrôleur */
     const ARCHIVE_TYPES = (window.ArchiDoc && window.ArchiDoc.archiveTypes) || [];
 
@@ -128,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (previewPdf) previewPdf.src = currentObjectURL;
 
-            // Auto-sélection du format
+            // Auto-sélection du format : PDF
             if (formatSelect) {
                 formatSelect.value = 'Document PDF';
             }
@@ -150,11 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (previewImage) previewImage.src = currentObjectURL;
 
-            // Auto-sélection du format
+            // Auto-sélection du format : Image
             if (formatSelect) {
                 formatSelect.value = 'Image';
             }
         } else {
+            // Ni Image ni PDF : aucune sélection automatique du format
             if (fileIconContainer) {
                 fileIconContainer.textContent = 'DOC';
                 fileIconContainer.className =
@@ -169,6 +196,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (previewUnsupportedState) previewUnsupportedState.classList.remove('hidden');
             if (previewPdfContainer) previewPdfContainer.classList.add('hidden');
             if (previewImageContainer) previewImageContainer.classList.add('hidden');
+
+            if (formatSelect && (formatSelect.value === 'Document PDF' || formatSelect.value === 'Image')) {
+                formatSelect.value = '';
+            }
         }
 
         if (previewToolbar) previewToolbar.classList.remove('hidden');
@@ -194,10 +225,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 descriptionInput.value = extracted.description;
                 const len = descriptionInput.value.length;
                 if (descriptionCount) {
-                    descriptionCount.textContent = `${len}/30`;
-                    descriptionCount.classList.toggle('text-red-500', len >= 30);
-                    descriptionCount.classList.toggle('text-amber-600', len >= 25 && len < 30);
-                    descriptionCount.classList.toggle('text-gray-400', len < 25);
+                    descriptionCount.textContent = `${len}/250`;
+                    descriptionCount.classList.toggle('text-red-500', len >= 250);
+                    descriptionCount.classList.toggle('text-amber-600', len >= 220 && len < 250);
+                    descriptionCount.classList.toggle('text-gray-400', len < 220);
                 }
                 autofillDetails.push(`Objet: "${extracted.description}"`);
             }
@@ -387,14 +418,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* Compteur de caractères — Objet de l'archive */
+    /* Compteur de caractères — Objet de l'archive (limite 250) */
     if (descriptionInput && descriptionCount) {
         descriptionInput.addEventListener('input', () => {
             const len = descriptionInput.value.length;
-            descriptionCount.textContent = `${len}/30`;
-            descriptionCount.classList.toggle('text-red-500', len >= 30);
-            descriptionCount.classList.toggle('text-amber-600', len >= 25 && len < 30);
-            descriptionCount.classList.toggle('text-gray-400', len < 25);
+            descriptionCount.textContent = `${len}/250`;
+            descriptionCount.classList.toggle('text-red-500', len >= 250);
+            descriptionCount.classList.toggle('text-amber-600', len >= 220 && len < 250);
+            descriptionCount.classList.toggle('text-gray-400', len < 220);
         });
     }
 
@@ -403,9 +434,12 @@ document.addEventListener('DOMContentLoaded', () => {
         dateInput.max = new Date().toISOString().split('T')[0];
     }
 
-    /* Validation et soumission du formulaire */
+    /* ------------------------------------------------------------------ */
+    /* Validation et envoi AJAX du formulaire                             */
+    /* ------------------------------------------------------------------ */
     const form = document.getElementById('archive-form');
     const successPanel = document.getElementById('success-panel');
+    const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
 
     const REQUIRED_FIELDS = [
         { id: 'format', message: 'Veuillez sélectionner un format de document.' },
@@ -478,6 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!valid) {
+                notyf.error('Veuillez compléter les champs obligatoires du formulaire.');
                 if (firstInvalid) {
                     if (firstInvalid.scrollIntoView) {
                         firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -487,11 +522,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            if (successPanel) {
-                successPanel.classList.remove('hidden');
-                successPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                successPanel.focus();
+            /* Animation de chargement et soumission AJAX */
+            const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
+                    <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Enregistrement en cours...</span>
+                `;
             }
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+            })
+                .then(async (response) => {
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Une erreur est survenue lors de la création de l\'archive.');
+                    }
+                    return data;
+                })
+                .then((data) => {
+                    notyf.success(data.message || 'L\'archive a été enregistrée avec succès !');
+                    form.reset();
+                    clearPreview();
+                    if (successPanel) {
+                        successPanel.classList.remove('hidden');
+                        successPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                })
+                .catch((err) => {
+                    notyf.error(err.message || 'Erreur lors de l\'enregistrement.');
+                })
+                .finally(() => {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnHtml;
+                    }
+                });
         });
 
         form.addEventListener('reset', () => {
@@ -500,7 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearPreview();
                 if (successPanel) successPanel.classList.add('hidden');
                 if (descriptionCount) {
-                    descriptionCount.textContent = '0/30';
+                    descriptionCount.textContent = '0/250';
                     descriptionCount.className = 'shrink-0 text-xs text-gray-400';
                 }
                 if (typeHint) typeHint.classList.add('hidden');

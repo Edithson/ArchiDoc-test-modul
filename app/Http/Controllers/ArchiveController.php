@@ -6,6 +6,7 @@ use App\Http\Requests\StoreArchiveRequest;
 use App\Http\Requests\UpdateArchiveRequest;
 use App\Models\Archive;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 
 class ArchiveController extends Controller
 {
@@ -34,9 +35,35 @@ class ArchiveController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreArchiveRequest $request)
+    public function store(StoreArchiveRequest $request): JsonResponse
     {
-        //
+        $validated = $request->validated();
+
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('archives', 'public');
+        }
+
+        $archive = Archive::create([
+            'typearchive' => $validated['typearchive'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'date_doc' => $validated['date_doc'] ?? null,
+            'emplacement' => $validated['emplacement'] ?? null,
+            'emplacement2' => $validated['emplacement2'] ?? null,
+            'rayon' => $validated['rayon'] ?? null,
+            'travee' => $validated['travee'] ?? null,
+            'cote' => $validated['cote'] ?? null,
+            'format' => $validated['format'] ?? null,
+            'departement' => $validated['departement'] ?? null,
+            'filepath' => $filePath,
+            'user_id' => 1,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "L'archive « {$archive->description} » a été enregistrée avec succès !",
+            'archive' => $archive,
+        ], 201);
     }
 
     /**

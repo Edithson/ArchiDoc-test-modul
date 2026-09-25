@@ -150,10 +150,10 @@
                   <label for="description" class="block text-sm font-medium text-gray-700">
                     Objet de l'archive <span class="text-red-500" aria-hidden="true">*</span><span class="sr-only">(obligatoire)</span>
                   </label>
-                  <span id="description-count" class="shrink-0 text-xs text-gray-400">0/30</span>
+                  <span id="description-count" class="shrink-0 text-xs text-gray-400">0/250</span>
                 </div>
-                <textarea id="description" name="description" rows="3" maxlength="30" required aria-required="true" aria-describedby="description-count"
-                  placeholder="Résumé court de l'objet de l'archive..."
+                <textarea id="description" name="description" rows="3" maxlength="250" required aria-required="true" aria-describedby="description-count"
+                  placeholder="Résumé de l'objet de l'archive (jusqu'à 250 caractères)..."
                   class="block w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30"></textarea>
                 <p id="description-error" class="mt-1 hidden text-sm text-red-600" role="alert"></p>
               </div>
