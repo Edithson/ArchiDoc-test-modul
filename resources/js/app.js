@@ -36,6 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setupDropdown('creations-trigger', 'creations-menu');
+    setupDropdown('consultations-trigger', 'consultations-menu');
+    setupDropdown('documentation-trigger', 'documentation-menu');
+    setupDropdown('administration-trigger', 'administration-menu');
     setupDropdown('notif-trigger', 'notif-panel');
     setupDropdown('avatar-trigger', 'avatar-menu');
 
