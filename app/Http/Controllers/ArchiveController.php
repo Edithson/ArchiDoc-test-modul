@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreArchiveRequest;
 use App\Http\Requests\UpdateArchiveRequest;
 use App\Models\Archive;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ArchiveController extends Controller
 {
@@ -16,6 +18,49 @@ class ArchiveController extends Controller
     public function index(): View
     {
         return view('admin.index');
+    }
+
+    /**
+     * Search archives based on multi-criteria filter, pagination and sorting.
+     */
+    public function search(Request $request): View
+    {
+        $query = Archive::query();
+
+        if ($request->filled('typearchive')) {
+            $query->where('typearchive', $request->input('typearchive'));
+        }
+
+        if ($request->filled('date_doc')) {
+            $query->where('date_doc', 'like', '%'.$request->input('date_doc').'%');
+        }
+
+        if ($request->filled('description')) {
+            $query->where('description', 'like', '%'.$request->input('description').'%');
+        }
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->input('user_id'));
+        }
+
+        $sortBy = $request->input('sort_by', 'created_at');
+        $allowedSorts = ['typearchive', 'description', 'date_doc', 'created_at'];
+        if (! in_array($sortBy, $allowedSorts, true)) {
+            $sortBy = 'created_at';
+        }
+
+        $sortOrder = strtolower((string) $request->input('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        $archives = $query->orderBy($sortBy, $sortOrder)
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.pages.archives.search', [
+            'archives' => $archives,
+            'archiveTypes' => $this->getArchiveTypes(),
+            'users' => User::all(['id', 'name']),
+            'filters' => $request->only(['typearchive', 'date_doc', 'description', 'user_id', 'sort_by', 'sort_order']),
+        ]);
     }
 
     /**
@@ -69,9 +114,11 @@ class ArchiveController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Archive $archive)
+    public function show(Archive $archive): View
     {
-        //
+        return view('admin.pages.archives.show', [
+            'archive' => $archive,
+        ]);
     }
 
     /**

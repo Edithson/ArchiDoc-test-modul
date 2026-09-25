@@ -12,12 +12,10 @@
       <!-- Logo -->
       <a href="{{ route('archives.index') }}" class="flex shrink-0 items-center gap-2.5">
         <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-white shadow-sm">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
-            <path d="M3 7.2 5 4h14l2 3.2"/><rect x="3" y="7.2" width="18" height="12.3" rx="1.5"/><path d="M8 11.5h8"/>
-          </svg>
+          <img src="{{asset('media/img/logo_archidoc_dgb.png')}}" alt="logo ARCHIDOC DGB" class="rounded-full">
         </span>
         <span class="hidden flex-col leading-none sm:flex">
-          <span class="text-sm font-bold tracking-tight text-gray-900">ArchiDoc</span>
+          <span class="text-sm font-bold tracking-tight text-gray-900">ARCHIDOC</span>
           <span class="text-[11px] font-medium tracking-wide text-gray-400">DGB</span>
         </span>
       </a>
@@ -77,7 +75,7 @@
         </div>
 
         <span class="text-gray-300" aria-hidden="true">/</span>
-        <a href="#" class="rounded px-2 py-1.5 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Consultations</a>
+        <a href="{{ route('archives.search') }}" class="rounded px-2 py-1.5 {{ request()->routeIs('archives.search') ? 'font-semibold text-brand-700' : 'hover:text-gray-900' }} focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Consultations</a>
         <span class="text-gray-300" aria-hidden="true">/</span>
         <a href="#" class="rounded px-2 py-1.5 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Réglementation Archives</a>
         <span class="text-gray-300" aria-hidden="true">/</span>

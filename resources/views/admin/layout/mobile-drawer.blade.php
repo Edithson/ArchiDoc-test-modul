@@ -6,10 +6,10 @@
 
   <div class="flex h-16 items-center justify-between border-b border-white/15 px-4">
     <span class="flex items-center gap-2 font-semibold">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
-        <path d="M3 7.2 5 4h14l2 3.2"/><rect x="3" y="7.2" width="18" height="12.3" rx="1.5"/><path d="M8 11.5h8"/>
-      </svg>
-      ArchiDoc
+      <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-white shadow-sm">
+        <img src="{{asset('media/img/logo_archidoc_dgb.png')}}" alt="logo ARCHIDOC DGB" class="rounded-full">
+      </span>
+      ARCHIDOC
     </span>
     <button id="mobile-drawer-close" type="button" class="rounded-md p-2 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white" aria-label="Fermer le menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
