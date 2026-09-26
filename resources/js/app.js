@@ -1,5 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Donut et Menus déroulants réutilisables (Header: créations, notifications, avatar)
+function initHeaderNavigation() {
+    // Donut et Menus déroulants réutilisables (Header: créations, consultations, documentation, administration, notifications, avatar)
     const dropdownClosers = [];
 
     function closeAllDropdowns() {
@@ -79,4 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeaderNavigation);
+} else {
+    initHeaderNavigation();
+}

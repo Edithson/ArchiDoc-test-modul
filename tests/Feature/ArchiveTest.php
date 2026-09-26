@@ -1,17 +1,22 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
-test('index page returns success and displays admin dashboard', function () {
-    $response = $this->get('/');
+test('index page returns success and displays admin dashboard for authenticated user', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->get('/');
 
     $response->assertStatus(200);
     $response->assertViewIs('admin.index');
 });
 
 test('create page returns success and passes dynamic dataset', function () {
-    $response = $this->get('/archives/create');
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->get('/archives/create');
 
     $response->assertStatus(200);
     $response->assertViewIs('admin.pages.archives.create');
@@ -27,6 +32,7 @@ test('create page returns success and passes dynamic dataset', function () {
 test('storing an archive saves file and creates database record', function () {
     Storage::fake('public');
 
+    $user = User::factory()->create();
     $file = UploadedFile::fake()->create('ARRETE_01022026.pdf', 500, 'application/pdf');
 
     $data = [
@@ -43,7 +49,7 @@ test('storing an archive saves file and creates database record', function () {
         'departement' => 'CAB DGB',
     ];
 
-    $response = $this->postJson('/archives', $data);
+    $response = $this->actingAs($user)->postJson('/archives', $data);
 
     $response->assertStatus(201);
     $response->assertJson([
@@ -57,7 +63,7 @@ test('storing an archive saves file and creates database record', function () {
         'emplacement' => 'FOUDA',
         'emplacement2' => 'Serveur',
         'departement' => 'CAB DGB',
-        'user_id' => 1,
+        'user_id' => $user->id,
     ]);
 
     Storage::disk('public')->assertExists($response->json('archive.filepath'));

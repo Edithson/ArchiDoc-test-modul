@@ -4,7 +4,7 @@
 @section('meta_description', 'Tableau de bord et gestion des archives — Direction Générale du Budget')
 
 @section('content')
-<div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
+<div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 
   <!-- Bannière de bienvenue -->
   <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 p-6 sm:p-8 text-white shadow-lg mb-8">
@@ -134,80 +134,4 @@
 </div>
 @endsection
 
-@push('scripts')
-<script>
-(function() {
-  "use strict";
 
-  /* Gestion des menus déroulants pour l'en-tête */
-  function setupDropdown(triggerId, panelId) {
-    var trigger = document.getElementById(triggerId);
-    var panel = document.getElementById(panelId);
-    if (!trigger || !panel) return;
-
-    function close() {
-      panel.classList.add("hidden");
-      trigger.setAttribute("aria-expanded", "false");
-      var chev = trigger.querySelector("[data-chevron]");
-      if (chev) chev.style.transform = "";
-    }
-    function open() {
-      closeAllDropdowns();
-      panel.classList.remove("hidden");
-      trigger.setAttribute("aria-expanded", "true");
-      var chev = trigger.querySelector("[data-chevron]");
-      if (chev) chev.style.transform = "rotate(180deg)";
-    }
-    trigger.addEventListener("click", function (e) {
-      e.stopPropagation();
-      var isOpen = trigger.getAttribute("aria-expanded") === "true";
-      isOpen ? close() : open();
-    });
-    dropdownClosers.push(close);
-  }
-
-  var dropdownClosers = [];
-  function closeAllDropdowns() {
-    dropdownClosers.forEach(function (close) { close(); });
-  }
-
-  setupDropdown("creations-trigger", "creations-menu");
-  setupDropdown("notif-trigger", "notif-panel");
-  setupDropdown("avatar-trigger", "avatar-menu");
-
-  document.addEventListener("click", closeAllDropdowns);
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeAllDropdowns();
-  });
-
-  /* Tiroir mobile */
-  var drawer = document.getElementById("mobile-drawer");
-  var backdrop = document.getElementById("mobile-drawer-backdrop");
-  var menuBtn = document.getElementById("mobile-menu-btn");
-  var closeBtn = document.getElementById("mobile-drawer-close");
-
-  if (menuBtn && closeBtn && drawer && backdrop) {
-    function openDrawer() {
-      drawer.classList.remove("-translate-x-full");
-      backdrop.classList.remove("hidden");
-      document.documentElement.classList.add("overflow-hidden");
-      menuBtn.setAttribute("aria-expanded", "true");
-      closeBtn.focus();
-    }
-    function closeDrawer() {
-      drawer.classList.add("-translate-x-full");
-      backdrop.classList.add("hidden");
-      document.documentElement.classList.remove("overflow-hidden");
-      menuBtn.setAttribute("aria-expanded", "false");
-      menuBtn.focus();
-    }
-    menuBtn.addEventListener("click", openDrawer);
-    closeBtn.addEventListener("click", closeDrawer);
-    backdrop.addEventListener("click", closeDrawer);
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && !drawer.classList.contains("-translate-x-full")) closeDrawer();
-    });
-  }
-})();
-</script>
-@endpush
