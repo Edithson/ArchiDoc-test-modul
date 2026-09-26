@@ -12,7 +12,7 @@ class StoreArchiveRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,17 @@ class StoreArchiveRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'file' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg,webp', 'max:20480'],
+            'format' => ['required', 'string'],
+            'typearchive' => ['required', 'string'],
+            'description' => ['required', 'string', 'max:250'],
+            'date_doc' => ['required', 'string'],
+            'emplacement' => ['required', 'string'],
+            'emplacement2' => ['required', 'string'],
+            'rayon' => ['nullable', 'string'],
+            'travee' => ['nullable', 'string'],
+            'cote' => ['nullable', 'string'],
+            'departement' => ['required', 'string'],
         ];
     }
 }

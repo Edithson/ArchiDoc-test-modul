@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Archive;
 use Illuminate\Database\Seeder;
 
 class ArchiveSeeder extends Seeder
@@ -12,6 +12,6 @@ class ArchiveSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        Archive::factory(25)->create();
     }
 }

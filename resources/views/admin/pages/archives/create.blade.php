@@ -1,249 +1,117 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nouvelle archive — ArchiDoc DGB</title>
-<meta name="description" content="Création d'une nouvelle archive — ArchiDoc, Direction Générale du Budget">
+@extends('admin.layout.app')
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+@section('title', 'Nouvelle archive — ARCHIDOC DGB')
+@section('meta_description', 'Création et numérisation d\'une nouvelle archive — ARCHIDOC, Direction Générale du Budget')
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        fontFamily: {
-          sans: ['Figtree', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        },
-        colors: {
-          brand: {
-            50:  '#eff9f9',
-            100: '#dcf3f2',
-            200: '#bee9e6',
-            300: '#94dbd6',
-            400: '#66cbc5',
-            500: '#40beb7',
-            600: '#339892',
-            700: '#297a75',
-            800: '#21635f',
-            900: '#194c49',
-            950: '#113533',
-          },
-        },
-      },
-    },
-  };
-</script>
+@section('content')
+<div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 
-<style>
-  :root { color-scheme: light; }
-  html { scroll-behavior: smooth; }
-  body { font-feature-settings: "cv02","cv03","cv04","cv11"; }
-
-  /* Barre de défilement discrète pour les listes déroulantes */
-  .styled-scroll::-webkit-scrollbar { width: 8px; }
-  .styled-scroll::-webkit-scrollbar-track { background: transparent; }
-  .styled-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 9999px; }
-
-  input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
-  input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
-
-  /* Respecte les préférences de mouvement réduit */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.001ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.001ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-</style>
-</head>
-
-<body class="min-h-screen bg-gray-50 font-sans text-gray-900 antialiased">
-
-<a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[60] focus:rounded-md focus:bg-brand-800 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white">
-  Passer au contenu principal
-</a>
-
-<!-- ============================= HEADER ============================= -->
-<header class="sticky top-0 z-30 border-b border-gray-200 bg-white">
-  <div class="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-
-    <div class="flex min-w-0 items-center gap-3">
-      <!-- Bouton menu mobile -->
-      <button id="mobile-menu-btn" type="button"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 xl:hidden"
-        aria-label="Ouvrir le menu de navigation" aria-expanded="false" aria-controls="mobile-drawer">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
-
-      <!-- Logo -->
-      <a href="#" class="flex shrink-0 items-center gap-2.5">
-        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-white shadow-sm">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
-            <path d="M3 7.2 5 4h14l2 3.2"/><rect x="3" y="7.2" width="18" height="12.3" rx="1.5"/><path d="M8 11.5h8"/>
-          </svg>
-        </span>
-        <span class="hidden flex-col leading-none sm:flex">
-          <span class="text-sm font-bold tracking-tight text-gray-900">ArchiDoc</span>
-          <span class="text-[11px] font-medium tracking-wide text-gray-400">DGB</span>
-        </span>
+  <!-- En-tête de page -->
+  <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">Nouvelle archive</h1>
+      <p class="text-sm text-gray-500">Chargez le document et renseignez les informations de classement dans ce formulaire unique.</p>
+    </div>
+    <div>
+      <a href="{{ route('archives.index') }}" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-600">
+        <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Retour au tableau de bord
       </a>
-
-      <!-- Navigation desktop -->
-      <nav aria-label="Navigation principale" class="hidden min-w-0 items-center gap-1 whitespace-nowrap pl-2 text-sm text-gray-500 xl:flex">
-        <a href="#" class="rounded px-2 py-1.5 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Accueil</a>
-        <span class="text-gray-300" aria-hidden="true">/</span>
-
-        <div class="relative">
-          <button id="creations-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="creations-menu"
-            class="inline-flex items-center gap-1 rounded px-2 py-1.5 font-semibold text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
-            Créations
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 opacity-70 transition-transform" data-chevron aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div id="creations-menu"
-            class="absolute left-0 z-40 mt-2 hidden w-72 origin-top-left rounded-lg border border-gray-100 bg-white p-1.5 shadow-lg">
-            <ul id="header-creations-list" class="space-y-0.5 text-sm"></ul>
-          </div>
-        </div>
-
-        <span class="text-gray-300" aria-hidden="true">/</span>
-        <a href="#" class="rounded px-2 py-1.5 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Consultations</a>
-        <span class="text-gray-300" aria-hidden="true">/</span>
-        <a href="#" class="rounded px-2 py-1.5 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Réglementation Archives</a>
-        <span class="text-gray-300" aria-hidden="true">/</span>
-        <a href="#" class="rounded px-2 py-1.5 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Organigramme DGB</a>
-        <span class="text-gray-300" aria-hidden="true">/</span>
-        <a href="#" class="max-w-[13rem] truncate rounded px-2 py-1.5 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600" title="Organisation des archives de la DGB">Organisation des archives de la DGB</a>
-        <span class="text-gray-300" aria-hidden="true">/</span>
-        <a href="#" class="rounded px-2 py-1.5 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Service Archives</a>
-        <span class="text-gray-300" aria-hidden="true">/</span>
-        <a href="#" class="rounded px-2 py-1.5 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Administration</a>
-      </nav>
-    </div>
-
-    <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
-      <!-- Notifications -->
-      <div class="relative">
-        <button id="notif-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="notif-panel"
-          class="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
-          aria-label="Notifications">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
-            <path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2.5 6.7.3.3.1.8-.3.8H3.8c-.4 0-.6-.5-.3-.8C4.5 13.5 6 12 6 8Z"/><path d="M10 19a2 2 0 0 0 4 0"/>
-          </svg>
-        </button>
-        <div id="notif-panel" class="absolute right-0 z-40 mt-2 hidden w-64 rounded-lg border border-gray-100 bg-white p-4 text-sm text-gray-500 shadow-lg">
-          Aucune nouvelle notification pour le moment.
-        </div>
-      </div>
-
-      <!-- Avatar / compte -->
-      <div class="relative">
-        <button id="avatar-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="avatar-menu"
-          class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 sm:pr-3">
-          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-800">S</span>
-          <span class="hidden text-sm font-medium text-gray-700 md:inline">Service</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-        <div id="avatar-menu" class="absolute right-0 z-40 mt-2 hidden w-56 rounded-lg border border-gray-100 bg-white p-1.5 shadow-lg">
-          <div class="border-b border-gray-100 px-3 py-2.5">
-            <p class="text-sm font-semibold text-gray-900">Service</p>
-            <p class="text-xs text-gray-500">DGB · Rôle Super</p>
-          </div>
-          <a href="#" class="block rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">Mon profil</a>
-          <a href="#" class="block rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">Paramètres</a>
-          <a href="#" class="block rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50">Déconnexion</a>
-        </div>
-      </div>
     </div>
   </div>
-</header>
 
-<!-- ==================== RIDEAU DE NAVIGATION MOBILE ==================== -->
-<div id="mobile-drawer-backdrop" class="fixed inset-0 z-40 hidden bg-gray-900/50 xl:hidden" aria-hidden="true"></div>
-<div id="mobile-drawer"
-  class="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] -translate-x-full bg-brand-700 text-white shadow-xl transition-transform duration-200 ease-out xl:hidden"
-  role="dialog" aria-modal="true" aria-label="Menu de navigation">
-  <div class="flex h-16 items-center justify-between border-b border-white/15 px-4">
-    <span class="flex items-center gap-2 font-semibold">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M3 7.2 5 4h14l2 3.2"/><rect x="3" y="7.2" width="18" height="12.3" rx="1.5"/><path d="M8 11.5h8"/></svg>
-      ArchiDoc
-    </span>
-    <button id="mobile-drawer-close" type="button" class="rounded-md p-2 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white" aria-label="Fermer le menu">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-    </button>
-  </div>
-  <nav class="styled-scroll h-[calc(100%-4rem)] overflow-y-auto px-3 py-4">
-    <ul id="mobile-toplevel-list" class="space-y-0.5 text-sm"></ul>
-    <div class="mb-2 mt-5 px-3 text-xs font-semibold uppercase tracking-wider text-brand-100/80">Créations</div>
-    <ul id="mobile-creations-list" class="space-y-1"></ul>
-  </nav>
-</div>
+  <!-- Disposition sur 2 colonnes (Split-View) -->
+  <div class="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
 
-<!-- ============================= CORPS ============================= -->
-<div class="mx-auto flex max-w-[1600px]">
-
-  <!-- Barre latérale (desktop) -->
-  <aside class="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 flex-col bg-brand-700 text-white xl:flex">
-    <div class="border-b border-white/15 px-6 py-5">
-      <p class="text-xs font-semibold uppercase tracking-wider text-brand-100/80">Créations</p>
-    </div>
-    <nav class="styled-scroll flex-1 overflow-y-auto px-3 py-4" aria-label="Sous-navigation Créations">
-      <ul id="sidebar-creations-list" class="space-y-1"></ul>
-    </nav>
-  </aside>
-
-  <!-- Contenu principal -->
-  <main id="main-content" tabindex="-1" class="min-w-0 flex-1 focus:outline-none">
-    <div class="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-10 lg:px-10">
+    <!-- ==================== COLONNE GAUCHE : FORMULAIRE & UPLOAD ==================== -->
+    <div class="lg:col-span-7 xl:col-span-7 space-y-6">
 
       <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 
-        <div class="border-b border-gray-100 px-6 py-5 sm:px-8">
-          <h1 class="text-xl font-bold tracking-tight text-brand-700 sm:text-2xl">Nouvelle archive</h1>
-          <p class="mt-1 text-sm text-gray-500">Renseignez les informations ci-dessous pour créer une nouvelle archive.</p>
+        <!-- En-tête de la carte -->
+        <div class="border-b border-gray-100 bg-gray-50/50 px-6 py-4 sm:px-8">
+          <div class="flex items-center gap-2">
+            <svg class="h-4 w-4 text-brand-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 12h4"/>
+            </svg>
+            <h2 class="text-base font-bold text-gray-900">Document & Informations de l'archive</h2>
+          </div>
         </div>
 
         <div class="px-6 py-6 sm:px-8 sm:py-8">
 
-          <!-- Indicateur d'étapes -->
-          <div class="mb-8">
-            <ol class="flex items-center">
-              <li class="flex items-center gap-2.5">
-                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-700 text-sm font-semibold text-white">1</span>
-                <span class="hidden text-sm font-semibold text-brand-700 sm:inline">Informations</span>
-              </li>
-              <li class="mx-3 h-px flex-1 bg-gray-200" aria-hidden="true"></li>
-              <li class="flex items-center gap-2.5">
-                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-gray-200 text-sm font-semibold text-gray-400">2</span>
-                <span class="hidden text-sm font-medium text-gray-400 sm:inline">Étape 2</span>
-              </li>
-              <li class="mx-3 h-px flex-1 bg-gray-200" aria-hidden="true"></li>
-              <li class="flex items-center gap-2.5">
-                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-gray-200 text-sm font-semibold text-gray-400">3</span>
-                <span class="hidden text-sm font-medium text-gray-400 sm:inline">Étape 3</span>
-              </li>
-            </ol>
-            <p class="mt-3 text-sm font-medium text-gray-600">Étape 1 sur 3 — Création d'une archive</p>
-          </div>
-
           <!-- Bandeau de confirmation (masqué par défaut) -->
-          <div id="success-panel" tabindex="-1" class="mb-6 hidden rounded-lg border border-emerald-200 bg-emerald-50 p-4 focus:outline-none" role="status">
+          <div id="success-panel" tabindex="-1" class="mb-6 hidden rounded-xl border border-emerald-200 bg-emerald-50 p-4 focus:outline-none" role="status">
             <div class="flex gap-3">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
               <div>
-                <p class="text-sm font-semibold text-emerald-800">Étape 1 validée</p>
-                <p class="mt-1 text-sm text-emerald-700">Les informations saisies sont correctes. Les étapes 2 et 3 ne font pas partie de cette maquette et restent à implémenter.</p>
+                <p class="text-sm font-bold text-emerald-800">Archive créée avec succès !</p>
+                <p class="mt-1 text-sm text-emerald-700">Le document et les informations de classement ont été enregistrés.</p>
               </div>
             </div>
           </div>
 
-          <form id="archive-form" novalidate>
+          <form id="archive-form" action="{{ route('archives.store') }}" method="POST" enctype="multipart/form-data" novalidate>
+            @csrf
+
             <div class="space-y-6">
+
+              <!-- Zone d'upload de fichier (Drag & Drop) -->
+              <div>
+                <label class="mb-1.5 block text-sm font-semibold text-gray-800">
+                  Document numérique <span class="text-red-500" aria-hidden="true">*</span><span class="sr-only">(obligatoire)</span>
+                </label>
+
+                <!-- Zone réceptrice -->
+                <div id="dropzone"
+                  class="group relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-6 text-center transition-all hover:border-brand-600 hover:bg-brand-50/30 cursor-pointer">
+                  
+                  <input type="file" id="file" name="file" accept=".pdf,image/*" required class="sr-only">
+
+                  <!-- Prompt par défaut -->
+                  <div id="dropzone-prompt" class="flex flex-col items-center">
+                    <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-50 text-brand-700 shadow-sm transition-transform group-hover:scale-110">
+                      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                      </svg>
+                    </span>
+                    <p class="text-sm font-medium text-gray-700">
+                      <span class="font-bold text-brand-700 underline underline-offset-2 hover:text-brand-800">Glissez-déposez un fichier ici</span> ou parcourez
+                    </p>
+                    <p class="mt-1 text-xs text-gray-400">Formats acceptés : PDF, PNG, JPG, WEBP (jusqu'à 20 Mo)</p>
+                  </div>
+
+                  <!-- Badge Fichier sélectionné (Masqué par défaut) -->
+                  <div id="selected-file-badge" class="hidden w-full flex-col sm:flex-row items-center justify-between gap-3 rounded-lg border border-brand-200 bg-white p-3.5 shadow-sm">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <span id="file-icon-container" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-brand-700 font-bold text-xs uppercase">
+                        PDF
+                      </span>
+                      <div class="text-left truncate">
+                        <p id="file-name-display" class="truncate text-sm font-bold text-gray-900">nom-du-fichier.pdf</p>
+                        <p id="file-size-display" class="text-xs text-gray-500">2.4 Mo · Charger un autre fichier</p>
+                      </div>
+                    </div>
+
+                    <button type="button" id="btn-remove-file" class="inline-flex shrink-0 items-center gap-1 rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors">
+                      <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      Retirer
+                    </button>
+                  </div>
+
+                </div>
+                
+                <!-- Notification de pré-remplissage automatique -->
+                <div id="autofill-notice" class="mt-2.5 hidden flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50/80 p-3 text-xs text-brand-900 shadow-sm transition-all">
+                  <svg class="h-4 w-4 shrink-0 text-brand-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                  <span id="autofill-notice-text">Informations détectées et pré-remplies automatiquement depuis le nom du fichier. Veuillez vérifier la concordance ci-dessous.</span>
+                </div>
+
+                <p id="file-error" class="mt-1.5 hidden text-sm text-red-600" role="alert"></p>
+              </div>
 
               <!-- Format du document -->
               <div>
@@ -254,9 +122,9 @@
                   <select id="format" name="format" required aria-required="true"
                     class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
                     <option value="" disabled selected>Sélectionner le format...</option>
-                    <option value="Document PDF">Document PDF</option>
-                    <option value="Image">Image</option>
-                    <option value="Document Papier">Document Papier</option>
+                    @foreach($formats as $fmt)
+                      <option value="{{ $fmt }}">{{ $fmt }}</option>
+                    @endforeach
                   </select>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                 </div>
@@ -285,10 +153,10 @@
                   <label for="description" class="block text-sm font-medium text-gray-700">
                     Objet de l'archive <span class="text-red-500" aria-hidden="true">*</span><span class="sr-only">(obligatoire)</span>
                   </label>
-                  <span id="description-count" class="shrink-0 text-xs text-gray-400">0/30</span>
+                  <span id="description-count" class="shrink-0 text-xs text-gray-400">0/250</span>
                 </div>
-                <textarea id="description" name="description" rows="3" maxlength="30" required aria-required="true" aria-describedby="description-count"
-                  placeholder="Résumé court de l'objet de l'archive..."
+                <textarea id="description" name="description" rows="3" maxlength="250" required aria-required="true" aria-describedby="description-count"
+                  placeholder="Résumé de l'objet de l'archive (jusqu'à 250 caractères)..."
                   class="block w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30"></textarea>
                 <p id="description-error" class="mt-1 hidden text-sm text-red-600" role="alert"></p>
               </div>
@@ -313,9 +181,9 @@
                     <select id="emplacement" name="emplacement" required aria-required="true"
                       class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
                       <option value="" disabled selected>Sélectionner l'emplacement...</option>
-                      <option value="FOUDA">FOUDA — Centre d'excellence DGB</option>
-                      <option value="DGB">DGB — Direction Générale du Budget</option>
-                      <option value="IMPRIMERIE NATIONALE">Imprimerie Nationale</option>
+                      @foreach($emplacementsPhysiques as $val => $label)
+                        <option value="{{ $val }}">{{ $label }}</option>
+                      @endforeach
                     </select>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                   </div>
@@ -330,7 +198,9 @@
                     <select id="emplacement2" name="emplacement2" required aria-required="true"
                       class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
                       <option value="" disabled selected>Sélectionner l'emplacement...</option>
-                      <option value="Serveur">Serveur</option>
+                      @foreach($emplacementsVirtuels as $val => $label)
+                        <option value="{{ $val }}">{{ $label }}</option>
+                      @endforeach
                     </select>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                   </div>
@@ -374,6 +244,9 @@
                   <select id="departement" name="departement" required aria-required="true"
                     class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
                     <option value="" disabled selected>Sélectionner le groupe d'accès...</option>
+                    @foreach($groupesAcces as $grp)
+                      <option value="{{ $grp['sigle'] }}">{{ $grp['sigle'] }} — {{ $grp['nom'] }}</option>
+                    @endforeach
                   </select>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                 </div>
@@ -384,16 +257,16 @@
 
             <!-- Pied de formulaire -->
             <div class="mt-8 border-t border-gray-100 pt-6">
-              <p class="mb-4 text-sm italic text-gray-500"><span class="text-red-500" aria-hidden="true">*</span> Les champs marqués d'un astérisque sont obligatoires.</p>
+              <p class="mb-4 text-xs text-gray-500"><span class="text-red-500" aria-hidden="true">*</span> Les champs marqués d'un astérisque sont obligatoires.</p>
               <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <button type="reset" id="reset-btn"
-                  class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+                  class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-600">
                   Réinitialiser
                 </button>
                 <button type="submit"
-                  class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2">
-                  Suivant
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+                  class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-700 px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-700">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Créer l'archive
                 </button>
               </div>
             </div>
@@ -402,400 +275,91 @@
         </div>
       </div>
 
-      <p class="mt-4 text-center text-xs text-gray-400">ArchiDoc — Direction Générale du Budget</p>
     </div>
-  </main>
+
+    <!-- ==================== COLONNE DROITE : APERÇU EN DIRECT (STICKY) ==================== -->
+    <div class="lg:col-span-5 xl:col-span-5 lg:sticky lg:top-20 space-y-4">
+
+      <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        
+        <!-- En-tête de la carte d'aperçu -->
+        <div class="flex items-center justify-between border-b border-gray-100 bg-gray-50/50 px-5 py-3.5">
+          <div class="flex items-center gap-2">
+            <svg class="h-4 w-4 text-brand-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            <h3 class="text-sm font-bold text-gray-900">Aperçu du document</h3>
+          </div>
+          <span id="preview-status-badge" class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600">
+            En attente
+          </span>
+        </div>
+
+        <!-- Conteneur d'affichage de l'aperçu -->
+        <div class="relative flex min-h-[500px] lg:min-h-[660px] flex-col items-center justify-center bg-gray-100/70 p-3">
+
+          <!-- 1. État Vide (No file selected) -->
+          <div id="preview-empty-state" class="flex flex-col items-center justify-center text-center p-6 max-w-xs">
+            <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm text-gray-400">
+              <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <h4 class="text-sm font-bold text-gray-800">Aucun document chargé</h4>
+            <p class="mt-1 text-xs text-gray-500 leading-relaxed">
+              Sélectionnez ou glissez un fichier <strong>PDF</strong> ou une <strong>Image</strong> dans le formulaire pour afficher l'aperçu dynamique ici.
+            </p>
+          </div>
+
+          <!-- 2. Aperçu PDF (iframe) -->
+          <div id="preview-pdf-container" class="hidden h-full w-full">
+            <iframe id="preview-pdf" src="" class="h-[520px] lg:h-[660px] w-full rounded-lg border border-gray-200 bg-white shadow-inner" title="Aperçu PDF"></iframe>
+          </div>
+
+          <!-- 3. Aperçu Image (img) -->
+          <div id="preview-image-container" class="hidden flex h-full w-full items-center justify-center overflow-auto p-2">
+            <img id="preview-image" src="" alt="Aperçu de l'image" class="max-h-[520px] lg:max-h-[660px] w-auto max-w-full rounded-lg object-contain shadow-md border border-gray-200">
+          </div>
+
+          <!-- 4. Format non géré -->
+          <div id="preview-unsupported-state" class="hidden flex flex-col items-center justify-center text-center p-6">
+            <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+              <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </div>
+            <h4 class="text-sm font-bold text-gray-900">Aperçu direct non disponible</h4>
+            <p class="mt-1 text-xs text-gray-500">Ce format de fichier ne supporte pas l'aperçu visuel direct.</p>
+          </div>
+
+        </div>
+
+        <!-- Barre d'outils bas d'aperçu -->
+        <div id="preview-toolbar" class="hidden border-t border-gray-100 bg-white px-4 py-2.5 flex items-center justify-between">
+          <div class="flex items-center gap-2 min-w-0">
+            <span id="preview-filename" class="text-xs font-semibold text-gray-700 truncate max-w-[180px]">document.pdf</span>
+          </div>
+          <a id="btn-open-new-tab" href="#" target="_blank" class="inline-flex items-center gap-1 text-xs font-semibold text-brand-700 hover:text-brand-800 underline">
+            Ouvrir plein écran
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
+@endsection
 
+@push('scripts')
 <script>
-(function () {
-  "use strict";
-
-  /* ------------------------------------------------------------------ */
-  /* Données réelles réutilisées à plusieurs endroits (menu, listes...) */
-  /* ------------------------------------------------------------------ */
-
-  var ARCHIVE_TYPES = [
-    "ARRETE","ATTESTATION","AUTRES TYPES DE DOCUMENTS","BONS D'ENGAGEMENT","BORDEREAUX",
-    "CARNETS D'ENGAGEMENT","CERTIFICATS","CIRCULAIRE","COMMUNIQUES","COMPTE ADMINISTRATIF",
-    "COMPTE D'EMPLOI","COMPTE-RENDU","CONSTITUTION","CONVOCATIONS","COURRIERS","DECISIONS",
-    "DECRET","ETATS DE SOMMES DUES","FONDS DE DOSSIER","INVITATIONS","LETTRE CIRCULAIRE",
-    "LETTRE DE MISSION","LOI","MEMO","MEMOIRES DE DEPENSE","MESSAGE-FAX","MESSAGE-PORTE",
-    "NOTE","NOTE DE SERVICE","ORDONNANCES","PROCES-VERBAL","SOIT-TRANSMIS"
-  ];
-
-  var GROUPES = [
-    { sigle: "CAB DGB", nom: "Cabinet DGB" },
-    { sigle: "DCOB", nom: "Division du Contrôle Budgétaire, de l'Audit et de la Qualité de la Dépense" },
-    { sigle: "DDPP", nom: "Direction de la Dépense du Personnel et des Pensions" },
-    { sigle: "DI", nom: "Division Informatique" },
-    { sigle: "DPB", nom: "Division de la Préparation du Budget" },
-    { sigle: "DPC", nom: "Division de Participation et Contribution" },
-    { sigle: "DREF", nom: "Division de la Réforme Budgétaire" },
-    { sigle: "PUBLIC", nom: "Public" },
-    { sigle: "S-DAG", nom: "Sous-Direction des Affaires Générales" },
-    { sigle: "S-DCF", nom: "Sous-Direction du Contrôle Financier" },
-    { sigle: "SGCCC", nom: "Service de Gestion des Crédits des Chapitres Communs" },
-    { sigle: "SGDB", nom: "Service de Gestion des Documents Budgétaires" },
-    { sigle: "SO", nom: "Service d'Ordre" }
-  ];
-
-  var ICONS = {
-    home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1v-9"/>',
-    tag: '<path d="M4 4h7l9 9-7 7-9-9V4Z"/><circle cx="8.5" cy="8.5" r="1.2"/>',
-    pin: '<path d="M12 21s7-6.7 7-12a7 7 0 1 0-14 0c0 5.3 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/>',
-    users: '<circle cx="9" cy="8" r="3.2"/><path d="M2.3 20c0-3.6 3-6.2 6.7-6.2s6.7 2.6 6.7 6.2"/><path d="M15.8 8.3a3 3 0 1 1 3.5 2.9"/><path d="M21.7 20c0-2.8-1.8-5-4.3-5.8"/>',
-    archivePlus: '<path d="M3 7.2 5 4h14l2 3.2"/><rect x="3" y="7.2" width="18" height="12.3" rx="1.5"/><path d="M12 11v5M9.5 13.5h5"/>',
-    userPlus: '<circle cx="9" cy="7.5" r="3.5"/><path d="M2 20c0-3.9 3.1-6.3 7-6.3"/><path d="M17.5 12.5v6M14.5 15.5h6"/>'
-  };
-
-  var CREATION_LINKS = [
-    { href: "#", label: "Accueil", icon: ICONS.home, active: false },
-    { href: "#", label: "Nouveau Type d'archive", icon: ICONS.tag, active: false },
-    { href: "#", label: "Nouvel Emplacement", icon: ICONS.pin, active: false },
-    { href: "#", label: "Nouveau Groupe d'accès", icon: ICONS.users, active: false },
-    { href: "#", label: "Nouvelle Archive", icon: ICONS.archivePlus, active: true },
-    { href: "#", label: "Nouveau Dossier du personnel", icon: ICONS.userPlus, active: false }
-  ];
-
-  var TOP_LEVEL_LINKS = [
-    "Accueil", "Consultations", "Réglementation Archives", "Organigramme DGB",
-    "Organisation des archives de la DGB", "Service Archives", "Administration"
-  ];
-
-  function svg(pathInner, cls) {
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="' + cls + '" aria-hidden="true">' + pathInner + '</svg>';
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Rendu des listes de navigation "Créations" (3 emplacements)         */
-  /* ------------------------------------------------------------------ */
-
-  function renderSidebarStyle(container) {
-    var html = "";
-    CREATION_LINKS.forEach(function (item) {
-      if (item.active) {
-        html += '<li><a href="' + item.href + '" aria-current="page" class="flex items-center gap-3 rounded-lg border-l-4 border-brand-600 bg-white px-3 py-2.5 text-sm font-semibold text-brand-800 shadow-sm">' +
-          svg(item.icon, "h-4 w-4 shrink-0") + '<span class="truncate">' + item.label + "</span></a></li>";
-      } else {
-        html += '<li><a href="' + item.href + '" class="flex items-center gap-3 rounded-lg border-l-4 border-transparent px-3 py-2.5 text-sm text-brand-50 transition-colors hover:bg-white/10 hover:text-white">' +
-          svg(item.icon, "h-4 w-4 shrink-0") + '<span class="truncate">' + item.label + "</span></a></li>";
-      }
-    });
-    container.innerHTML = html;
-  }
-
-  function renderDropdownStyle(container) {
-    var html = "";
-    CREATION_LINKS.forEach(function (item) {
-      var stateCls = item.active
-        ? "flex items-center gap-2.5 rounded-md bg-brand-50 px-3 py-2 text-sm font-semibold text-brand-700"
-        : "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50";
-      html += '<li><a href="' + item.href + '" class="' + stateCls + '">' + svg(item.icon, "h-4 w-4 shrink-0 text-current") + "<span>" + item.label + "</span></a></li>";
-    });
-    container.innerHTML = html;
-  }
-
-  renderSidebarStyle(document.getElementById("sidebar-creations-list"));
-  renderDropdownStyle(document.getElementById("header-creations-list"));
-  renderSidebarStyle(document.getElementById("mobile-creations-list"));
-
-  var topLevelHtml = "";
-  TOP_LEVEL_LINKS.forEach(function (label) {
-    topLevelHtml += '<li><a href="#" class="block rounded-lg px-3 py-2.5 text-brand-50 hover:bg-white/10 hover:text-white">' + label + "</a></li>";
-  });
-  document.getElementById("mobile-toplevel-list").innerHTML = topLevelHtml;
-
-  var departementSelect = document.getElementById("departement");
-  GROUPES.forEach(function (g) {
-    var opt = document.createElement("option");
-    opt.value = g.sigle;
-    opt.textContent = g.sigle + " — " + g.nom;
-    departementSelect.appendChild(opt);
-  });
-
-  /* ------------------------------------------------------------------ */
-  /* Menus déroulants réutilisables (Créations, Notifications, Avatar)   */
-  /* ------------------------------------------------------------------ */
-
-  function setupDropdown(triggerId, panelId) {
-    var trigger = document.getElementById(triggerId);
-    var panel = document.getElementById(panelId);
-    if (!trigger || !panel) return;
-
-    function close() {
-      panel.classList.add("hidden");
-      trigger.setAttribute("aria-expanded", "false");
-      var chev = trigger.querySelector("[data-chevron]");
-      if (chev) chev.style.transform = "";
-    }
-    function open() {
-      closeAllDropdowns();
-      panel.classList.remove("hidden");
-      trigger.setAttribute("aria-expanded", "true");
-      var chev = trigger.querySelector("[data-chevron]");
-      if (chev) chev.style.transform = "rotate(180deg)";
-    }
-    trigger.addEventListener("click", function (e) {
-      e.stopPropagation();
-      var isOpen = trigger.getAttribute("aria-expanded") === "true";
-      isOpen ? close() : open();
-    });
-    trigger._closeDropdown = close;
-    dropdownClosers.push(close);
-  }
-
-  var dropdownClosers = [];
-  function closeAllDropdowns() {
-    dropdownClosers.forEach(function (close) { close(); });
-  }
-
-  setupDropdown("creations-trigger", "creations-menu");
-  setupDropdown("notif-trigger", "notif-panel");
-  setupDropdown("avatar-trigger", "avatar-menu");
-
-  document.addEventListener("click", closeAllDropdowns);
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeAllDropdowns();
-  });
-
-  /* ------------------------------------------------------------------ */
-  /* Tiroir de navigation mobile                                        */
-  /* ------------------------------------------------------------------ */
-
-  var drawer = document.getElementById("mobile-drawer");
-  var backdrop = document.getElementById("mobile-drawer-backdrop");
-  var menuBtn = document.getElementById("mobile-menu-btn");
-  var closeBtn = document.getElementById("mobile-drawer-close");
-
-  function openDrawer() {
-    drawer.classList.remove("-translate-x-full");
-    backdrop.classList.remove("hidden");
-    document.documentElement.classList.add("overflow-hidden");
-    menuBtn.setAttribute("aria-expanded", "true");
-    closeBtn.focus();
-  }
-  function closeDrawer() {
-    drawer.classList.add("-translate-x-full");
-    backdrop.classList.add("hidden");
-    document.documentElement.classList.remove("overflow-hidden");
-    menuBtn.setAttribute("aria-expanded", "false");
-    menuBtn.focus();
-  }
-  menuBtn.addEventListener("click", openDrawer);
-  closeBtn.addEventListener("click", closeDrawer);
-  backdrop.addEventListener("click", closeDrawer);
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !drawer.classList.contains("-translate-x-full")) closeDrawer();
-  });
-  drawer.addEventListener("click", function (e) {
-    var link = e.target.closest("a");
-    if (link) { e.preventDefault(); closeDrawer(); }
-  });
-  document.getElementById("creations-menu").addEventListener("click", function (e) {
-    var link = e.target.closest("a");
-    if (link) e.preventDefault();
-  });
-
-  /* ------------------------------------------------------------------ */
-  /* Combobox "Type d'archives" avec autocomplétion                     */
-  /* ------------------------------------------------------------------ */
-
-  var typeInput = document.getElementById("typearchive");
-  var typeListbox = document.getElementById("typearchive-listbox");
-  var typeHint = document.getElementById("typearchive-hint");
-  var activeIndex = -1;
-  var currentMatches = [];
-
-  function renderTypeOptions(query) {
-    var q = query.trim().toLowerCase();
-    currentMatches = q === ""
-      ? ARCHIVE_TYPES.slice()
-      : ARCHIVE_TYPES.filter(function (t) { return t.toLowerCase().indexOf(q) !== -1; });
-
-    if (currentMatches.length === 0) {
-      typeListbox.innerHTML = '<li class="px-3 py-2 text-sm text-gray-400">Aucun type existant ne correspond.</li>';
-    } else {
-      typeListbox.innerHTML = currentMatches.map(function (t, i) {
-        return '<li role="option" id="type-opt-' + i + '" data-value="' + t.replace(/"/g, "&quot;") + '" class="cursor-pointer px-3 py-1.5 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700">' + t + "</li>";
-      }).join("");
-    }
-    activeIndex = -1;
-    updateHint(query);
-  }
-
-  function updateHint(query) {
-    var trimmed = query.trim();
-    if (trimmed === "") {
-      typeHint.classList.add("hidden");
-      return;
-    }
-    var exact = ARCHIVE_TYPES.some(function (t) { return t.toLowerCase() === trimmed.toLowerCase(); });
-    if (!exact) {
-      typeHint.textContent = "Nouveau type — sera proposé à l'ajout dans la liste.";
-      typeHint.classList.remove("hidden");
-    } else {
-      typeHint.classList.add("hidden");
-    }
-  }
-
-  function openTypeListbox() {
-    typeListbox.classList.remove("hidden");
-    typeInput.setAttribute("aria-expanded", "true");
-  }
-  function closeTypeListbox() {
-    typeListbox.classList.add("hidden");
-    typeInput.setAttribute("aria-expanded", "false");
-    activeIndex = -1;
-  }
-
-  function highlightActive() {
-    var items = typeListbox.querySelectorAll('li[role="option"]');
-    items.forEach(function (li, i) {
-      if (i === activeIndex) {
-        li.classList.add("bg-brand-50", "text-brand-700");
-        li.scrollIntoView({ block: "nearest" });
-      } else {
-        li.classList.remove("bg-brand-50", "text-brand-700");
-      }
-    });
-  }
-
-  typeInput.addEventListener("input", function () {
-    renderTypeOptions(typeInput.value);
-    openTypeListbox();
-  });
-  typeInput.addEventListener("focus", function () {
-    renderTypeOptions(typeInput.value);
-    openTypeListbox();
-  });
-  typeInput.addEventListener("keydown", function (e) {
-    var items = typeListbox.querySelectorAll('li[role="option"]');
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      if (typeListbox.classList.contains("hidden")) { renderTypeOptions(typeInput.value); openTypeListbox(); return; }
-      activeIndex = Math.min(activeIndex + 1, items.length - 1);
-      highlightActive();
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      activeIndex = Math.max(activeIndex - 1, 0);
-      highlightActive();
-    } else if (e.key === "Enter") {
-      if (activeIndex >= 0 && currentMatches[activeIndex]) {
-        e.preventDefault();
-        typeInput.value = currentMatches[activeIndex];
-        closeTypeListbox();
-        updateHint(typeInput.value);
-      }
-    } else if (e.key === "Escape") {
-      closeTypeListbox();
-    }
-  });
-  typeListbox.addEventListener("click", function (e) {
-    var li = e.target.closest('li[role="option"]');
-    if (li && li.dataset.value) {
-      typeInput.value = li.dataset.value;
-      closeTypeListbox();
-      updateHint(typeInput.value);
-      typeInput.focus();
-    }
-  });
-  document.addEventListener("click", function (e) {
-    if (!e.target.closest("#typearchive") && !e.target.closest("#typearchive-listbox")) closeTypeListbox();
-  });
-
-  /* ------------------------------------------------------------------ */
-  /* Compteur de caractères — Objet de l'archive                        */
-  /* ------------------------------------------------------------------ */
-
-  var descriptionInput = document.getElementById("description");
-  var descriptionCount = document.getElementById("description-count");
-  descriptionInput.addEventListener("input", function () {
-    var len = descriptionInput.value.length;
-    descriptionCount.textContent = len + "/30";
-    descriptionCount.classList.toggle("text-red-500", len >= 30);
-    descriptionCount.classList.toggle("text-amber-600", len >= 25 && len < 30);
-    descriptionCount.classList.toggle("text-gray-400", len < 25);
-  });
-
-  /* Date signature : pas de date future */
-  var dateInput = document.getElementById("date_doc");
-  dateInput.max = new Date().toISOString().split("T")[0];
-
-  /* ------------------------------------------------------------------ */
-  /* Validation et soumission du formulaire (étape 1)                   */
-  /* ------------------------------------------------------------------ */
-
-  var form = document.getElementById("archive-form");
-  var successPanel = document.getElementById("success-panel");
-
-  var REQUIRED_FIELDS = [
-    { id: "format", message: "Veuillez sélectionner un format de document." },
-    { id: "typearchive", message: "Veuillez indiquer un type d'archives." },
-    { id: "description", message: "Veuillez renseigner l'objet de l'archive." },
-    { id: "date_doc", message: "Veuillez indiquer la date de signature." },
-    { id: "emplacement", message: "Veuillez sélectionner l'emplacement physique." },
-    { id: "emplacement2", message: "Veuillez sélectionner l'emplacement virtuel." },
-    { id: "departement", message: "Veuillez sélectionner un groupe d'accès." }
-  ];
-
-  function clearErrors() {
-    REQUIRED_FIELDS.forEach(function (f) {
-      var el = document.getElementById(f.id);
-      var err = document.getElementById(f.id + "-error");
-      el.classList.remove("border-red-400", "focus:border-red-500", "focus:ring-red-500/30");
-      el.removeAttribute("aria-invalid");
-      if (err) { err.textContent = ""; err.classList.add("hidden"); }
-    });
-  }
-
-  function showError(id, message) {
-    var el = document.getElementById(id);
-    var err = document.getElementById(id + "-error");
-    el.classList.add("border-red-400", "focus:border-red-500", "focus:ring-red-500/30");
-    el.setAttribute("aria-invalid", "true");
-    if (err) { err.textContent = message; err.classList.remove("hidden"); }
-  }
-
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-    clearErrors();
-    successPanel.classList.add("hidden");
-
-    var firstInvalid = null;
-    var valid = true;
-
-    REQUIRED_FIELDS.forEach(function (f) {
-      var el = document.getElementById(f.id);
-      if (!el.value || !el.value.trim()) {
-        valid = false;
-        showError(f.id, f.message);
-        if (!firstInvalid) firstInvalid = el;
-      }
-    });
-
-    if (!valid) {
-      firstInvalid.focus();
-      return;
-    }
-
-    successPanel.classList.remove("hidden");
-    successPanel.scrollIntoView({ behavior: "smooth", block: "center" });
-    successPanel.focus();
-  });
-
-  form.addEventListener("reset", function () {
-    window.setTimeout(function () {
-      clearErrors();
-      successPanel.classList.add("hidden");
-      descriptionCount.textContent = "0/30";
-      descriptionCount.className = "shrink-0 text-xs text-gray-400";
-      typeHint.classList.add("hidden");
-    }, 0);
-  });
-
-})();
+  window.ArchiDoc = window.ArchiDoc || {};
+  window.ArchiDoc.archiveTypes = @json($archiveTypes);
+  window.ArchiDoc.groupesAcces = @json($groupesAcces);
 </script>
-
-</body>
-</html>
+@vite('resources/js/archives/create.js')
+@endpush
