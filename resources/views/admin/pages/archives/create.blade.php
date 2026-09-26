@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Nouvelle archive — ArchiDoc DGB')
-@section('meta_description', 'Création et numérisation d\'une nouvelle archive — ArchiDoc, Direction Générale du Budget')
+@section('title', 'Nouvelle archive — ARCHIDOC DGB')
+@section('meta_description', 'Création et numérisation d\'une nouvelle archive — ARCHIDOC, Direction Générale du Budget')
 
 @section('content')
 <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -31,7 +31,10 @@
         <!-- En-tête de la carte -->
         <div class="border-b border-gray-100 bg-gray-50/50 px-6 py-4 sm:px-8">
           <div class="flex items-center gap-2">
-            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-700 text-xs font-bold text-white shadow-sm">1</span>
+            <svg class="h-4 w-4 text-brand-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 12h4"/>
+            </svg>
             <h2 class="text-base font-bold text-gray-900">Document & Informations de l'archive</h2>
           </div>
         </div>
