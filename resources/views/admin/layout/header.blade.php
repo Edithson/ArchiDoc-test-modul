@@ -293,21 +293,44 @@
 
       <!-- Avatar / Compte -->
       <div class="relative">
-        <button id="avatar-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="avatar-menu"
-          class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 sm:pr-3">
-          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-800">A</span>
-          <span class="hidden text-sm font-semibold text-gray-700 md:inline">Administrateur</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-        <div id="avatar-menu" class="absolute right-0 z-40 mt-2 hidden w-56 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl">
-          <div class="border-b border-gray-100 px-3 py-2.5">
-            <p class="text-sm font-bold text-gray-900">Admin ArchiDoc</p>
-            <p class="text-xs text-gray-500">DGB · Service Archives</p>
+        @auth
+          <button id="avatar-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="avatar-menu"
+            class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 sm:pr-3">
+            @if(auth()->user()->avatar)
+              <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}" class="h-8 w-8 rounded-full object-cover">
+            @else
+              <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-800">
+                {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+              </span>
+            @endif
+            <span class="hidden text-sm font-semibold text-gray-700 md:inline truncate max-w-[120px]">
+              {{ auth()->user()->name ?? 'Utilisateur' }}
+            </span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div id="avatar-menu" class="absolute right-0 z-40 mt-2 hidden w-60 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl">
+            <div class="border-b border-gray-100 px-3 py-2.5">
+              <p class="text-sm font-bold text-gray-900 truncate">{{ auth()->user()->name }}</p>
+              <p class="text-xs text-gray-500 truncate">{{ auth()->user()->departement ?? 'DGB' }} · {{ ucfirst(auth()->user()->roles ?? 'Classique') }}</p>
+              @if(auth()->user()->matricule)
+                <p class="mt-0.5 text-[10px] font-mono text-brand-700">Matricule: {{ auth()->user()->matricule }}</p>
+              @endif
+            </div>
+            <a href="{{ route('profile.edit') }}" class="block rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 font-medium">
+              Mon profil
+            </a>
+            <form method="POST" action="{{ route('logout') }}">
+              @csrf
+              <button type="submit" class="w-full text-left rounded-lg px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors">
+                Déconnexion
+              </button>
+            </form>
           </div>
-          <a href="#" class="block rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">Mon profil</a>
-          <a href="#" class="block rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">Paramètres</a>
-          <a href="#" class="block rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50">Déconnexion</a>
-        </div>
+        @else
+          <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 rounded-lg bg-brand-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-brand-800">
+            Connexion
+          </a>
+        @endauth
       </div>
     </div>
   </div>

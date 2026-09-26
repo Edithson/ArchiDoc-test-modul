@@ -101,7 +101,7 @@ class ArchiveController extends Controller
             'format' => $validated['format'] ?? null,
             'departement' => $validated['departement'] ?? null,
             'filepath' => $filePath,
-            'user_id' => 1,
+            'user_id' => auth()->id() ?? 1,
         ]);
 
         return response()->json([
