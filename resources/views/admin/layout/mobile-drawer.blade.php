@@ -84,15 +84,48 @@
       <div class="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-brand-200/80">Documentation</div>
       <ul class="space-y-1">
         <li>
-          <a href="#" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-brand-200/70 hover:bg-white/5">
-            <span>Réglementation Archives</span>
-            <span class="text-[10px]">Bientôt</span>
+          <a href="{{ asset('document/Loi_001_Regissant_Archives_Cameroun_24072024.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-brand-50 hover:bg-white/10">
+            <div class="flex items-center gap-2.5 truncate">
+              <svg class="h-4 w-4 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+              <span class="truncate">Loi N° 001/2024 (Archives)</span>
+            </div>
+            <span class="rounded bg-red-900/40 px-1.5 py-0.5 text-[10px] font-bold text-red-200 shrink-0">PDF</span>
           </a>
         </li>
         <li>
-          <a href="#" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-brand-200/70 hover:bg-white/5">
-            <span>Organisation & Gouvernance</span>
-            <span class="text-[10px]">Bientôt</span>
+          <a href="{{ asset('document/Loi_2000-010_19-dec_Regissant_Archives_Cameroun.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-brand-50 hover:bg-white/10">
+            <div class="flex items-center gap-2.5 truncate">
+              <svg class="h-4 w-4 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+              <span class="truncate">Loi N° 2000/010 (19/12/2000)</span>
+            </div>
+            <span class="rounded bg-red-900/40 px-1.5 py-0.5 text-[10px] font-bold text-red-200 shrink-0">PDF</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ asset('document/Loi_Cybersecurite_Criminalite.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-brand-50 hover:bg-white/10">
+            <div class="flex items-center gap-2.5 truncate">
+              <svg class="h-4 w-4 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              <span class="truncate">Cybersécurité & Cybercriminalité</span>
+            </div>
+            <span class="rounded bg-red-900/40 px-1.5 py-0.5 text-[10px] font-bold text-red-200 shrink-0">PDF</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ asset('document/ORGANIGRAMME_DGB.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-brand-50 hover:bg-white/10">
+            <div class="flex items-center gap-2.5 truncate">
+              <svg class="h-4 w-4 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+              <span class="truncate">Organigramme DGB</span>
+            </div>
+            <span class="rounded bg-red-900/40 px-1.5 py-0.5 text-[10px] font-bold text-red-200 shrink-0">PDF</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ asset('document/Rapport_Audit_Archivage-Novembre-2019.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-brand-50 hover:bg-white/10">
+            <div class="flex items-center gap-2.5 truncate">
+              <svg class="h-4 w-4 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+              <span class="truncate">Audit Archivage (2019)</span>
+            </div>
+            <span class="rounded bg-red-900/40 px-1.5 py-0.5 text-[10px] font-bold text-red-200 shrink-0">PDF</span>
           </a>
         </li>
       </ul>

@@ -145,26 +145,35 @@
             <span>Documentation</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 opacity-70 transition-transform" data-chevron aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
           </button>
-          <div id="documentation-menu" class="absolute left-0 z-40 mt-2 hidden w-80 origin-top-left rounded-xl border border-gray-100 bg-white p-2.5 shadow-xl">
+          <div id="documentation-menu" class="absolute left-0 z-40 mt-2 hidden w-88 origin-top-left rounded-xl border border-gray-100 bg-white p-2.5 shadow-xl">
             <!-- Groupe 1: Réglementation Archives -->
             <div class="px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-700">Réglementation Archives</div>
             <ul class="mb-3 space-y-0.5 text-sm">
               <li>
-                <a href="#" class="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
+                <a href="{{ asset('document/Loi_001_Regissant_Archives_Cameroun_24072024.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
                   <div class="flex items-center gap-2.5">
-                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
-                    <span>Lois et textes juridiques</span>
+                    <svg class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    <span class="truncate">Loi N° 001/2024 (Archives)</span>
                   </div>
-                  <span class="text-[10px] text-gray-400 font-medium">Bientôt</span>
+                  <span class="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700 shrink-0">PDF</span>
                 </a>
               </li>
               <li>
-                <a href="#" class="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
+                <a href="{{ asset('document/Loi_2000-010_19-dec_Regissant_Archives_Cameroun.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
                   <div class="flex items-center gap-2.5">
-                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    <span>Cybersécurité & Normes</span>
+                    <svg class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    <span class="truncate">Loi N° 2000/010 du 19 Déc. 2000</span>
                   </div>
-                  <span class="text-[10px] text-gray-400 font-medium">Bientôt</span>
+                  <span class="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700 shrink-0">PDF</span>
+                </a>
+              </li>
+              <li>
+                <a href="{{ asset('document/Loi_Cybersecurite_Criminalite.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
+                  <div class="flex items-center gap-2.5">
+                    <svg class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <span class="truncate">Loi Cybersécurité & Cybercriminalité</span>
+                  </div>
+                  <span class="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700 shrink-0">PDF</span>
                 </a>
               </li>
             </ul>
@@ -173,21 +182,21 @@
             <div class="px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-700 border-t border-gray-100 pt-2">Organisation & Gouvernance</div>
             <ul class="space-y-0.5 text-sm">
               <li>
-                <a href="#" class="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
+                <a href="{{ asset('document/ORGANIGRAMME_DGB.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
                   <div class="flex items-center gap-2.5">
-                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                    <span>Organigramme DGB</span>
+                    <svg class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    <span class="truncate">Organigramme Général DGB</span>
                   </div>
-                  <span class="text-[10px] text-gray-400 font-medium">Bientôt</span>
+                  <span class="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700 shrink-0">PDF</span>
                 </a>
               </li>
               <li>
-                <a href="#" class="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
+                <a href="{{ asset('document/Rapport_Audit_Archivage-Novembre-2019.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
                   <div class="flex items-center gap-2.5">
-                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                    <span>Audit & Conformité</span>
+                    <svg class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    <span class="truncate">Rapport Audit Archivage (2019)</span>
                   </div>
-                  <span class="text-[10px] text-gray-400 font-medium">Bientôt</span>
+                  <span class="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700 shrink-0">PDF</span>
                 </a>
               </li>
             </ul>
