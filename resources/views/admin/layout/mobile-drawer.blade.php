@@ -103,9 +103,12 @@
       <div class="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-brand-200/80">Administration</div>
       <ul class="space-y-1">
         <li>
-          <a href="#" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-brand-200/70 hover:bg-white/5">
-            <span>Comptes utilisateurs</span>
-            <span class="text-[10px]">Bientôt</span>
+          <a href="{{ route('users.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('users.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
+            <div class="flex items-center gap-2.5">
+              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+              <span>Comptes utilisateurs</span>
+            </div>
+            <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
         <li>
