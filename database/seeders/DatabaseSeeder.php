@@ -68,6 +68,8 @@ class DatabaseSeeder extends Seeder
             ArchiveTypeSeeder::class,
             ArchiveLocationSeeder::class,
             ArchiveSeeder::class,
+            PieceSeeder::class,
+            PersonnelSeeder::class,
         ]);
     }
 }
