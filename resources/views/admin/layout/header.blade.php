@@ -34,7 +34,7 @@
 
         <!-- 2. Menu Création -->
         @php
-          $isCreationActive = request()->routeIs('archives.create');
+          $isCreationActive = request()->routeIs('archives.create') || request()->routeIs('archive-types.*');
         @endphp
         <div class="relative">
           <button id="creations-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="creations-menu"
@@ -58,12 +58,12 @@
                 </a>
               </li>
               <li>
-                <a href="#" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-gray-500 hover:bg-gray-50">
+                <a href="{{ route('archive-types.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archive-types.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
-                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h10M7 11h10M7 15h10"/></svg>
-                    <span>Nouveau Type d'archive</span>
+                    <svg class="h-4 w-4 text-brand-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h10M7 11h10M7 15h10"/></svg>
+                    <span>Types d'archives</span>
                   </div>
-                  <span class="text-[10px] text-gray-400 font-medium">Bientôt</span>
+                  <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
               <li>

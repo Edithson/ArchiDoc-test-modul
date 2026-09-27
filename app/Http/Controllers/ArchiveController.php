@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreArchiveRequest;
 use App\Http\Requests\UpdateArchiveRequest;
 use App\Models\Archive;
+use App\Models\ArchiveType;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -160,46 +161,52 @@ class ArchiveController extends Controller
     }
 
     /**
-     * Get the list of archive types.
+     * Get the list of archive types from the dedicated table.
      *
      * @return array<int, string>
      */
     protected function getArchiveTypes(): array
     {
-        return [
-            'ARRETE',
-            'ATTESTATION',
-            'AUTRES TYPES DE DOCUMENTS',
-            "BONS D'ENGAGEMENT",
-            'BORDEREAUX',
-            "CARNETS D'ENGAGEMENT",
-            'CERTIFICATS',
-            'CIRCULAIRE',
-            'COMMUNIQUES',
-            'COMPTE ADMINISTRATIF',
-            "COMPTE D'EMPLOI",
-            'COMPTE-RENDU',
-            'CONSTITUTION',
-            'CONVOCATIONS',
-            'COURRIERS',
-            'DECISIONS',
-            'DECRET',
-            'ETATS DE SOMMES DUES',
-            'FONDS DE DOSSIER',
-            'INVITATIONS',
-            'LETTRE CIRCULAIRE',
-            'LETTRE DE MISSION',
-            'LOI',
-            'MEMO',
-            'MEMOIRES DE DEPENSE',
-            'MESSAGE-FAX',
-            'MESSAGE-PORTE',
-            'NOTE',
-            'NOTE DE SERVICE',
-            'ORDONNANCES',
-            'PROCES-VERBAL',
-            'SOIT-TRANSMIS',
-        ];
+        $types = ArchiveType::orderBy('name')->pluck('name')->toArray();
+
+        if (empty($types)) {
+            return [
+                'ARRETE',
+                'ATTESTATION',
+                'AUTRES TYPES DE DOCUMENTS',
+                "BONS D'ENGAGEMENT",
+                'BORDEREAUX',
+                "CARNETS D'ENGAGEMENT",
+                'CERTIFICATS',
+                'CIRCULAIRE',
+                'COMMUNIQUES',
+                'COMPTE ADMINISTRATIF',
+                "COMPTE D'EMPLOI",
+                'COMPTE-RENDU',
+                'CONSTITUTION',
+                'CONVOCATIONS',
+                'COURRIERS',
+                'DECISIONS',
+                'DECRET',
+                'ETATS DE SOMMES DUES',
+                'FONDS DE DOSSIER',
+                'INVITATIONS',
+                'LETTRE CIRCULAIRE',
+                'LETTRE DE MISSION',
+                'LOI',
+                'MEMO',
+                'MEMOIRES DE DEPENSE',
+                'MESSAGE-FAX',
+                'MESSAGE-PORTE',
+                'NOTE',
+                'NOTE DE SERVICE',
+                'ORDONNANCES',
+                'PROCES-VERBAL',
+                'SOIT-TRANSMIS',
+            ];
+        }
+
+        return $types;
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArchiveController;
+use App\Http\Controllers\ArchiveTypeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\EnsureSuperPrivileged;
@@ -10,6 +11,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/', [ArchiveController::class, 'index'])->name('archives.index');
     Route::get('/consultations', [ArchiveController::class, 'search'])->name('archives.search');
     Route::resource('archives', ArchiveController::class)->except(['index']);
+    Route::resource('archive-types', ArchiveTypeController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

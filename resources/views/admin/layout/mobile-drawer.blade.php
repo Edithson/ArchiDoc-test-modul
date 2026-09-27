@@ -43,9 +43,12 @@
           </a>
         </li>
         <li>
-          <a href="#" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-brand-200/70 hover:bg-white/5">
-            <span>Nouveau Type d'archive</span>
-            <span class="text-[10px]">Bientôt</span>
+          <a href="{{ route('archive-types.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archive-types.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
+            <div class="flex items-center gap-2.5">
+              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h10M7 11h10M7 15h10"/></svg>
+              <span>Types d'archives</span>
+            </div>
+            <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
         <li>

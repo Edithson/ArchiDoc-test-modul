@@ -63,7 +63,9 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Création des types d'archives
         $this->call([
+            ArchiveTypeSeeder::class,
             ArchiveSeeder::class,
         ]);
     }
