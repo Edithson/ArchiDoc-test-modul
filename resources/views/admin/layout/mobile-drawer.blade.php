@@ -52,9 +52,12 @@
           </a>
         </li>
         <li>
-          <a href="#" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-brand-200/70 hover:bg-white/5">
-            <span>Nouvel Emplacement</span>
-            <span class="text-[10px]">Bientôt</span>
+          <a href="{{ route('archive-locations.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archive-locations.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
+            <div class="flex items-center gap-2.5">
+              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+              <span>Emplacements</span>
+            </div>
+            <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
       </ul>

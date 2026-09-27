@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreArchiveRequest;
 use App\Http\Requests\UpdateArchiveRequest;
 use App\Models\Archive;
+use App\Models\ArchiveLocation;
 use App\Models\ArchiveType;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -210,29 +211,51 @@ class ArchiveController extends Controller
     }
 
     /**
-     * Get the list of physical locations.
+     * Get the list of physical locations from database.
      *
      * @return array<string, string>
      */
     protected function getEmplacementsPhysiques(): array
     {
-        return [
-            'FOUDA' => "FOUDA — Centre d'excellence DGB",
-            'DGB' => 'DGB — Direction Générale du Budget',
-            'IMPRIMERIE NATIONALE' => 'Imprimerie Nationale',
-        ];
+        $locations = ArchiveLocation::where('type', ArchiveLocation::TYPE_PHYSICAL)
+            ->orderBy('name')
+            ->get();
+
+        if ($locations->isEmpty()) {
+            return [
+                'FOUDA' => "FOUDA — Centre d'excellence DGB",
+                'DGB' => 'DGB — Direction Générale du Budget',
+                'IMPRIMERIE NATIONALE' => 'Imprimerie Nationale',
+            ];
+        }
+
+        $result = [];
+        foreach ($locations as $loc) {
+            $result[$loc->name] = $loc->description ? "{$loc->name} — {$loc->description}" : $loc->name;
+        }
+
+        return $result;
     }
 
     /**
-     * Get the list of virtual locations.
+     * Get the list of virtual locations from database.
      *
      * @return array<string, string>
      */
     protected function getEmplacementsVirtuels(): array
     {
-        return [
-            'Serveur' => 'Serveur',
-        ];
+        $locations = ArchiveLocation::where('type', ArchiveLocation::TYPE_VIRTUAL)
+            ->orderBy('name')
+            ->pluck('name', 'name')
+            ->toArray();
+
+        if (empty($locations)) {
+            return [
+                'Serveur' => 'Serveur',
+            ];
+        }
+
+        return $locations;
     }
 
     /**

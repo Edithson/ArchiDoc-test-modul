@@ -5,12 +5,12 @@
   $sidebarTitle = '';
   $sidebarNav = [];
 
-  if (request()->routeIs('archives.create') || request()->routeIs('archive-types.*')) {
+  if (request()->routeIs('archives.create') || request()->routeIs('archive-types.*') || request()->routeIs('archive-locations.*')) {
       $sidebarTitle = 'CRÉATION';
       $sidebarNav = [
           ['title' => 'Nouvelle Archive', 'route' => route('archives.create'), 'active' => request()->routeIs('archives.create'), 'icon' => 'archive', 'badge' => 'Actif'],
           ['title' => 'Types d\'archives', 'route' => route('archive-types.index'), 'active' => request()->routeIs('archive-types.*'), 'icon' => 'default', 'badge' => 'Actif'],
-          ['title' => 'Nouvel Emplacement', 'route' => '#', 'active' => false, 'icon' => 'default', 'badge' => 'Bientôt'],
+          ['title' => 'Emplacements', 'route' => route('archive-locations.index'), 'active' => request()->routeIs('archive-locations.*'), 'icon' => 'default', 'badge' => 'Actif'],
           ['title' => 'Nouveau Groupe d\'accès', 'route' => '#', 'active' => false, 'icon' => 'default', 'badge' => 'Bientôt'],
           ['title' => 'Nouveau Dossier Personnel', 'route' => '#', 'active' => false, 'icon' => 'default', 'badge' => 'Bientôt'],
       ];
