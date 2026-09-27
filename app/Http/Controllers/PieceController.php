@@ -26,6 +26,13 @@ class PieceController extends Controller
             });
         }
 
+        if ($request->filled('obligatory')) {
+            $obligatoryVal = $request->input('obligatory');
+            if ($obligatoryVal === '1' || $obligatoryVal === '0') {
+                $query->where('obligatory', (bool) (int) $obligatoryVal);
+            }
+        }
+
         $pieces = $query->orderBy('obligatory', 'desc')
             ->orderBy('name', 'asc')
             ->paginate(15)
@@ -34,6 +41,7 @@ class PieceController extends Controller
         return view('admin.pages.pieces.index', [
             'pieces' => $pieces,
             'search' => $request->input('search'),
+            'obligatoryFilter' => $request->input('obligatory'),
         ]);
     }
 
@@ -79,9 +87,17 @@ class PieceController extends Controller
 
     /**
      * Remove the specified integration piece from storage.
+     * Enforces functional dependency check on pivot/file relations.
      */
     public function destroy(Piece $piece): RedirectResponse
     {
+        $filesCount = $piece->files()->count();
+
+        if ($filesCount > 0) {
+            return redirect()->route('pieces.index')
+                ->with('error', "Impossible de supprimer la pièce « {$piece->name} » car elle est actuellement associée à {$filesCount} dossier(s) du personnel. Veuillez d'abord retirer les pièces enregistrées sous ce libellé.");
+        }
+
         $name = $piece->name;
         $piece->delete();
 
