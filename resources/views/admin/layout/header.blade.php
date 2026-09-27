@@ -34,7 +34,7 @@
 
         <!-- 2. Menu Création -->
         @php
-          $isCreationActive = request()->routeIs('archives.create') || request()->routeIs('archive-types.*');
+          $isCreationActive = request()->routeIs('archives.create') || request()->routeIs('archive-types.*') || request()->routeIs('archive-locations.*');
         @endphp
         <div class="relative">
           <button id="creations-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="creations-menu"
@@ -67,12 +67,12 @@
                 </a>
               </li>
               <li>
-                <a href="#" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-gray-500 hover:bg-gray-50">
+                <a href="{{ route('archive-locations.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archive-locations.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
-                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-                    <span>Nouvel Emplacement</span>
+                    <svg class="h-4 w-4 text-brand-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                    <span>Emplacements</span>
                   </div>
-                  <span class="text-[10px] text-gray-400 font-medium">Bientôt</span>
+                  <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
               <li>

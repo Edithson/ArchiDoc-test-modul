@@ -63,9 +63,10 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Création des types d'archives
+        // Création des types d'archives et emplacements
         $this->call([
             ArchiveTypeSeeder::class,
+            ArchiveLocationSeeder::class,
             ArchiveSeeder::class,
         ]);
     }
