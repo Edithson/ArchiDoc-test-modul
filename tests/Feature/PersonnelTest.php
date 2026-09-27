@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Personnel;
+use App\Models\PersonnelFiles;
 use App\Models\Piece;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -117,6 +118,33 @@ test('user can update personnel details and append files', function () {
         'id' => $personnel->id,
         'name' => 'NEW NAME',
     ]);
+});
+
+test('user receives error when trying to download zip of personnel with no files', function () {
+    $personnel = Personnel::factory()->create(['name' => 'Agent Sans Fichier']);
+
+    $response = $this->actingAs($this->user)->get(route('personnels.download-zip', $personnel));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('error');
+});
+
+test('user can download zip archive of personnel dossier when files exist', function () {
+    $personnel = Personnel::factory()->create(['name' => 'Agent Avec Fichier', 'matricule' => 'MAT-ZIP']);
+    $piece = Piece::factory()->create(['name' => 'Acte Recrutement']);
+
+    Storage::disk('public')->put('personnel_files/MAT-ZIP/test.pdf', 'dummy content');
+
+    PersonnelFiles::create([
+        'personnels_id' => $personnel->id,
+        'pieces_id' => $piece->id,
+        'file_paths' => ['personnel_files/MAT-ZIP/test.pdf'],
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('personnels.download-zip', $personnel));
+
+    $response->assertStatus(200);
+    $response->assertHeader('content-type', 'application/zip');
 });
 
 test('user can soft delete personnel record', function () {

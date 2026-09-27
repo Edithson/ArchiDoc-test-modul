@@ -16,6 +16,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('archives', ArchiveController::class)->except(['index']);
     Route::resource('archive-types', ArchiveTypeController::class);
     Route::resource('archive-locations', ArchiveLocationController::class);
+    Route::get('personnels/{personnel}/download-zip', [PersonnelController::class, 'downloadZip'])->name('personnels.download-zip');
     Route::resource('personnels', PersonnelController::class);
     Route::resource('pieces', PieceController::class);
 
