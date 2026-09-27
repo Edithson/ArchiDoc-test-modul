@@ -12,6 +12,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PersonnelController extends Controller
 {
@@ -204,5 +206,69 @@ class PersonnelController extends Controller
 
         return redirect()->route('personnels.index')
             ->with('success', "Le dossier de l'agent « {$name} » a été supprimé.");
+    }
+
+    /**
+     * Download the full dossier files of the specified personnel as a ZIP archive.
+     */
+    public function downloadZip(Personnel $personnel): BinaryFileResponse|RedirectResponse
+    {
+        $personnel->load(['personnelFiles.piece']);
+
+        $filesToZip = [];
+
+        foreach ($personnel->personnelFiles as $personnelFile) {
+            if (empty($personnelFile->file_paths)) {
+                continue;
+            }
+
+            $pieceName = $personnelFile->piece ? $personnelFile->piece->name : 'Piece';
+            $sanitizedPieceName = Str::slug($pieceName, '_');
+
+            foreach ($personnelFile->file_paths as $index => $relativePath) {
+                if (Storage::disk('public')->exists($relativePath)) {
+                    $absolutePath = Storage::disk('public')->path($relativePath);
+                    $extension = pathinfo($absolutePath, PATHINFO_EXTENSION);
+                    $extension = $extension ? ".{$extension}" : '';
+
+                    $suffix = count($personnelFile->file_paths) > 1 ? '_'.($index + 1) : '';
+                    $zipEntryName = "{$sanitizedPieceName}{$suffix}{$extension}";
+
+                    $filesToZip[] = [
+                        'path' => $absolutePath,
+                        'name' => $zipEntryName,
+                    ];
+                }
+            }
+        }
+
+        if (empty($filesToZip)) {
+            return redirect()->back()
+                ->with('error', "Aucun fichier n'a été téléversé pour le dossier de « {$personnel->name} ».");
+        }
+
+        $tempDir = storage_path('app/temp');
+        if (! file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $zipFileName = "Dossier_{$personnel->matricule}_".time().'.zip';
+        $zipFilePath = "{$tempDir}/{$zipFileName}";
+
+        $zip = new \ZipArchive;
+        if ($zip->open($zipFilePath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            return redirect()->back()
+                ->with('error', "Impossible de créer l'archive ZIP.");
+        }
+
+        foreach ($filesToZip as $fileInfo) {
+            $zip->addFile($fileInfo['path'], $fileInfo['name']);
+        }
+
+        $zip->close();
+
+        $downloadName = "Dossier_{$personnel->matricule}_{$personnel->name}.zip";
+
+        return response()->download($zipFilePath, $downloadName)->deleteFileAfterSend(true);
     }
 }
