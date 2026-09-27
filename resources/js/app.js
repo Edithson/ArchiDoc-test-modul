@@ -36,6 +36,7 @@ function initHeaderNavigation() {
     }
 
     setupDropdown('creations-trigger', 'creations-menu');
+    setupDropdown('personnel-trigger', 'personnel-menu');
     setupDropdown('consultations-trigger', 'consultations-menu');
     setupDropdown('documentation-trigger', 'documentation-menu');
     setupDropdown('administration-trigger', 'administration-menu');

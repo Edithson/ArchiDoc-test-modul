@@ -5,14 +5,20 @@
   $sidebarTitle = '';
   $sidebarNav = [];
 
-  if (request()->routeIs('archives.create') || request()->routeIs('archive-types.*') || request()->routeIs('archive-locations.*')) {
+  if (request()->routeIs('personnels.*') || request()->routeIs('pieces.*')) {
+      $sidebarTitle = 'GESTION DU PERSONNEL';
+      $sidebarNav = [
+          ['title' => 'Dossiers du personnel', 'route' => route('personnels.index'), 'active' => request()->routeIs('personnels.index') || request()->routeIs('personnels.show') || request()->routeIs('personnels.edit'), 'icon' => 'users', 'badge' => 'Actif'],
+          ['title' => 'Pièces d\'intégration', 'route' => route('pieces.index'), 'active' => request()->routeIs('pieces.*'), 'icon' => 'default', 'badge' => 'Actif'],
+          ['title' => 'Nouveau dossier agent', 'route' => route('personnels.create'), 'active' => request()->routeIs('personnels.create'), 'icon' => 'default', 'badge' => 'Actif'],
+      ];
+  } elseif (request()->routeIs('archives.create') || request()->routeIs('archive-types.*') || request()->routeIs('archive-locations.*')) {
       $sidebarTitle = 'CRÉATION';
       $sidebarNav = [
           ['title' => 'Nouvelle Archive', 'route' => route('archives.create'), 'active' => request()->routeIs('archives.create'), 'icon' => 'archive', 'badge' => 'Actif'],
           ['title' => 'Types d\'archives', 'route' => route('archive-types.index'), 'active' => request()->routeIs('archive-types.*'), 'icon' => 'default', 'badge' => 'Actif'],
           ['title' => 'Emplacements', 'route' => route('archive-locations.index'), 'active' => request()->routeIs('archive-locations.*'), 'icon' => 'default', 'badge' => 'Actif'],
           ['title' => 'Nouveau Groupe d\'accès', 'route' => '#', 'active' => false, 'icon' => 'default', 'badge' => 'Bientôt'],
-          ['title' => 'Nouveau Dossier Personnel', 'route' => '#', 'active' => false, 'icon' => 'default', 'badge' => 'Bientôt'],
       ];
   } elseif (request()->routeIs('archives.search') || request()->routeIs('archives.show')) {
       $sidebarTitle = 'CONSULTATION';
