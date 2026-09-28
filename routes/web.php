@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\ArchiveLocationController;
 use App\Http\Controllers\ArchiveTypeController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PersonnelController;
 use App\Http\Controllers\PieceController;
 use App\Http\Controllers\ProfileController;
@@ -16,6 +17,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('archives', ArchiveController::class)->except(['index']);
     Route::resource('archive-types', ArchiveTypeController::class);
     Route::resource('archive-locations', ArchiveLocationController::class);
+    Route::resource('departments', DepartmentController::class);
     Route::get('personnels/{personnel}/download-zip', [PersonnelController::class, 'downloadZip'])->name('personnels.download-zip');
     Route::resource('personnels', PersonnelController::class);
     Route::resource('pieces', PieceController::class);
