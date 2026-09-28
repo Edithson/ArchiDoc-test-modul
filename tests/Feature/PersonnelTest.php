@@ -46,11 +46,11 @@ test('user can access create personnel page', function () {
     $response->assertSee('Block 1 : Pièces Obligatoires');
 });
 
-test('user can store new personnel with uploaded integration files', function () {
+test('user can store new personnel with multiple uploaded files for a single piece', function () {
     $pieceObligatory = Piece::factory()->create(['name' => 'Acte de Recrutement', 'obligatory' => true]);
-    $pieceOptional = Piece::factory()->create(['name' => 'Attestation de mariage', 'obligatory' => false]);
 
-    $fakeFile = UploadedFile::fake()->create('recrutement.pdf', 100, 'application/pdf');
+    $file1 = UploadedFile::fake()->create('recrutement_p1.pdf', 100, 'application/pdf');
+    $file2 = UploadedFile::fake()->create('recrutement_p2.pdf', 150, 'application/pdf');
 
     $response = $this->actingAs($this->user)->post(route('personnels.store'), [
         'name' => 'TCHATCHOUA Alain',
@@ -59,7 +59,7 @@ test('user can store new personnel with uploaded integration files', function ()
         'phone' => '+237699001122',
         'address' => 'Yaoundé',
         'files' => [
-            $pieceObligatory->id => $fakeFile,
+            $pieceObligatory->id => [$file1, $file2],
         ],
     ]);
 
@@ -68,15 +68,27 @@ test('user can store new personnel with uploaded integration files', function ()
 
     $response->assertRedirect(route('personnels.show', $personnel));
 
-    $this->assertDatabaseHas('personnels', [
-        'name' => 'TCHATCHOUA Alain',
-        'matricule' => 'MAT-7788',
+    $personnelFile = PersonnelFiles::where('personnels_id', $personnel->id)
+        ->where('pieces_id', $pieceObligatory->id)
+        ->first();
+
+    expect($personnelFile)->not->toBeNull();
+    expect(count($personnelFile->file_paths))->toBe(2);
+});
+
+test('validation fails if uploaded file exceeds 5 Mo', function () {
+    $piece = Piece::factory()->create(['name' => 'Diplôme', 'obligatory' => true]);
+    $overSizedFile = UploadedFile::fake()->create('heavy.pdf', 6000, 'application/pdf'); // 6 Mo
+
+    $response = $this->actingAs($this->user)->post(route('personnels.store'), [
+        'name' => 'TEST Oversize',
+        'matricule' => 'MAT-OVER',
+        'files' => [
+            $piece->id => [$overSizedFile],
+        ],
     ]);
 
-    $this->assertDatabaseHas('personnel_files', [
-        'personnels_id' => $personnel->id,
-        'pieces_id' => $pieceObligatory->id,
-    ]);
+    $response->assertSessionHasErrors();
 });
 
 test('personnel completion accessors calculate rate accurately', function () {
@@ -99,25 +111,36 @@ test('user can view personnel dossier details page', function () {
     $response->assertSee('EBOA Francois');
 });
 
-test('user can update personnel details and append files', function () {
-    $personnel = Personnel::factory()->create(['name' => 'OLD NAME', 'matricule' => 'MAT-5000']);
+test('user can update personnel details and remove specific existing file', function () {
+    $personnel = Personnel::factory()->create(['name' => 'AGENT EDIT', 'matricule' => 'MAT-5000']);
     $piece = Piece::factory()->create(['name' => 'CV Certifié', 'obligatory' => false]);
-    $fakeFile = UploadedFile::fake()->create('cv.pdf', 50, 'application/pdf');
+
+    Storage::disk('public')->put('personnel_files/MAT-5000/file1.pdf', 'content 1');
+    Storage::disk('public')->put('personnel_files/MAT-5000/file2.pdf', 'content 2');
+
+    $personnelFile = PersonnelFiles::create([
+        'personnels_id' => $personnel->id,
+        'pieces_id' => $piece->id,
+        'file_paths' => [
+            'personnel_files/MAT-5000/file1.pdf',
+            'personnel_files/MAT-5000/file2.pdf',
+        ],
+    ]);
 
     $response = $this->actingAs($this->user)->put(route('personnels.update', $personnel), [
-        'name' => 'NEW NAME',
+        'name' => 'AGENT EDIT UPDATED',
         'matricule' => 'MAT-5000',
-        'email' => 'newname@minfi.cm',
-        'files' => [
-            $piece->id => $fakeFile,
+        'remove_files' => [
+            'personnel_files/MAT-5000/file1.pdf',
         ],
     ]);
 
     $response->assertRedirect(route('personnels.show', $personnel));
-    $this->assertDatabaseHas('personnels', [
-        'id' => $personnel->id,
-        'name' => 'NEW NAME',
-    ]);
+
+    $personnelFile->refresh();
+    expect($personnelFile->file_paths)->toBe(['personnel_files/MAT-5000/file2.pdf']);
+    Storage::disk('public')->assertMissing('personnel_files/MAT-5000/file1.pdf');
+    Storage::disk('public')->assertExists('personnel_files/MAT-5000/file2.pdf');
 });
 
 test('user receives error when trying to download zip of personnel with no files', function () {

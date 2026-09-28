@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\UploadedFile;
 
 class StorePersonnelRequest extends FormRequest
 {
@@ -31,7 +32,31 @@ class StorePersonnelRequest extends FormRequest
             'pieces' => ['nullable', 'array'],
             'pieces.*' => ['nullable'],
             'files' => ['nullable', 'array'],
-            'files.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            'files.*' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    if (empty($value)) {
+                        return;
+                    }
+                    $files = is_array($value) ? $value : [$value];
+                    foreach ($files as $file) {
+                        if (! $file || ! ($file instanceof UploadedFile)) {
+                            continue;
+                        }
+                        $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension());
+                        if (! in_array($extension, ['pdf', 'jpg', 'jpeg', 'png'], true)) {
+                            $fail('Les pièces jointes doivent être au format PDF ou image (JPG, PNG).');
+
+                            return;
+                        }
+                        if ($file->getSize() > 5120 * 1024) {
+                            $fail('La taille maximale de chaque fichier est de 5 Mo.');
+
+                            return;
+                        }
+                    }
+                },
+            ],
         ];
     }
 
@@ -48,8 +73,6 @@ class StorePersonnelRequest extends FormRequest
             'matricule.unique' => 'Ce matricule est déjà attribué à un autre agent.',
             'email.email' => 'Adresse email invalide.',
             'email.unique' => 'Cette adresse email est déjà utilisée.',
-            'files.*.mimes' => 'Les pièces jointes doivent être des fichiers PDF ou images (JPG, PNG).',
-            'files.*.max' => 'La taille maximale d\'une pièce est de 5 Mo.',
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
 
 class UpdatePersonnelRequest extends FormRequest
@@ -32,10 +33,36 @@ class UpdatePersonnelRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255', Rule::unique('personnels', 'email')->ignore($personnelId)],
             'phone' => ['nullable', 'string', 'max:50'],
             'address' => ['nullable', 'string', 'max:255'],
+            'remove_files' => ['nullable', 'array'],
+            'remove_files.*' => ['nullable', 'string'],
             'pieces' => ['nullable', 'array'],
             'pieces.*' => ['nullable'],
             'files' => ['nullable', 'array'],
-            'files.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            'files.*' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    if (empty($value)) {
+                        return;
+                    }
+                    $files = is_array($value) ? $value : [$value];
+                    foreach ($files as $file) {
+                        if (! $file || ! ($file instanceof UploadedFile)) {
+                            continue;
+                        }
+                        $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension());
+                        if (! in_array($extension, ['pdf', 'jpg', 'jpeg', 'png'], true)) {
+                            $fail('Les pièces jointes doivent être au format PDF ou image (JPG, PNG).');
+
+                            return;
+                        }
+                        if ($file->getSize() > 5120 * 1024) {
+                            $fail('La taille maximale de chaque fichier est de 5 Mo.');
+
+                            return;
+                        }
+                    }
+                },
+            ],
         ];
     }
 
@@ -51,8 +78,6 @@ class UpdatePersonnelRequest extends FormRequest
             'matricule.required' => 'Le matricule est obligatoire.',
             'matricule.unique' => 'Ce matricule appartient déjà à un autre agent.',
             'email.unique' => 'Cette adresse email est déjà utilisée.',
-            'files.*.mimes' => 'Les pièces jointes doivent être au format PDF ou image (JPG, PNG).',
-            'files.*.max' => 'La taille maximale d\'un fichier est de 5 Mo.',
         ];
     }
 }

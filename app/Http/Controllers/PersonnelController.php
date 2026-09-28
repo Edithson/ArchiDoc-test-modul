@@ -10,6 +10,7 @@ use App\Models\Piece;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -100,15 +101,24 @@ class PersonnelController extends Controller
             'address' => $validated['address'] ?? null,
         ]);
 
-        // Traitement des pièces jointes déposées
-        if ($request->hasFile('files')) {
-            foreach ($request->file('files') as $pieceId => $file) {
-                if ($file && $file->isValid()) {
-                    $path = $file->store("personnel_files/{$personnel->matricule}", 'public');
+        // Traitement des pièces jointes déposées (support des uploads multiples)
+        $filesInput = $request->file('files');
+        if (! empty($filesInput) && is_array($filesInput)) {
+            foreach ($filesInput as $pieceId => $uploadedFiles) {
+                $fileList = is_array($uploadedFiles) ? $uploadedFiles : [$uploadedFiles];
+                $storedPaths = [];
+
+                foreach ($fileList as $file) {
+                    if ($file && $file instanceof UploadedFile) {
+                        $storedPaths[] = $file->store("personnel_files/{$personnel->matricule}", 'public');
+                    }
+                }
+
+                if (! empty($storedPaths)) {
                     PersonnelFiles::create([
                         'personnels_id' => $personnel->id,
                         'pieces_id' => $pieceId,
-                        'file_paths' => [$path],
+                        'file_paths' => $storedPaths,
                     ]);
                 }
             }
@@ -169,23 +179,59 @@ class PersonnelController extends Controller
             'address' => $validated['address'] ?? null,
         ]);
 
-        // Mise à jour des pièces jointes
-        if ($request->hasFile('files')) {
-            foreach ($request->file('files') as $pieceId => $file) {
-                if ($file && $file->isValid()) {
-                    $path = $file->store("personnel_files/{$personnel->matricule}", 'public');
+        // 1. Prise en charge de la suppression sélective des anciens fichiers
+        if ($request->filled('remove_files')) {
+            foreach ($request->input('remove_files') as $pathToRemove) {
+                $record = PersonnelFiles::where('personnels_id', $personnel->id)
+                    ->whereJsonContains('file_paths', $pathToRemove)
+                    ->first();
 
+                if ($record) {
+                    if (Storage::disk('public')->exists($pathToRemove)) {
+                        Storage::disk('public')->delete($pathToRemove);
+                    }
+
+                    $updatedPaths = array_values(array_filter(
+                        $record->file_paths ?? [],
+                        fn ($p) => $p !== $pathToRemove
+                    ));
+
+                    if (! empty($updatedPaths)) {
+                        $record->update(['file_paths' => $updatedPaths]);
+                    } else {
+                        $record->delete();
+                    }
+                }
+            }
+        }
+
+        // 2. Traitement des nouveaux fichiers téléversés (ajout cumulatif)
+        $filesInput = $request->file('files');
+        if (! empty($filesInput) && is_array($filesInput)) {
+            foreach ($filesInput as $pieceId => $uploadedFiles) {
+                $fileList = is_array($uploadedFiles) ? $uploadedFiles : [$uploadedFiles];
+                $storedPaths = [];
+
+                foreach ($fileList as $file) {
+                    if ($file && $file instanceof UploadedFile) {
+                        $storedPaths[] = $file->store("personnel_files/{$personnel->matricule}", 'public');
+                    }
+                }
+
+                if (! empty($storedPaths)) {
                     $existingRecord = PersonnelFiles::where('personnels_id', $personnel->id)
                         ->where('pieces_id', $pieceId)
                         ->first();
 
                     if ($existingRecord) {
-                        $existingRecord->update(['file_paths' => [$path]]);
+                        $currentPaths = $existingRecord->file_paths ?? [];
+                        $mergedPaths = array_values(array_unique(array_merge($currentPaths, $storedPaths)));
+                        $existingRecord->update(['file_paths' => $mergedPaths]);
                     } else {
                         PersonnelFiles::create([
                             'personnels_id' => $personnel->id,
                             'pieces_id' => $pieceId,
-                            'file_paths' => [$path],
+                            'file_paths' => $storedPaths,
                         ]);
                     }
                 }
