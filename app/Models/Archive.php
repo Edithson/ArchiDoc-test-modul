@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Database\Factories\ArchiveFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Archive extends Model
 {
     /** @use HasFactory<ArchiveFactory> */
-    use HasFactory;
+    use Auditable, HasFactory, LogsActivity, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -32,5 +37,39 @@ class Archive extends Model
         'zip_file',
         'filepath',
         'user_id',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
+
+    /**
+     * Options for activity logging.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
+
+    /**
+     * Boot model listeners for soft deletion file purge.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (Archive $archive) {
+            $filesToDelete = array_filter([
+                $archive->filepath,
+                $archive->piece_jointe,
+                $archive->zip_file,
+            ]);
+
+            foreach ($filesToDelete as $file) {
+                if (Storage::disk('public')->exists($file)) {
+                    Storage::disk('public')->delete($file);
+                }
+            }
+        });
+    }
 }

@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('filepath')->nullable();
             $table->unsignedTinyInteger('user_id')->default(1);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

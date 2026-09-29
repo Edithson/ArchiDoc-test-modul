@@ -2,17 +2,20 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Database\Factories\ArchiveLocationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class ArchiveLocation extends Model
 {
     /** @use HasFactory<ArchiveLocationFactory> */
-    use HasFactory, SoftDeletes;
+    use Auditable, HasFactory, LogsActivity, SoftDeletes;
 
     public const TYPE_PHYSICAL = 1;
 
@@ -29,7 +32,20 @@ class ArchiveLocation extends Model
         'location',
         'type',
         'created_by',
+        'updated_by',
+        'deleted_by',
     ];
+
+    /**
+     * Options for activity logging.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     /**
      * Get the human-readable label for location type.
