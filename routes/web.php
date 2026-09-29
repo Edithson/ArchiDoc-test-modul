@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\ArchiveLocationController;
 use App\Http\Controllers\ArchiveTypeController;
@@ -26,10 +27,16 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Gestion des Comptes Utilisateurs — Réservé aux Super Privilégiés
+    // Administration & Boîte Noire — Réservé aux Super Privilégiés
     Route::middleware([EnsureSuperPrivileged::class])->group(function () {
         Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
         Route::resource('users', UserController::class);
+
+        // Journal d'événements (Boîte noire)
+        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::get('/activity-logs/auth', [ActivityLogController::class, 'auth'])->name('activity-logs.auth');
+        Route::get('/activity-logs/system', [ActivityLogController::class, 'system'])->name('activity-logs.system');
+        Route::get('/activity-logs/{activity}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
     });
 });
 
