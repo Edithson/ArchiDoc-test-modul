@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    $this->user = User::factory()->create(['departement' => 'CAB DGB']);
 });
 
 test('user can view department list page', function () {

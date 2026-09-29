@@ -144,3 +144,26 @@ test('super administrator can fetch activity log detail via JSON API endpoint', 
         ],
     ]);
 });
+
+test('super administrator can export filtered activity logs in CSV, JSON, and TXT formats', function () {
+    $this->actingAs($this->adminUser);
+
+    activity('auth')
+        ->causedBy($this->adminUser)
+        ->log('Événement de test export audit');
+
+    // Test Export CSV
+    $csvResponse = $this->get(route('activity-logs.export', ['format' => 'csv', 'search' => 'export audit']));
+    $csvResponse->assertStatus(200);
+    $csvResponse->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+    // Test Export JSON
+    $jsonResponse = $this->get(route('activity-logs.export', ['format' => 'json', 'search' => 'export audit']));
+    $jsonResponse->assertStatus(200);
+    $jsonResponse->assertHeader('content-type', 'application/json; charset=UTF-8');
+
+    // Test Export TXT
+    $txtResponse = $this->get(route('activity-logs.export', ['format' => 'txt', 'search' => 'export audit']));
+    $txtResponse->assertStatus(200);
+    $txtResponse->assertHeader('content-type', 'text/plain; charset=UTF-8');
+});

@@ -34,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Journal d'événements (Boîte noire)
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::get('/activity-logs/export', [ActivityLogController::class, 'export'])->name('activity-logs.export');
         Route::get('/activity-logs/auth', [ActivityLogController::class, 'auth'])->name('activity-logs.auth');
         Route::get('/activity-logs/system', [ActivityLogController::class, 'system'])->name('activity-logs.system');
         Route::get('/activity-logs/{activity}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
