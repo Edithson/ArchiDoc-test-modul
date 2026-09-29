@@ -70,6 +70,7 @@ class DatabaseSeeder extends Seeder
             ArchiveSeeder::class,
             PieceSeeder::class,
             PersonnelSeeder::class,
+            ActivityLogSeeder::class,
         ]);
     }
 }

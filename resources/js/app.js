@@ -40,6 +40,7 @@ function initHeaderNavigation() {
     setupDropdown('consultations-trigger', 'consultations-menu');
     setupDropdown('documentation-trigger', 'documentation-menu');
     setupDropdown('administration-trigger', 'administration-menu');
+    setupDropdown('export-trigger', 'export-menu');
     setupDropdown('notif-trigger', 'notif-panel');
     setupDropdown('avatar-trigger', 'avatar-menu');
 

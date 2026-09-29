@@ -205,4 +205,130 @@ class ActivityLogController extends Controller
             'properties' => $activity->properties ?? null,
         ]);
     }
+
+    /**
+     * Export activity logs in CSV, JSON, or TXT format respecting active filters.
+     */
+    public function export(Request $request)
+    {
+        $query = Activity::with(['causer', 'subject']);
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                    ->orWhere('event', 'like', "%{$search}%")
+                    ->orWhere('subject_type', 'like', "%{$search}%")
+                    ->orWhereHasMorph('causer', [User::class], function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('matricule', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($request->filled('log_name') && $request->input('log_name') !== 'all') {
+            $query->where('log_name', $request->input('log_name'));
+        }
+
+        if ($request->filled('event_type') && $request->input('event_type') !== 'all') {
+            $query->where('event', $request->input('event_type'));
+        }
+
+        if ($request->filled('date_range')) {
+            $range = $request->input('date_range');
+            if ($range === 'today') {
+                $query->whereDate('created_at', now()->today());
+            } elseif ($range === '7days') {
+                $query->where('created_at', '>=', now()->subDays(7));
+            } elseif ($range === '30days') {
+                $query->where('created_at', '>=', now()->subDays(30));
+            }
+        }
+
+        if ($request->filled('causer_id') && $request->input('causer_id') !== 'all') {
+            $query->where('causer_id', $request->input('causer_id'));
+        }
+
+        $activities = $query->orderBy('created_at', 'desc')->get();
+
+        $format = strtolower($request->input('format', 'csv'));
+        $timestamp = now()->format('Y-m-d_H-i-s');
+
+        if ($format === 'json') {
+            $data = $activities->map(function ($activity) {
+                return [
+                    'id' => $activity->id,
+                    'log_name' => $activity->log_name,
+                    'event' => $activity->event,
+                    'description' => $activity->description,
+                    'causer' => $activity->causer ? [
+                        'id' => $activity->causer->id,
+                        'name' => $activity->causer->name,
+                        'email' => $activity->causer->email,
+                        'matricule' => $activity->causer->matricule,
+                    ] : 'System',
+                    'subject_type' => $activity->subject_type,
+                    'subject_id' => $activity->subject_id,
+                    'properties' => $activity->properties,
+                    'created_at' => $activity->created_at ? $activity->created_at->toIso8601String() : null,
+                ];
+            });
+
+            return response()->streamDownload(function () use ($data) {
+                echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            }, "activity_logs_{$timestamp}.json", ['Content-Type' => 'application/json; charset=UTF-8']);
+        }
+
+        if ($format === 'txt') {
+            return response()->streamDownload(function () use ($activities) {
+                echo "========================================================================\n";
+                echo "           ARCHIDOC DGB — JOURNAL DES ÉVÉNEMENTS (BOÎTE NOIRE)           \n";
+                echo '           Généré le : '.now()->format('d/m/Y H:i:s')."\n";
+                echo "========================================================================\n\n";
+
+                foreach ($activities as $activity) {
+                    $causerStr = $activity->causer ? "{$activity->causer->name} ({$activity->causer->matricule})" : 'Système';
+                    $dateStr = $activity->created_at ? $activity->created_at->format('d/m/Y H:i:s') : 'N/A';
+                    $subjectStr = $activity->subject_type ? class_basename($activity->subject_type)." #{$activity->subject_id}" : 'N/A';
+
+                    echo "[{$dateStr}] [{$activity->log_name}.{$activity->event}] Auteur: {$causerStr}\n";
+                    echo "Description : {$activity->description}\n";
+                    echo "Cible       : {$subjectStr}\n";
+                    if ($activity->properties && count($activity->properties) > 0) {
+                        echo 'Propriétés  : '.json_encode($activity->properties, JSON_UNESCAPED_UNICODE)."\n";
+                    }
+                    echo "------------------------------------------------------------------------\n";
+                }
+            }, "activity_logs_{$timestamp}.txt", ['Content-Type' => 'text/plain; charset=UTF-8']);
+        }
+
+        // Defaut: CSV Export avec BOM UTF-8
+        return response()->streamDownload(function () use ($activities) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, ['ID', 'Horodatage', 'Catégorie (Log)', 'Type Événement', 'Description', 'Auteur / Agent', 'Matricule Auteur', 'Entité Ciblée', 'ID Entité', 'Propriétés / Métadonnées']);
+
+            foreach ($activities as $activity) {
+                fputcsv($handle, [
+                    $activity->id,
+                    $activity->created_at ? $activity->created_at->format('Y-m-d H:i:s') : '',
+                    $activity->log_name,
+                    $activity->event,
+                    $activity->description,
+                    $activity->causer ? $activity->causer->name : 'Système',
+                    $activity->causer ? $activity->causer->matricule : 'SYS',
+                    $activity->subject_type ? class_basename($activity->subject_type) : 'N/A',
+                    $activity->subject_id ?? 'N/A',
+                    json_encode($activity->properties, JSON_UNESCAPED_UNICODE),
+                ]);
+            }
+
+            fclose($handle);
+        }, "activity_logs_{$timestamp}.csv", [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"activity_logs_{$timestamp}.csv\"",
+        ]);
+    }
 }

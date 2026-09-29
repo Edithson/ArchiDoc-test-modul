@@ -41,6 +41,56 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 1;
 }
 
+/* Design Système — Form Inputs & Selects ArchiDoc */
+.form-input-styled {
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #0f172a;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.form-input-styled:hover {
+    background-color: #ffffff;
+    border-color: #94dbd6;
+}
+.form-input-styled:focus {
+    background-color: #ffffff;
+    border-color: #339892;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(64, 190, 183, 0.18);
+}
+
+.form-select-styled {
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 0.5rem 2.25rem 0.5rem 0.875rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #0f172a;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23339892' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.625rem center;
+    background-repeat: no-repeat;
+    background-size: 1.25em 1.25em;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.form-select-styled:hover {
+    background-color: #ffffff;
+    border-color: #94dbd6;
+}
+.form-select-styled:focus {
+    background-color: #ffffff;
+    border-color: #339892;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(64, 190, 183, 0.18);
+}
+
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.001ms !important;
@@ -49,4 +99,5 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
         scroll-behavior: auto !important;
     }
 }
+
 
