@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
         types: [
             {
                 type: 'success',
-                background: '#297a75',
+                background: getComputedStyle(document.documentElement).getPropertyValue('--color-emerald-500').trim() || '#10b981',
                 icon: {
                     className: 'notyf__icon--success',
                     tagName: 'i',
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             {
                 type: 'error',
-                background: '#e11d48',
+                background: getComputedStyle(document.documentElement).getPropertyValue('--color-rose-500').trim() || '#f43f5e',
                 icon: {
                     className: 'notyf__icon--error',
                     tagName: 'i',

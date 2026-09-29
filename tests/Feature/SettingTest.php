@@ -6,7 +6,9 @@ use App\Models\User;
 use App\Services\SettingService;
 use Database\Seeders\SettingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -113,4 +115,20 @@ test('layout renders dynamically injected CSS color variables', function () {
     $response->assertStatus(200);
     $response->assertSee('--color-brand-700: #297a75', false);
     $response->assertSee('--color-brand-800: #21635f', false);
+});
+
+test('super administrator can upload application logo and favicon', function () {
+    Storage::fake('public');
+    $this->actingAs($this->adminUser);
+
+    $logo = UploadedFile::fake()->image('custom_logo.png', 100, 100);
+
+    $response = $this->post(route('settings.update'), [
+        'logo' => $logo,
+    ]);
+
+    $response->assertRedirect(route('settings.index'));
+
+    $storedUrl = setting('branding.logo');
+    expect($storedUrl)->not()->toBeNull();
 });

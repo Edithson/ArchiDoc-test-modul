@@ -104,6 +104,74 @@
 
           </div>
 
+          <!-- Section Logotypes & Visuels Officiels -->
+          <div class="border-t border-gray-100 pt-6">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-brand-800 mb-3 flex items-center gap-2">
+              <svg class="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              Logos, Favicon & Arrière-plan de Connexion
+            </h3>
+
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              
+              <!-- 1. Logo principal -->
+              <div class="rounded-xl border border-gray-200 bg-gray-50/50 p-4 space-y-3">
+                <label for="logo" class="block text-xs font-bold uppercase tracking-wider text-gray-700">Logo de l'application</label>
+                <div class="flex items-center gap-3">
+                  <div class="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white border border-gray-200 shadow-2xs flex items-center justify-center">
+                    @if(setting('logo'))
+                      <img src="{{ setting('logo') }}" alt="Logo" class="h-full w-full object-cover">
+                    @else
+                      <img src="{{ asset('media/img/logo_archidoc_dgb.png') }}" alt="Logo DGB" class="h-full w-full object-cover">
+                    @endif
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <input type="file" name="logo" id="logo" accept="image/png,image/jpeg,image/svg+xml,image/webp" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
+                    <p class="mt-1 text-[10px] text-gray-400">PNG, SVG, JPG, WebP (Max 2MB)</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Favicon -->
+              <div class="rounded-xl border border-gray-200 bg-gray-50/50 p-4 space-y-3">
+                <label for="favicon" class="block text-xs font-bold uppercase tracking-wider text-gray-700">Favicon (Icône Onglet)</label>
+                <div class="flex items-center gap-3">
+                  <div class="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white border border-gray-200 shadow-2xs flex items-center justify-center">
+                    @if(setting('favicon'))
+                      <img src="{{ setting('favicon') }}" alt="Favicon" class="h-6 w-6 object-contain">
+                    @else
+                      <span class="text-xs font-extrabold text-brand-700">ICO</span>
+                    @endif
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <input type="file" name="favicon" id="favicon" accept="image/x-icon,image/png,image/svg+xml" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
+                    <p class="mt-1 text-[10px] text-gray-400">ICO, PNG, SVG (Max 1MB)</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Image de connexion -->
+              <div class="rounded-xl border border-gray-200 bg-gray-50/50 p-4 space-y-3">
+                <label for="login_image" class="block text-xs font-bold uppercase tracking-wider text-gray-700">Arrière-plan de Connexion</label>
+                <div class="flex items-center gap-3">
+                  <div class="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white border border-gray-200 shadow-2xs flex items-center justify-center">
+                    @if(setting('login_image'))
+                      <img src="{{ setting('login_image') }}" alt="Arrière-plan" class="h-full w-full object-cover">
+                    @else
+                      <span class="text-[10px] font-bold text-gray-400">Défaut</span>
+                    @endif
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <input type="file" name="login_image" id="login_image" accept="image/png,image/jpeg,image/webp" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
+                    <p class="mt-1 text-[10px] text-gray-400">JPG, PNG, WebP (Max 4MB)</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
           <!-- Section Charte Graphique & Couleurs par défaut DGB -->
           <div class="border-t border-gray-100 pt-6">
             <h3 class="text-xs font-extrabold uppercase tracking-wider text-brand-800 mb-3 flex items-center gap-2">

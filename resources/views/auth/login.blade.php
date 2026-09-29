@@ -14,11 +14,28 @@
 
   <style>
       :root {
+          --color-brand-500: {{ setting('accent_color', '#40beb7') }};
+          --color-brand-600: {{ setting('accent_color', '#40beb7') }};
           --color-brand-700: {{ setting('primary_color', '#297a75') }};
           --color-brand-800: {{ setting('secondary_color', '#21635f') }};
-          --color-brand-500: {{ setting('accent_color', '#40beb7') }};
+          --color-brand-900: {{ setting('secondary_color', '#21635f') }};
+
+          /* Notifications & Messages de Succès */
           --color-emerald-500: {{ setting('success_color', '#10b981') }};
+          --color-emerald-600: {{ setting('success_color', '#10b981') }};
+          --color-emerald-700: {{ setting('success_color', '#10b981') }};
+          --color-emerald-800: {{ setting('success_color', '#10b981') }};
+          --color-emerald-900: {{ setting('success_color', '#10b981') }};
+
+          /* Notifications & Messages d'Échec */
           --color-rose-500: {{ setting('error_color', '#f43f5e') }};
+          --color-rose-600: {{ setting('error_color', '#f43f5e') }};
+          --color-rose-700: {{ setting('error_color', '#f43f5e') }};
+          --color-rose-800: {{ setting('error_color', '#f43f5e') }};
+          --color-red-500: {{ setting('error_color', '#f43f5e') }};
+          --color-red-600: {{ setting('error_color', '#f43f5e') }};
+          --color-red-700: {{ setting('error_color', '#f43f5e') }};
+          --color-red-800: {{ setting('error_color', '#f43f5e') }};
       }
   </style>
 </head>
