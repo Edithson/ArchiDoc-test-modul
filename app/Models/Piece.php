@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Database\Factories\PieceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Piece extends Model
 {
     /** @use HasFactory<PieceFactory> */
-    use HasFactory, SoftDeletes;
+    use Auditable, HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -22,6 +23,9 @@ class Piece extends Model
         'name',
         'description',
         'obligatory',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Database\Factories\ArchiveTypeFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ArchiveType extends Model
 {
     /** @use HasFactory<ArchiveTypeFactory> */
-    use HasFactory, SoftDeletes;
+    use Auditable, HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +25,8 @@ class ArchiveType extends Model
         'description',
         'dua',
         'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     /**

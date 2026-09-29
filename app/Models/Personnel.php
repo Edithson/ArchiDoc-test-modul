@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Database\Factories\PersonnelFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Personnel extends Model
 {
     /** @use HasFactory<PersonnelFactory> */
-    use HasFactory, SoftDeletes;
+    use Auditable, HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -25,6 +26,9 @@ class Personnel extends Model
         'matricule',
         'phone',
         'address',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     /**

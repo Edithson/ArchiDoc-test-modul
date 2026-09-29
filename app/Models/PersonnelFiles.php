@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Database\Factories\PersonnelFilesFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PersonnelFiles extends Model
 {
     /** @use HasFactory<PersonnelFilesFactory> */
-    use HasFactory;
+    use Auditable, HasFactory, SoftDeletes;
 
     /**
      * The table associated with the model.
@@ -28,6 +30,9 @@ class PersonnelFiles extends Model
         'pieces_id',
         'personnels_id',
         'file_paths',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     /**
