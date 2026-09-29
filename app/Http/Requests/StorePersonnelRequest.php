@@ -38,19 +38,23 @@ class StorePersonnelRequest extends FormRequest
                     if (empty($value)) {
                         return;
                     }
+                    $maxMb = (int) setting('archivage.max_upload_size_mb', 20);
+                    $allowedString = (string) setting('archivage.allowed_extensions', 'pdf, docx, xlsx, png, jpg, zip');
+                    $allowedExts = array_filter(array_map('trim', explode(',', str_replace(['.', ' '], ['', ''], strtolower($allowedString)))));
+
                     $files = is_array($value) ? $value : [$value];
                     foreach ($files as $file) {
                         if (! $file || ! ($file instanceof UploadedFile)) {
                             continue;
                         }
                         $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension());
-                        if (! in_array($extension, ['pdf', 'jpg', 'jpeg', 'png'], true)) {
-                            $fail('Les pièces jointes doivent être au format PDF ou image (JPG, PNG).');
+                        if (! empty($allowedExts) && ! in_array($extension, $allowedExts, true)) {
+                            $fail("Le fichier a une extension non autorisée ({$extension}). Extensions autorisées : {$allowedString}.");
 
                             return;
                         }
-                        if ($file->getSize() > 5120 * 1024) {
-                            $fail('La taille maximale de chaque fichier est de 5 Mo.');
+                        if ($file->getSize() > $maxMb * 1024 * 1024) {
+                            $fail("La taille maximale de chaque fichier est de {$maxMb} Mo.");
 
                             return;
                         }

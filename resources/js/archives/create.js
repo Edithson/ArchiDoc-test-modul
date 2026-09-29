@@ -111,6 +111,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Validation dynamique de la taille et des extensions autorisées
+        const maxMb = (window.ArchiDoc && window.ArchiDoc.maxUploadSizeMb) || 20;
+        const allowedExts = (window.ArchiDoc && window.ArchiDoc.allowedExtensions) || ['pdf', 'docx', 'xlsx', 'png', 'jpg', 'zip'];
+        const ext = file.name.split('.').pop().toLowerCase();
+
+        if (allowedExts.length > 0 && !allowedExts.includes(ext)) {
+            notyf.error(`Format de fichier non autorisé (.${ext}). Formats acceptés : ${allowedExts.join(', ').toUpperCase()}`);
+            fileInput.value = '';
+            clearPreview();
+            return;
+        }
+
+        if (file.size > maxMb * 1024 * 1024) {
+            notyf.error(`Fichier trop volumineux (${formatBytes(file.size)}). La taille maximale autorisée est de ${maxMb} Mo.`);
+            fileInput.value = '';
+            clearPreview();
+            return;
+        }
+
         if (currentObjectURL) {
             URL.revokeObjectURL(currentObjectURL);
             currentObjectURL = null;

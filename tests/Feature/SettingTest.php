@@ -132,3 +132,74 @@ test('super administrator can upload application logo and favicon', function () 
     $storedUrl = setting('branding.logo');
     expect($storedUrl)->not()->toBeNull();
 });
+
+test('archive file upload enforces dynamic max size and allowed extensions from settings', function () {
+    $this->actingAs($this->adminUser);
+    $this->seed(SettingSeeder::class);
+
+    // Définir la limite à 1 MB et autoriser uniquement PDF
+    $this->post(route('settings.update'), [
+        'max_upload_size_mb' => 1,
+        'allowed_extensions' => 'pdf',
+    ]);
+
+    // Tentative avec un fichier PNG (non autorisé)
+    $filePng = UploadedFile::fake()->create('document.png', 500);
+    $res1 = $this->post(route('archives.store'), [
+        'file' => $filePng,
+        'format' => 'Numérique',
+        'typearchive' => 'Facture',
+        'description' => 'Test PNG',
+        'date_doc' => '2026-09-29',
+        'emplacement' => 'Serveur A',
+        'emplacement2' => 'Magasin 1',
+        'departement' => 'DGB',
+    ]);
+    $res1->assertSessionHasErrors(['file']);
+
+    // Tentative avec un fichier PDF de 2 MB (dépassant 1 MB)
+    $filePdfBig = UploadedFile::fake()->create('document_big.pdf', 2048);
+    $res2 = $this->post(route('archives.store'), [
+        'file' => $filePdfBig,
+        'format' => 'Numérique',
+        'typearchive' => 'Facture',
+        'description' => 'Test Big PDF',
+        'date_doc' => '2026-09-29',
+        'emplacement' => 'Serveur A',
+        'emplacement2' => 'Magasin 1',
+        'departement' => 'DGB',
+    ]);
+    $res2->assertSessionHasErrors(['file']);
+});
+
+test('login rate limiting enforces dynamic max attempts from settings', function () {
+    $this->seed(SettingSeeder::class);
+
+    // Régler les tentatives max à 2
+    app(SettingService::class)->set('max_login_attempts', 2, 'securite', 'int');
+
+    // Échec 1
+    $this->post('/login', ['email' => 'admin.settings@minfi.cm', 'password' => 'wrong']);
+    // Échec 2
+    $this->post('/login', ['email' => 'admin.settings@minfi.cm', 'password' => 'wrong']);
+
+    // Échec 3 -> doit être bloqué par le rate limiter
+    $response = $this->post('/login', ['email' => 'admin.settings@minfi.cm', 'password' => 'wrong']);
+    $response->assertSessionHasErrors(['email']);
+    $errorMessage = session('errors')->get('email')[0];
+    expect($errorMessage)->toMatch('/(Too many login attempts|tentatives)/i');
+});
+
+test('session timeout middleware logs out inactive users when timeout is exceeded', function () {
+    $this->actingAs($this->adminUser);
+
+    // Régler l'inactivité max à 10 minutes
+    app(SettingService::class)->set('session_timeout_minutes', 10, 'securite', 'int');
+
+    // Simuler une dernière activité il y a 15 minutes
+    session(['last_activity_time' => time() - (15 * 60)]);
+
+    $response = $this->get(route('archives.index'));
+    $response->assertRedirect(route('login'));
+    expect(auth()->check())->toBeFalse();
+});
