@@ -9,11 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Personnel extends Model
 {
     /** @use HasFactory<PersonnelFactory> */
-    use Auditable, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, LogsActivity, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -30,6 +32,17 @@ class Personnel extends Model
         'updated_by',
         'deleted_by',
     ];
+
+    /**
+     * Options for activity logging.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     /**
      * Personnel files uploaded.

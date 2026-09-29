@@ -8,11 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Archive extends Model
 {
     /** @use HasFactory<ArchiveFactory> */
-    use Auditable, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, LogsActivity, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -39,6 +41,17 @@ class Archive extends Model
         'updated_by',
         'deleted_by',
     ];
+
+    /**
+     * Options for activity logging.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     /**
      * Boot model listeners for soft deletion file purge.

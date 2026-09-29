@@ -18,4 +18,25 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        $exceptions->reportable(function (Throwable $e) {
+            try {
+                activity('system')
+                    ->event('system.error')
+                    ->withProperties([
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'code' => $e->getCode(),
+                        'class' => get_class($e),
+                        'url' => request()->fullUrl(),
+                        'method' => request()->method(),
+                        'ip' => request()->ip(),
+                        'user_agent' => request()->userAgent(),
+                    ])
+                    ->log("Erreur système ({$e->getMessage()}) dans {$e->getFile()}:{$e->getLine()}");
+            } catch (Throwable $ignore) {
+                // Safeguard against nested exception logging issues
+            }
+        });
     })->create();
