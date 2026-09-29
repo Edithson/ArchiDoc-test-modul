@@ -43,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
         // Paramètres système de l'application
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+        Route::post('/settings/reset', [SettingController::class, 'reset'])->name('settings.reset');
     });
 });
 

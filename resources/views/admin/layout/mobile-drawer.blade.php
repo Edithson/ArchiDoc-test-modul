@@ -8,9 +8,13 @@
   <div class="flex h-16 items-center justify-between border-b border-white/15 px-4">
     <span class="flex items-center gap-2.5 font-extrabold tracking-tight text-white">
       <span class="flex h-9 w-9 items-center justify-center rounded-full bg-white text-brand-800 shadow-sm">
-        <img src="{{asset('media/img/logo_archidoc_dgb.png')}}" alt="logo ARCHIDOC DGB" class="rounded-full">
+        @if(setting('logo'))
+          <img src="{{ setting('logo') }}" alt="Logo {{ setting('app_name', 'ArchiDoc') }}" class="h-9 w-9 rounded-full object-cover">
+        @else
+          <img src="{{ asset('media/img/logo_archidoc_dgb.png') }}" alt="Logo {{ setting('app_name', 'ArchiDoc') }}" class="h-9 w-9 rounded-full object-cover">
+        @endif
       </span>
-      ARCHIDOC DGB
+      {{ strtoupper(setting('app_name', 'ARCHIDOC')) }} {{ setting('structure_acronym', 'DGB') }}
     </span>
     <button id="mobile-drawer-close" type="button" class="rounded-lg p-2 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white" aria-label="Fermer le menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>

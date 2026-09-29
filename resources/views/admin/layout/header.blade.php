@@ -12,11 +12,15 @@
       <!-- Logo -->
       <a href="{{ route('archives.index') }}" class="flex shrink-0 items-center gap-2.5">
         <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-white shadow-sm ring-2 ring-brand-700/20">
-          <img src="{{asset('media/img/logo_archidoc_dgb.png')}}" alt="logo ARCHIDOC DGB" class="rounded-full">
+          @if(setting('logo'))
+            <img src="{{ setting('logo') }}" alt="Logo {{ setting('app_name', 'ArchiDoc') }}" class="h-9 w-9 rounded-full object-cover">
+          @else
+            <img src="{{ asset('media/img/logo_archidoc_dgb.png') }}" alt="Logo {{ setting('app_name', 'ArchiDoc') }}" class="h-9 w-9 rounded-full object-cover">
+          @endif
         </span>
         <span class="hidden flex-col leading-none sm:flex">
-          <span class="text-sm font-extrabold tracking-tight text-gray-900">{{ strtoupper(setting('branding.app_name', 'ARCHIDOC')) }}</span>
-          <span class="text-[10px] font-bold tracking-widest text-brand-700 uppercase">{{ setting('branding.structure_acronym', 'DGB') }} CAMEROUN</span>
+          <span class="text-sm font-extrabold tracking-tight text-gray-900">{{ strtoupper(setting('app_name', 'ARCHIDOC')) }}</span>
+          <span class="text-[10px] font-bold tracking-widest text-brand-700 uppercase">{{ setting('structure_acronym', 'DGB') }} CAMEROUN</span>
         </span>
       </a>
 

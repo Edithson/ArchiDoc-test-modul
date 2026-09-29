@@ -82,3 +82,35 @@ test('setting helper returns fallback defaults when database has missing key', f
     expect(setting('branding.primary_color'))->toBe('#297a75');
     expect(setting('non_existing_key', 'fallback_custom'))->toBe('fallback_custom');
 });
+
+test('super administrator can reset settings to default DGB values', function () {
+    $this->actingAs($this->adminUser);
+
+    $this->seed(SettingSeeder::class);
+
+    // Modifier un paramètre
+    $this->post(route('settings.update'), [
+        'app_name' => 'CustomName',
+        'primary_color' => '#123456',
+    ]);
+    expect(setting('branding.app_name'))->toBe('CustomName');
+    expect(setting('branding.primary_color'))->toBe('#123456');
+
+    // Réinitialiser
+    $response = $this->post(route('settings.reset'));
+    $response->assertRedirect(route('settings.index'));
+
+    expect(setting('branding.app_name'))->toBe('ArchiDoc');
+    expect(setting('branding.primary_color'))->toBe('#297a75');
+});
+
+test('layout renders dynamically injected CSS color variables', function () {
+    $this->actingAs($this->adminUser);
+
+    $this->seed(SettingSeeder::class);
+
+    $response = $this->get(route('archives.index'));
+    $response->assertStatus(200);
+    $response->assertSee('--color-brand-700: #297a75', false);
+    $response->assertSee('--color-brand-800: #21635f', false);
+});

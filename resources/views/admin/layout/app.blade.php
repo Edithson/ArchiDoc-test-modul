@@ -3,14 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'ArchiDoc DGB')</title>
-    <meta name="description" content="@yield('meta_description', 'Système d\'archivage — ArchiDoc, Direction Générale du Budget')">
+    <title>@yield('title', setting('app_name', 'ArchiDoc') . ' ' . setting('structure_acronym', 'DGB'))</title>
+    <meta name="description" content="@yield('meta_description', 'Système d\'archivage — ' . setting('app_name', 'ArchiDoc') . ', ' . setting('structure_name', 'Direction Générale du Budget'))">
+
+    @if(setting('favicon'))
+        <link rel="icon" href="{{ setting('favicon') }}">
+    @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Injection dynamique de la charte graphique globale définie dans les Paramètres Système -->
+    <style>
+        :root {
+            --color-brand-700: {{ setting('primary_color', '#297a75') }};
+            --color-brand-800: {{ setting('secondary_color', '#21635f') }};
+            --color-brand-500: {{ setting('accent_color', '#40beb7') }};
+            --color-emerald-500: {{ setting('success_color', '#10b981') }};
+            --color-rose-500: {{ setting('error_color', '#f43f5e') }};
+        }
+    </style>
 </head>
 
 <body class="min-h-screen bg-gray-50 font-sans text-gray-900 antialiased">

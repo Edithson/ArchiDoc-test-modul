@@ -22,6 +22,19 @@
         </div>
       </div>
     </div>
+
+    <!-- Action de Réinitialisation -->
+    <div>
+      <form method="POST" action="{{ route('settings.reset') }}" onsubmit="return confirm('Êtes-vous sûr de vouloir réinitialiser l\'ensemble des paramètres aux valeurs par défaut de la DGB Cameroun ?');">
+        @csrf
+        <button type="submit" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 shadow-xs hover:bg-gray-50 hover:text-red-700 transition">
+          <svg class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Réinitialiser aux valeurs DGB par défaut
+        </button>
+      </form>
+    </div>
   </div>
 
   <!-- Messages Flash Success / Error -->

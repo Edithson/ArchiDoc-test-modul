@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\SettingService;
+use Database\Seeders\SettingSeeder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -112,5 +113,16 @@ class SettingController extends Controller
         }
 
         return redirect()->route('settings.index')->with('success', 'Les paramètres de l\'application ont été mis à jour avec succès.');
+    }
+
+    /**
+     * Réinitialiser tous les paramètres aux valeurs par défaut DGB Cameroun.
+     */
+    public function reset(Request $request): RedirectResponse
+    {
+        // Exécuter le seeder pour rétablir les valeurs par défaut
+        app(SettingSeeder::class)->run();
+
+        return redirect()->route('settings.index')->with('success', 'Tous les paramètres ont été réinitialisés avec succès aux valeurs par défaut de la DGB Cameroun.');
     }
 }
