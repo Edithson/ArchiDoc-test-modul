@@ -71,6 +71,7 @@ class DatabaseSeeder extends Seeder
             PieceSeeder::class,
             PersonnelSeeder::class,
             ActivityLogSeeder::class,
+            SettingSeeder::class,
         ]);
     }
 }
