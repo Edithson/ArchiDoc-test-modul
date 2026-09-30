@@ -2,13 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Models\Archive;
 use App\Models\Department;
+use App\Models\Personnel;
+use App\Models\PersonnelFiles;
+use App\Models\Piece;
 use App\Models\User;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Models\Activity;
 
 uses(RefreshDatabase::class);
@@ -86,4 +91,90 @@ test('model creation and update generate detailed activity log records with old 
     expect($updateActivity)->not->toBeNull();
     expect($updateActivity->attribute_changes['old']['description'])->toBe('Original Description');
     expect($updateActivity->attribute_changes['attributes']['description'])->toBe('New Description');
+});
+
+test('consulting an archive logs archive.consultation event asynchronously', function () {
+    $archive = Archive::factory()->create(['description' => 'DOC-SURVEILLANCE-001']);
+
+    $response = $this->actingAs($this->user)->get(route('archives.show', $archive));
+
+    $response->assertOk();
+
+    $activity = Activity::where('event', 'archive.consultation')
+        ->where('subject_type', Archive::class)
+        ->where('subject_id', $archive->id)
+        ->first();
+
+    expect($activity)->not->toBeNull();
+    expect($activity->causer_id)->toBe($this->user->id);
+    expect($activity->properties['description'])->toBe('DOC-SURVEILLANCE-001');
+});
+
+test('downloading an archive logs archive.download event asynchronously', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('archives/doc_test.pdf', 'Content');
+
+    $archive = Archive::factory()->create([
+        'description' => 'DOC-DOWNLOAD-001',
+        'filepath' => 'archives/doc_test.pdf',
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('archives.download', $archive));
+
+    $response->assertOk();
+
+    $activity = Activity::where('event', 'archive.download')
+        ->where('subject_type', Archive::class)
+        ->where('subject_id', $archive->id)
+        ->first();
+
+    expect($activity)->not->toBeNull();
+    expect($activity->causer_id)->toBe($this->user->id);
+    expect($activity->properties['description'])->toBe('DOC-DOWNLOAD-001');
+});
+
+test('consulting a personnel dossier logs personnel.consultation event asynchronously', function () {
+    $personnel = Personnel::factory()->create(['name' => 'TCHATCHOUANG Paul', 'matricule' => 'MAT-8877']);
+
+    $response = $this->actingAs($this->user)->get(route('personnels.show', $personnel));
+
+    $response->assertOk();
+
+    $activity = Activity::where('event', 'personnel.consultation')
+        ->where('subject_type', Personnel::class)
+        ->where('subject_id', $personnel->id)
+        ->first();
+
+    expect($activity)->not->toBeNull();
+    expect($activity->causer_id)->toBe($this->user->id);
+    expect($activity->properties['name'])->toBe('TCHATCHOUANG Paul');
+    expect($activity->properties['matricule'])->toBe('MAT-8877');
+});
+
+test('downloading a personnel ZIP dossier logs personnel.download event asynchronously', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('personnel_files/MAT-9988/piece_test.pdf', 'Content');
+
+    $personnel = Personnel::factory()->create(['name' => 'FOUDA Joseph', 'matricule' => 'MAT-9988']);
+    $piece = Piece::factory()->create(['name' => 'Acte de nomination']);
+
+    PersonnelFiles::create([
+        'personnels_id' => $personnel->id,
+        'pieces_id' => $piece->id,
+        'file_paths' => ['personnel_files/MAT-9988/piece_test.pdf'],
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('personnels.download-zip', $personnel));
+
+    $response->assertOk();
+
+    $activity = Activity::where('event', 'personnel.download')
+        ->where('subject_type', Personnel::class)
+        ->where('subject_id', $personnel->id)
+        ->first();
+
+    expect($activity)->not->toBeNull();
+    expect($activity->causer_id)->toBe($this->user->id);
+    expect($activity->properties['name'])->toBe('FOUDA Joseph');
+    expect($activity->properties['matricule'])->toBe('MAT-9988');
 });

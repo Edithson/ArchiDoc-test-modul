@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth'])->group(function () {
     Route::get('/', [ArchiveController::class, 'index'])->name('archives.index');
     Route::get('/consultations', [ArchiveController::class, 'search'])->name('archives.search');
+    Route::get('/archives/{archive}/download', [ArchiveController::class, 'download'])->name('archives.download');
     Route::resource('archives', ArchiveController::class)->except(['index']);
     Route::resource('archive-types', ArchiveTypeController::class);
     Route::resource('archive-locations', ArchiveLocationController::class);

@@ -6,6 +6,7 @@ use App\Traits\Auditable;
 use Database\Factories\ArchiveFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -15,6 +16,14 @@ class Archive extends Model
 {
     /** @use HasFactory<ArchiveFactory> */
     use Auditable, HasFactory, LogsActivity, SoftDeletes;
+
+    /**
+     * User associated with the archive.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     /**
      * The attributes that are mass assignable.

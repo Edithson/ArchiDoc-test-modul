@@ -10,7 +10,12 @@ use App\Models\ArchiveType;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Spatie\Activitylog\Models\Activity;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ArchiveController extends Controller
 {
@@ -114,13 +119,90 @@ class ArchiveController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource and log consultation without latency.
      */
     public function show(Archive $archive): View
     {
+        $archive->load(['user', 'creator', 'updater']);
+        $user = auth()->user();
+        $ip = request()->ip();
+        $userAgent = request()->userAgent();
+
+        // Enregistrement asynchrone ultra-rapide sans latence HTTP (defer)
+        defer(function () use ($archive, $user, $ip, $userAgent) {
+            activity('archives')
+                ->performedOn($archive)
+                ->causedBy($user)
+                ->event('archive.consultation')
+                ->withProperties([
+                    'archive_id' => $archive->id,
+                    'typearchive' => $archive->typearchive,
+                    'description' => $archive->description,
+                    'format' => $archive->format,
+                    'departement' => $archive->departement,
+                    'ip' => $ip,
+                    'user_agent' => $userAgent,
+                ])
+                ->log("Consultation de l'archive N°{$archive->id} (« {$archive->description} ») par ".($user->name ?? 'Utilisateur'));
+        });
+
+        // Compteurs et historique d'activités pour cette archive
+        $activityQuery = Activity::forSubject($archive);
+
+        $stats = [
+            'consultations' => (clone $activityQuery)->where('event', 'like', '%consultation%')->count(),
+            'downloads' => (clone $activityQuery)->where('event', 'like', '%download%')->count(),
+            'updates' => (clone $activityQuery)->whereIn('event', ['created', 'updated'])->count(),
+            'total' => (clone $activityQuery)->count(),
+        ];
+
+        $activities = Activity::forSubject($archive)
+            ->with('causer')
+            ->latest()
+            ->paginate(6, ['*'], 'activity_page');
+
         return view('admin.pages.archives.show', [
             'archive' => $archive,
+            'stats' => $stats,
+            'activities' => $activities,
         ]);
+    }
+
+    /**
+     * Download the specified archive document file and log activity without latency.
+     */
+    public function download(Archive $archive): BinaryFileResponse|RedirectResponse
+    {
+        if (empty($archive->filepath) || ! Storage::disk('public')->exists($archive->filepath)) {
+            return redirect()->back()
+                ->with('error', "Le fichier lié à cette archive n'est pas disponible sur le stockage.");
+        }
+
+        $user = auth()->user();
+        $ip = request()->ip();
+        $userAgent = request()->userAgent();
+
+        // Enregistrement asynchrone ultra-rapide sans latence HTTP (defer)
+        defer(function () use ($archive, $user, $ip, $userAgent) {
+            activity('archives')
+                ->performedOn($archive)
+                ->causedBy($user)
+                ->event('archive.download')
+                ->withProperties([
+                    'archive_id' => $archive->id,
+                    'typearchive' => $archive->typearchive,
+                    'description' => $archive->description,
+                    'filepath' => $archive->filepath,
+                    'ip' => $ip,
+                    'user_agent' => $userAgent,
+                ])
+                ->log("Téléchargement du document d'archive N°{$archive->id} (« {$archive->description} ») par ".($user->name ?? 'Utilisateur'));
+        });
+
+        $extension = pathinfo($archive->filepath, PATHINFO_EXTENSION);
+        $fileName = Str::slug($archive->description ?: 'archive', '_').($extension ? ".{$extension}" : '');
+
+        return response()->download(Storage::disk('public')->path($archive->filepath), $fileName);
     }
 
     /**
