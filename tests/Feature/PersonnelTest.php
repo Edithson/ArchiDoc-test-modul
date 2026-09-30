@@ -78,7 +78,7 @@ test('user can store new personnel with multiple uploaded files for a single pie
 
 test('validation fails if uploaded file exceeds 5 Mo', function () {
     $piece = Piece::factory()->create(['name' => 'Diplôme', 'obligatory' => true]);
-    $overSizedFile = UploadedFile::fake()->create('heavy.pdf', 6000, 'application/pdf'); // 6 Mo
+    $overSizedFile = UploadedFile::fake()->create('heavy.pdf', 25000, 'application/pdf'); // 25 Mo (dépasse la limite de 20 Mo)
 
     $response = $this->actingAs($this->user)->post(route('personnels.store'), [
         'name' => 'TEST Oversize',

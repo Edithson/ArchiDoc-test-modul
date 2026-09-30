@@ -22,8 +22,13 @@ class StoreArchiveRequest extends FormRequest
      */
     public function rules(): array
     {
+        $maxKb = (int) setting('archivage.max_upload_size_mb', 20) * 1024;
+        $allowedString = (string) setting('archivage.allowed_extensions', 'pdf, docx, xlsx, png, jpg, zip');
+        $extensions = array_filter(array_map('trim', explode(',', str_replace(['.', ' '], ['', ''], $allowedString))));
+        $mimesRule = ! empty($extensions) ? 'mimes:'.implode(',', $extensions) : 'mimes:pdf,docx,xlsx,png,jpg,zip';
+
         return [
-            'file' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg,webp', 'max:20480'],
+            'file' => ['required', 'file', $mimesRule, "max:{$maxKb}"],
             'format' => ['required', 'string'],
             'typearchive' => ['required', 'string'],
             'description' => ['required', 'string', 'max:250'],

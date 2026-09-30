@@ -3,21 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connexion — ArchiDoc DGB</title>
-  <meta name="description" content="Connexion au logiciel de gestion d'archivage numérique ArchiDoc, Direction Générale du Budget">
+  <title>Connexion — {{ setting('app_name', 'ArchiDoc') }} {{ setting('structure_acronym', 'DGB') }}</title>
+  <meta name="description" content="Connexion au logiciel de gestion d'archivage numérique {{ setting('app_name', 'ArchiDoc') }}, {{ setting('structure_name', 'Direction Générale du Budget') }}">
+
+  @if(setting('favicon'))
+      <link rel="icon" href="{{ setting('favicon') }}">
+  @endif
+
   @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+  <style>
+      :root {
+          --color-brand-500: {{ setting('accent_color', '#40beb7') }};
+          --color-brand-600: {{ setting('accent_color', '#40beb7') }};
+          --color-brand-700: {{ setting('primary_color', '#297a75') }};
+          --color-brand-800: {{ setting('secondary_color', '#21635f') }};
+          --color-brand-900: {{ setting('secondary_color', '#21635f') }};
+
+          /* Notifications & Messages de Succès */
+          --color-emerald-500: {{ setting('success_color', '#10b981') }};
+          --color-emerald-600: {{ setting('success_color', '#10b981') }};
+          --color-emerald-700: {{ setting('success_color', '#10b981') }};
+          --color-emerald-800: {{ setting('success_color', '#10b981') }};
+          --color-emerald-900: {{ setting('success_color', '#10b981') }};
+
+          /* Notifications & Messages d'Échec */
+          --color-rose-500: {{ setting('error_color', '#f43f5e') }};
+          --color-rose-600: {{ setting('error_color', '#f43f5e') }};
+          --color-rose-700: {{ setting('error_color', '#f43f5e') }};
+          --color-rose-800: {{ setting('error_color', '#f43f5e') }};
+          --color-red-500: {{ setting('error_color', '#f43f5e') }};
+          --color-red-600: {{ setting('error_color', '#f43f5e') }};
+          --color-red-700: {{ setting('error_color', '#f43f5e') }};
+          --color-red-800: {{ setting('error_color', '#f43f5e') }};
+      }
+  </style>
 </head>
-<body class="h-full font-sans antialiased text-gray-900 bg-gradient-to-br from-gray-50 via-gray-100 to-brand-50/20">
+<body class="h-full font-sans antialiased text-gray-900 bg-gradient-to-br from-gray-50 via-gray-100 to-brand-50/20" @if(setting('login_image')) style="background-image: linear-gradient(to bottom right, rgba(249,250,251,0.9), rgba(243,244,246,0.95)), url('{{ setting('login_image') }}'); background-size: cover; background-position: center;" @endif>
 
   <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
     
     <!-- En-tête / Logo -->
     <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
       <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-700 text-white shadow-lg ring-4 ring-brand-700/20 mb-4">
-        <img src="{{ asset('media/img/logo_archidoc_dgb.png') }}" alt="Logo ARCHIDOC DGB" class="h-12 w-12 rounded-full object-cover">
+        @if(setting('logo'))
+          <img src="{{ setting('logo') }}" alt="Logo {{ setting('app_name', 'ArchiDoc') }}" class="h-12 w-12 rounded-full object-cover">
+        @else
+          <img src="{{ asset('media/img/logo_archidoc_dgb.png') }}" alt="Logo {{ setting('app_name', 'ArchiDoc') }}" class="h-12 w-12 rounded-full object-cover">
+        @endif
       </div>
-      <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">ARCHIDOC</h1>
-      <p class="mt-1 text-xs font-bold tracking-widest text-brand-700 uppercase">Direction Générale du Budget</p>
+      <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">{{ strtoupper(setting('app_name', 'ARCHIDOC')) }}</h1>
+      <p class="mt-1 text-xs font-bold tracking-widest text-brand-700 uppercase">{{ setting('structure_name', 'Direction Générale du Budget') }}</p>
       <p class="mt-2 text-sm text-gray-500">Connectez-vous pour accéder à la plateforme d'archivage</p>
     </div>
 
@@ -116,7 +152,7 @@
 
       <!-- Pied de carte -->
       <p class="mt-6 text-center text-xs text-gray-400">
-        © 2026 ArchiDoc — Direction Générale du Budget, Cameroun
+        {{ setting('footer_text', '© 2026 ArchiDoc — Direction Générale du Budget, Cameroun') }}
       </p>
     </div>
 
