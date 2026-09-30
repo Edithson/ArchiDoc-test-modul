@@ -236,3 +236,60 @@ test('archives consultations export outputs csv, json, and txt formats', functio
     $txtResponse->assertOk();
     $txtResponse->assertHeader('content-type', 'text/plain; charset=UTF-8');
 });
+
+test('personnel consultations dashboard page renders correctly with KPI statistics and filters', function () {
+    $personnel = Personnel::factory()->create(['name' => 'AGENT-HISTORIQUE-TEST', 'matricule' => 'MAT-HIST-001']);
+
+    activity('personnel')
+        ->performedOn($personnel)
+        ->causedBy($this->user)
+        ->event('personnel.consultation')
+        ->withProperties([
+            'personnel_id' => $personnel->id,
+            'name' => $personnel->name,
+            'matricule' => $personnel->matricule,
+            'departement' => 'DGB-DSI',
+            'ip' => '127.0.0.1',
+            'user_agent' => 'PHPUnit Test Agent',
+        ])
+        ->log('Consultation fiche agent : AGENT-HISTORIQUE-TEST (MAT-HIST-001)');
+
+    $response = $this->actingAs($this->user)->get(route('activity-logs.personnel-consultations'));
+
+    $response->assertOk();
+    $response->assertViewIs('admin.pages.activity_logs.personnel_consultations');
+    $response->assertSee('AGENT-HISTORIQUE-TEST');
+});
+
+test('personnel consultations export outputs csv, json, and txt formats', function () {
+    $personnel = Personnel::factory()->create(['name' => 'AGENT-EXPORT-TEST', 'matricule' => 'MAT-EXP-002']);
+
+    activity('personnel')
+        ->performedOn($personnel)
+        ->causedBy($this->user)
+        ->event('personnel.download')
+        ->withProperties([
+            'personnel_id' => $personnel->id,
+            'name' => $personnel->name,
+            'matricule' => $personnel->matricule,
+            'departement' => 'DGB-DGB',
+            'ip' => '127.0.0.1',
+            'user_agent' => 'PHPUnit Test Agent',
+        ])
+        ->log('Téléchargement ZIP dossier agent : AGENT-EXPORT-TEST');
+
+    // Test CSV export
+    $csvResponse = $this->actingAs($this->user)->get(route('activity-logs.personnel-consultations', ['export' => 'csv']));
+    $csvResponse->assertOk();
+    $csvResponse->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+    // Test JSON export
+    $jsonResponse = $this->actingAs($this->user)->get(route('activity-logs.personnel-consultations', ['export' => 'json']));
+    $jsonResponse->assertOk();
+    $jsonResponse->assertHeader('content-type', 'application/json; charset=UTF-8');
+
+    // Test TXT export
+    $txtResponse = $this->actingAs($this->user)->get(route('activity-logs.personnel-consultations', ['export' => 'txt']));
+    $txtResponse->assertOk();
+    $txtResponse->assertHeader('content-type', 'text/plain; charset=UTF-8');
+});

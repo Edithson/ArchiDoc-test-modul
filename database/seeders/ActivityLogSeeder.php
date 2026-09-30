@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Archive;
 use App\Models\Department;
+use App\Models\Personnel;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Activitylog\Models\Activity;
@@ -255,6 +256,46 @@ class ActivityLogSeeder extends Seeder
                     'typearchive' => $docType,
                     'description' => $archive->description,
                     'format' => $fmt,
+                    'departement' => $dept,
+                    'ip' => $ips[array_rand($ips)],
+                    'user_agent' => $userAgents[array_rand($userAgents)],
+                ],
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
+            ]);
+        }
+
+        // 5. Événements Consultations & Téléchargements de Dossiers Personnel (personnel.consultation, personnel.download)
+        $personnels = Personnel::all();
+        if ($personnels->isEmpty()) {
+            $personnels = Personnel::factory(10)->create();
+        }
+
+        for ($p = 0; $p < 60; $p++) {
+            $user = $users->random();
+            $personnel = $personnels->random();
+            $dept = $departmentsListNames[array_rand($departmentsListNames)];
+
+            $daysAgo = rand(0, 13);
+            $hoursAgo = rand(1, 23);
+            $createdAt = now()->subDays($daysAgo)->subHours($hoursAgo);
+
+            $isDownload = rand(1, 4) === 4;
+            $eventType = $isDownload ? 'personnel.download' : 'personnel.consultation';
+            $logAction = $isDownload ? 'Téléchargement ZIP dossier agent' : 'Consultation fiche agent';
+
+            Activity::create([
+                'log_name' => 'personnel',
+                'description' => "{$logAction} : {$personnel->name} ({$personnel->matricule})",
+                'event' => $eventType,
+                'subject_type' => Personnel::class,
+                'subject_id' => $personnel->id,
+                'causer_type' => User::class,
+                'causer_id' => $user->id,
+                'properties' => [
+                    'personnel_id' => $personnel->id,
+                    'name' => $personnel->name,
+                    'matricule' => $personnel->matricule,
                     'departement' => $dept,
                     'ip' => $ips[array_rand($ips)],
                     'user_agent' => $userAgents[array_rand($userAgents)],
