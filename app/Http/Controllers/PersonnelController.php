@@ -48,9 +48,9 @@ class PersonnelController extends Controller
 
         // Statistiques globales
         $totalPersonnel = Personnel::count();
-        $allPersonnels = Personnel::with(['personnelFiles.piece'])->get();
+        $allPersonnels = $request->filled('search') ? Personnel::with(['personnelFiles.piece'])->get() : $personnelsList;
         $completeCount = $allPersonnels->filter(fn ($p) => $p->is_complete)->count();
-        $incompleteCount = $totalPersonnel - $completeCount;
+        $incompleteCount = max(0, $totalPersonnel - $completeCount);
 
         // Pagination manuelle après filtrage par accesseur
         $page = (int) $request->input('page', 1);
