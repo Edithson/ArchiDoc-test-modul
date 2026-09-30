@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Archive;
 use App\Models\Department;
+use App\Models\Personnel;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Activitylog\Models\Activity;
@@ -199,6 +200,108 @@ class ActivityLogSeeder extends Seeder
                 ],
                 'created_at' => $errDate,
                 'updated_at' => $errDate,
+            ]);
+        }
+
+        // 4. Événements Consultations & Téléchargements d'Archives (archive.consultation, archive.download)
+        $archives = Archive::all();
+        if ($archives->isEmpty()) {
+            $archives = Archive::factory(10)->create();
+        }
+
+        $departmentsListNames = [
+            'CAB DGB', 'DCOB', 'DDPP', 'DI', 'DPB', 'DPC',
+            'DREF', 'S-DAG', 'SGDB', 'SO', 'CABINET MINFI',
+        ];
+
+        $documentTypes = [
+            'Rapport d\'Exécution Budgétaire',
+            'Arrêté Ministériel',
+            'Fiche de Solde & Traitement',
+            'Bordereau d\'Expédition',
+            'Note de Service Organique',
+            'Décret d\'Habilitation DGB',
+            'Procès-Verbal de Recette',
+            'Dossier de Cadre Budgétaire',
+        ];
+
+        $formats = ['pdf', 'pdf', 'pdf', 'docx', 'scan', 'xlsx'];
+
+        for ($j = 0; $j < 60; $j++) {
+            $user = $users->random();
+            $archive = $archives->random();
+            $dept = $departmentsListNames[array_rand($departmentsListNames)];
+            $docType = $documentTypes[array_rand($documentTypes)];
+            $fmt = $formats[array_rand($formats)];
+
+            // Répartition réaliste sur les 14 derniers jours
+            $daysAgo = rand(0, 13);
+            $hoursAgo = rand(1, 23);
+            $createdAt = now()->subDays($daysAgo)->subHours($hoursAgo);
+
+            $isDownload = rand(1, 5) === 5;
+            $eventType = $isDownload ? 'archive.download' : 'archive.consultation';
+            $logAction = $isDownload ? 'Téléchargement archive' : 'Consultation archive';
+
+            Activity::create([
+                'log_name' => 'archive',
+                'description' => "{$logAction} ".strtoupper($fmt)." : {$docType} — {$archive->description}",
+                'event' => $eventType,
+                'subject_type' => Archive::class,
+                'subject_id' => $archive->id,
+                'causer_type' => User::class,
+                'causer_id' => $user->id,
+                'properties' => [
+                    'archive_id' => $archive->id,
+                    'typearchive' => $docType,
+                    'description' => $archive->description,
+                    'format' => $fmt,
+                    'departement' => $dept,
+                    'ip' => $ips[array_rand($ips)],
+                    'user_agent' => $userAgents[array_rand($userAgents)],
+                ],
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
+            ]);
+        }
+
+        // 5. Événements Consultations & Téléchargements de Dossiers Personnel (personnel.consultation, personnel.download)
+        $personnels = Personnel::all();
+        if ($personnels->isEmpty()) {
+            $personnels = Personnel::factory(10)->create();
+        }
+
+        for ($p = 0; $p < 60; $p++) {
+            $user = $users->random();
+            $personnel = $personnels->random();
+            $dept = $departmentsListNames[array_rand($departmentsListNames)];
+
+            $daysAgo = rand(0, 13);
+            $hoursAgo = rand(1, 23);
+            $createdAt = now()->subDays($daysAgo)->subHours($hoursAgo);
+
+            $isDownload = rand(1, 4) === 4;
+            $eventType = $isDownload ? 'personnel.download' : 'personnel.consultation';
+            $logAction = $isDownload ? 'Téléchargement ZIP dossier agent' : 'Consultation fiche agent';
+
+            Activity::create([
+                'log_name' => 'personnel',
+                'description' => "{$logAction} : {$personnel->name} ({$personnel->matricule})",
+                'event' => $eventType,
+                'subject_type' => Personnel::class,
+                'subject_id' => $personnel->id,
+                'causer_type' => User::class,
+                'causer_id' => $user->id,
+                'properties' => [
+                    'personnel_id' => $personnel->id,
+                    'name' => $personnel->name,
+                    'matricule' => $personnel->matricule,
+                    'departement' => $dept,
+                    'ip' => $ips[array_rand($ips)],
+                    'user_agent' => $userAgents[array_rand($userAgents)],
+                ],
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
             ]);
         }
     }

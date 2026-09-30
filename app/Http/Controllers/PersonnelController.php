@@ -14,6 +14,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\Models\Activity;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PersonnelController extends Controller
@@ -129,20 +130,57 @@ class PersonnelController extends Controller
     }
 
     /**
-     * Display the specified personnel record and full dossier breakdown.
+     * Display the specified personnel record and full dossier breakdown with zero-latency consultation logging.
      */
     public function show(Personnel $personnel): View
     {
-        $personnel->load(['personnelFiles.piece']);
+        $personnel->load(['personnelFiles.piece', 'creator', 'updater']);
+        $user = auth()->user();
+        $ip = request()->ip();
+        $userAgent = request()->userAgent();
+
+        // Enregistrement asynchrone ultra-rapide sans latence HTTP (defer)
+        defer(function () use ($personnel, $user, $ip, $userAgent) {
+            activity('personnel')
+                ->performedOn($personnel)
+                ->causedBy($user)
+                ->event('personnel.consultation')
+                ->withProperties([
+                    'personnel_id' => $personnel->id,
+                    'matricule' => $personnel->matricule,
+                    'name' => $personnel->name,
+                    'ip' => $ip,
+                    'user_agent' => $userAgent,
+                ])
+                ->log("Consultation du dossier de l'agent {$personnel->name} (Matricule: {$personnel->matricule}) par ".($user->name ?? 'Utilisateur'));
+        });
+
         $obligatoryPieces = Piece::where('obligatory', true)->orderBy('name')->get();
         $optionalPieces = Piece::where('obligatory', false)->orderBy('name')->get();
         $uploadedFiles = $personnel->personnelFiles->keyBy('pieces_id');
+
+        // Compteurs et historique d'activités pour ce dossier d'agent
+        $activityQuery = Activity::forSubject($personnel);
+
+        $stats = [
+            'consultations' => (clone $activityQuery)->where('event', 'like', '%consultation%')->count(),
+            'downloads' => (clone $activityQuery)->where('event', 'like', '%download%')->count(),
+            'updates' => (clone $activityQuery)->whereIn('event', ['created', 'updated'])->count(),
+            'total' => (clone $activityQuery)->count(),
+        ];
+
+        $activities = Activity::forSubject($personnel)
+            ->with('causer')
+            ->latest()
+            ->paginate(6, ['*'], 'activity_page');
 
         return view('admin.pages.personnels.show', [
             'personnel' => $personnel,
             'obligatoryPieces' => $obligatoryPieces,
             'optionalPieces' => $optionalPieces,
             'uploadedFiles' => $uploadedFiles,
+            'stats' => $stats,
+            'activities' => $activities,
         ]);
     }
 
@@ -314,6 +352,26 @@ class PersonnelController extends Controller
         $zip->close();
 
         $downloadName = "Dossier_{$personnel->matricule}_{$personnel->name}.zip";
+
+        $user = auth()->user();
+        $ip = request()->ip();
+        $userAgent = request()->userAgent();
+
+        // Enregistrement asynchrone ultra-rapide sans latence HTTP (defer)
+        defer(function () use ($personnel, $user, $ip, $userAgent) {
+            activity('personnel')
+                ->performedOn($personnel)
+                ->causedBy($user)
+                ->event('personnel.download')
+                ->withProperties([
+                    'personnel_id' => $personnel->id,
+                    'matricule' => $personnel->matricule,
+                    'name' => $personnel->name,
+                    'ip' => $ip,
+                    'user_agent' => $userAgent,
+                ])
+                ->log("Téléchargement de l'archive ZIP du dossier de l'agent {$personnel->name} (Matricule: {$personnel->matricule}) par ".($user->name ?? 'Utilisateur'));
+        });
 
         return response()->download($zipFilePath, $downloadName)->deleteFileAfterSend(true);
     }

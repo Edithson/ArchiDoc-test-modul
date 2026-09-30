@@ -178,6 +178,408 @@ class ActivityLogController extends Controller
     }
 
     /**
+     * Display Archive Consultation Analytics and Audit Dashboard.
+     */
+    public function archivesConsultations(Request $request)
+    {
+        $baseQuery = Activity::with(['causer', 'subject'])
+            ->where('event', 'archive.consultation');
+
+        $query = (clone $baseQuery);
+
+        // Recherche textuelle
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                    ->orWhereHasMorph('causer', [User::class], function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('matricule', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Filtre par département
+        if ($request->filled('departement') && $request->input('departement') !== 'all') {
+            $dept = $request->input('departement');
+            $query->where('properties->departement', $dept);
+        }
+
+        // Filtre par période
+        if ($request->filled('date_range')) {
+            $range = $request->input('date_range');
+            if ($range === 'today') {
+                $query->whereDate('created_at', now()->today());
+            } elseif ($range === '7days') {
+                $query->where('created_at', '>=', now()->subDays(7));
+            } elseif ($range === '30days') {
+                $query->where('created_at', '>=', now()->subDays(30));
+            }
+        }
+
+        // Filtre par auteur
+        if ($request->filled('causer_id') && $request->input('causer_id') !== 'all') {
+            $query->where('causer_id', $request->input('causer_id'));
+        }
+
+        // Traitement de l'exportation (CSV, JSON, TXT)
+        if ($request->filled('export')) {
+            $exportItems = (clone $query)->orderBy('created_at', 'desc')->get();
+            $format = strtolower((string) $request->input('export'));
+            $timestamp = now()->format('Y-m-d_H-i-s');
+
+            if ($format === 'json') {
+                $data = $exportItems->map(function ($activity) {
+                    return [
+                        'id' => $activity->id,
+                        'description' => $activity->description,
+                        'causer' => $activity->causer ? [
+                            'name' => $activity->causer->name,
+                            'email' => $activity->causer->email,
+                            'matricule' => $activity->causer->matricule,
+                        ] : 'Système',
+                        'departement' => $activity->properties['departement'] ?? 'N/A',
+                        'format' => $activity->properties['format'] ?? 'N/A',
+                        'ip' => $activity->properties['ip'] ?? 'N/A',
+                        'created_at' => $activity->created_at ? $activity->created_at->toIso8601String() : null,
+                    ];
+                });
+
+                return response()->streamDownload(function () use ($data) {
+                    echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                }, "consultations_archives_{$timestamp}.json", ['Content-Type' => 'application/json; charset=UTF-8']);
+            }
+
+            if ($format === 'txt') {
+                return response()->streamDownload(function () use ($exportItems) {
+                    echo "========================================================================\n";
+                    echo "      ARCHIDOC DGB — HISTORIQUE DES CONSULTATIONS D'ARCHIVES           \n";
+                    echo '      Généré le : '.now()->format('d/m/Y H:i:s')."\n";
+                    echo "========================================================================\n\n";
+
+                    foreach ($exportItems as $activity) {
+                        $causerStr = $activity->causer ? "{$activity->causer->name} ({$activity->causer->matricule})" : 'Système';
+                        $dateStr = $activity->created_at ? $activity->created_at->format('d/m/Y H:i:s') : 'N/A';
+                        $deptStr = $activity->properties['departement'] ?? 'N/A';
+                        $fmtStr = strtoupper((string) ($activity->properties['format'] ?? 'DOC'));
+
+                        echo "[{$dateStr}] Auteur: {$causerStr} | Dept: {$deptStr} | Format: {$fmtStr}\n";
+                        echo "Description : {$activity->description}\n";
+                        echo 'IP Client   : '.($activity->properties['ip'] ?? 'N/A')."\n";
+                        echo "------------------------------------------------------------------------\n";
+                    }
+                }, "consultations_archives_{$timestamp}.txt", ['Content-Type' => 'text/plain; charset=UTF-8']);
+            }
+
+            // Défaut CSV
+            return response()->streamDownload(function () use ($exportItems) {
+                $handle = fopen('php://output', 'w');
+                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+                fputcsv($handle, ['ID', 'Horodatage', 'Auteur', 'Matricule', 'Département', 'Description Archive', 'Format Document', 'Adresse IP']);
+
+                foreach ($exportItems as $activity) {
+                    fputcsv($handle, [
+                        $activity->id,
+                        $activity->created_at ? $activity->created_at->format('Y-m-d H:i:s') : '',
+                        $activity->causer ? $activity->causer->name : 'Système',
+                        $activity->causer ? $activity->causer->matricule : 'SYS',
+                        $activity->properties['departement'] ?? 'N/A',
+                        $activity->description,
+                        strtoupper((string) ($activity->properties['format'] ?? 'DOC')),
+                        $activity->properties['ip'] ?? 'N/A',
+                    ]);
+                }
+
+                fclose($handle);
+            }, "consultations_archives_{$timestamp}.csv", [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"consultations_archives_{$timestamp}.csv\"",
+            ]);
+        }
+
+        $activities = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
+        // Statistiques globales KPI
+        $totalConsultations = (clone $baseQuery)->count();
+        $todayConsultations = (clone $baseQuery)->whereDate('created_at', now()->today())->count();
+        $uniqueArchivesCount = (clone $baseQuery)->whereNotNull('subject_id')->distinct('subject_id')->count('subject_id');
+
+        // Utilisateur le plus actif
+        $topUserActivity = (clone $baseQuery)
+            ->whereNotNull('causer_id')
+            ->selectRaw('causer_id, COUNT(*) as aggregate')
+            ->groupBy('causer_id')
+            ->orderByDesc('aggregate')
+            ->first();
+        $topUser = $topUserActivity ? User::find($topUserActivity->causer_id) : null;
+        $topUserCount = $topUserActivity ? $topUserActivity->aggregate : 0;
+
+        // Tendance sur les 14 derniers jours (Graphique 1)
+        $dailyTrend = [
+            'labels' => [],
+            'data' => [],
+        ];
+        for ($i = 13; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $label = now()->subDays($i)->format('d/m');
+            $count = (clone $baseQuery)->whereDate('created_at', $date)->count();
+            $dailyTrend['labels'][] = $label;
+            $dailyTrend['data'][] = $count;
+        }
+
+        // Répartition par Département & Type (Graphiques 2 & 3)
+        $allConsultations = (clone $baseQuery)->get();
+        $deptCounts = [];
+        $typeCounts = [];
+
+        foreach ($allConsultations as $act) {
+            $d = $act->properties['departement'] ?? 'Non Spécifié';
+            $deptCounts[$d] = ($deptCounts[$d] ?? 0) + 1;
+
+            $t = $act->properties['typearchive'] ?? 'Document Standard';
+            $typeCounts[$t] = ($typeCounts[$t] ?? 0) + 1;
+        }
+
+        arsort($deptCounts);
+        arsort($typeCounts);
+
+        $topDepts = array_slice($deptCounts, 0, 6, true);
+        $topTypes = array_slice($typeCounts, 0, 6, true);
+
+        $usersList = User::orderBy('name')->get();
+        $departmentsList = [
+            'CAB DGB', 'DCOB', 'DDPP', 'DI', 'DPB', 'DPC',
+            'DREF', 'PUBLIC', 'S-DAG', 'S-DCF', 'SGCCC', 'SGDB', 'SO',
+        ];
+
+        return view('admin.pages.activity_logs.archives_consultations', [
+            'activities' => $activities,
+            'search' => $request->input('search'),
+            'departementFilter' => $request->input('departement', 'all'),
+            'dateRange' => $request->input('date_range', 'all'),
+            'causerId' => $request->input('causer_id', 'all'),
+            'totalConsultations' => $totalConsultations,
+            'todayConsultations' => $todayConsultations,
+            'uniqueArchivesCount' => $uniqueArchivesCount,
+            'topUser' => $topUser,
+            'topUserCount' => $topUserCount,
+            'dailyTrend' => $dailyTrend,
+            'topDepts' => $topDepts,
+            'topTypes' => $topTypes,
+            'usersList' => $usersList,
+            'departmentsList' => $departmentsList,
+        ]);
+    }
+
+    /**
+     * Display Personnel Dossier Consultation Analytics and Audit Dashboard.
+     */
+    public function personnelConsultations(Request $request)
+    {
+        $baseQuery = Activity::with(['causer', 'subject'])
+            ->whereIn('event', ['personnel.consultation', 'personnel.download']);
+
+        $query = (clone $baseQuery);
+
+        // Recherche textuelle
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                    ->orWhere('properties->name', 'like', "%{$search}%")
+                    ->orWhere('properties->matricule', 'like', "%{$search}%")
+                    ->orWhereHasMorph('causer', [User::class], function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('matricule', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Filtre par département
+        if ($request->filled('departement') && $request->input('departement') !== 'all') {
+            $dept = $request->input('departement');
+            $query->where('properties->departement', $dept);
+        }
+
+        // Filtre par période
+        if ($request->filled('date_range')) {
+            $range = $request->input('date_range');
+            if ($range === 'today') {
+                $query->whereDate('created_at', now()->today());
+            } elseif ($range === '7days') {
+                $query->where('created_at', '>=', now()->subDays(7));
+            } elseif ($range === '30days') {
+                $query->where('created_at', '>=', now()->subDays(30));
+            }
+        }
+
+        // Filtre par auteur
+        if ($request->filled('causer_id') && $request->input('causer_id') !== 'all') {
+            $query->where('causer_id', $request->input('causer_id'));
+        }
+
+        // Traitement de l'exportation (CSV, JSON, TXT)
+        if ($request->filled('export')) {
+            $exportItems = (clone $query)->orderBy('created_at', 'desc')->get();
+            $format = strtolower((string) $request->input('export'));
+            $timestamp = now()->format('Y-m-d_H-i-s');
+
+            if ($format === 'json') {
+                $data = $exportItems->map(function ($activity) {
+                    return [
+                        'id' => $activity->id,
+                        'event' => $activity->event,
+                        'description' => $activity->description,
+                        'causer' => $activity->causer ? [
+                            'name' => $activity->causer->name,
+                            'email' => $activity->causer->email,
+                            'matricule' => $activity->causer->matricule,
+                        ] : 'Système',
+                        'personnel_nom' => $activity->properties['name'] ?? 'N/A',
+                        'personnel_matricule' => $activity->properties['matricule'] ?? 'N/A',
+                        'departement' => $activity->properties['departement'] ?? 'N/A',
+                        'ip' => $activity->properties['ip'] ?? 'N/A',
+                        'created_at' => $activity->created_at ? $activity->created_at->toIso8601String() : null,
+                    ];
+                });
+
+                return response()->streamDownload(function () use ($data) {
+                    echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                }, "consultations_personnel_{$timestamp}.json", ['Content-Type' => 'application/json; charset=UTF-8']);
+            }
+
+            if ($format === 'txt') {
+                return response()->streamDownload(function () use ($exportItems) {
+                    echo "========================================================================\n";
+                    echo "    ARCHIDOC DGB — HISTORIQUE DES CONSULTATIONS DOSSIERS PERSONNEL     \n";
+                    echo '      Généré le : '.now()->format('d/m/Y H:i:s')."\n";
+                    echo "========================================================================\n\n";
+
+                    foreach ($exportItems as $activity) {
+                        $causerStr = $activity->causer ? "{$activity->causer->name} ({$activity->causer->matricule})" : 'Système';
+                        $dateStr = $activity->created_at ? $activity->created_at->format('d/m/Y H:i:s') : 'N/A';
+                        $agentStr = ($activity->properties['name'] ?? 'Agent').' ['.($activity->properties['matricule'] ?? 'MAT-N/A').']';
+                        $actionStr = $activity->event === 'personnel.download' ? 'TÉLÉCHARGEMENT ZIP' : 'CONSULTATION FICHE';
+
+                        echo "[{$dateStr}] Action: {$actionStr} | Consultateur: {$causerStr}\n";
+                        echo "Dossier Agent: {$agentStr}\n";
+                        echo "Description  : {$activity->description}\n";
+                        echo 'IP Client    : '.($activity->properties['ip'] ?? 'N/A')."\n";
+                        echo "------------------------------------------------------------------------\n";
+                    }
+                }, "consultations_personnel_{$timestamp}.txt", ['Content-Type' => 'text/plain; charset=UTF-8']);
+            }
+
+            // Défaut CSV
+            return response()->streamDownload(function () use ($exportItems) {
+                $handle = fopen('php://output', 'w');
+                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+                fputcsv($handle, ['ID', 'Horodatage', 'Action', 'Consultateur', 'Matricule Consultateur', 'Nom Agent', 'Matricule Agent', 'Département', 'Adresse IP']);
+
+                foreach ($exportItems as $activity) {
+                    fputcsv($handle, [
+                        $activity->id,
+                        $activity->created_at ? $activity->created_at->format('Y-m-d H:i:s') : '',
+                        $activity->event === 'personnel.download' ? 'Téléchargement ZIP' : 'Consultation Fiche',
+                        $activity->causer ? $activity->causer->name : 'Système',
+                        $activity->causer ? $activity->causer->matricule : 'SYS',
+                        $activity->properties['name'] ?? 'N/A',
+                        $activity->properties['matricule'] ?? 'N/A',
+                        $activity->properties['departement'] ?? 'N/A',
+                        $activity->properties['ip'] ?? 'N/A',
+                    ]);
+                }
+
+                fclose($handle);
+            }, "consultations_personnel_{$timestamp}.csv", [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"consultations_personnel_{$timestamp}.csv\"",
+            ]);
+        }
+
+        $activities = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
+        // Statistiques globales KPI
+        $totalConsultations = (clone $baseQuery)->count();
+        $todayConsultations = (clone $baseQuery)->whereDate('created_at', now()->today())->count();
+        $uniquePersonnelsCount = (clone $baseQuery)->whereNotNull('subject_id')->distinct('subject_id')->count('subject_id');
+
+        // Utilisateur le plus actif
+        $topUserActivity = (clone $baseQuery)
+            ->whereNotNull('causer_id')
+            ->selectRaw('causer_id, COUNT(*) as aggregate')
+            ->groupBy('causer_id')
+            ->orderByDesc('aggregate')
+            ->first();
+        $topUser = $topUserActivity ? User::find($topUserActivity->causer_id) : null;
+        $topUserCount = $topUserActivity ? $topUserActivity->aggregate : 0;
+
+        // Tendance sur les 14 derniers jours (Graphique 1)
+        $dailyTrend = [
+            'labels' => [],
+            'data' => [],
+        ];
+        for ($i = 13; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $label = now()->subDays($i)->format('d/m');
+            $count = (clone $baseQuery)->whereDate('created_at', $date)->count();
+            $dailyTrend['labels'][] = $label;
+            $dailyTrend['data'][] = $count;
+        }
+
+        // Répartition par Département & Type d'action (Graphiques 2 & 3)
+        $allConsultations = (clone $baseQuery)->get();
+        $deptCounts = [];
+        $actionCounts = [
+            'Consultation Fiche Agent' => 0,
+            'Téléchargement ZIP Dossier' => 0,
+        ];
+
+        foreach ($allConsultations as $act) {
+            $d = $act->properties['departement'] ?? ($act->causer->departement ?? 'Non Spécifié');
+            $deptCounts[$d] = ($deptCounts[$d] ?? 0) + 1;
+
+            if ($act->event === 'personnel.download') {
+                $actionCounts['Téléchargement ZIP Dossier']++;
+            } else {
+                $actionCounts['Consultation Fiche Agent']++;
+            }
+        }
+
+        arsort($deptCounts);
+
+        $topDepts = array_slice($deptCounts, 0, 6, true);
+
+        $usersList = User::orderBy('name')->get();
+        $departmentsList = [
+            'CAB DGB', 'DCOB', 'DDPP', 'DI', 'DPB', 'DPC',
+            'DREF', 'PUBLIC', 'S-DAG', 'S-DCF', 'SGCCC', 'SGDB', 'SO',
+        ];
+
+        return view('admin.pages.activity_logs.personnel_consultations', [
+            'activities' => $activities,
+            'search' => $request->input('search'),
+            'departementFilter' => $request->input('departement', 'all'),
+            'dateRange' => $request->input('date_range', 'all'),
+            'causerId' => $request->input('causer_id', 'all'),
+            'totalConsultations' => $totalConsultations,
+            'todayConsultations' => $todayConsultations,
+            'uniquePersonnelsCount' => $uniquePersonnelsCount,
+            'topUser' => $topUser,
+            'topUserCount' => $topUserCount,
+            'dailyTrend' => $dailyTrend,
+            'topDepts' => $topDepts,
+            'actionCounts' => $actionCounts,
+            'usersList' => $usersList,
+            'departmentsList' => $departmentsList,
+        ]);
+    }
+
+    /**
      * Return activity log details as JSON.
      */
     public function show(Activity $activity): JsonResponse
@@ -248,6 +650,14 @@ class ActivityLogController extends Controller
 
         if ($request->filled('causer_id') && $request->input('causer_id') !== 'all') {
             $query->where('causer_id', $request->input('causer_id'));
+        }
+
+        if ($request->filled('subject_type')) {
+            $query->where('subject_type', $request->input('subject_type'));
+        }
+
+        if ($request->filled('subject_id')) {
+            $query->where('subject_id', $request->input('subject_id'));
         }
 
         $activities = $query->orderBy('created_at', 'desc')->get();

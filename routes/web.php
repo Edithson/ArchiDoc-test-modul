@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth'])->group(function () {
     Route::get('/', [ArchiveController::class, 'index'])->name('archives.index');
     Route::get('/consultations', [ArchiveController::class, 'search'])->name('archives.search');
+    Route::get('/archives/{archive}/download', [ArchiveController::class, 'download'])->name('archives.download');
     Route::resource('archives', ArchiveController::class)->except(['index']);
     Route::resource('archive-types', ArchiveTypeController::class);
     Route::resource('archive-locations', ArchiveLocationController::class);
@@ -38,6 +39,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/activity-logs/export', [ActivityLogController::class, 'export'])->name('activity-logs.export');
         Route::get('/activity-logs/auth', [ActivityLogController::class, 'auth'])->name('activity-logs.auth');
         Route::get('/activity-logs/system', [ActivityLogController::class, 'system'])->name('activity-logs.system');
+        Route::get('/activity-logs/archives-consultations', [ActivityLogController::class, 'archivesConsultations'])->name('activity-logs.archives-consultations');
+        Route::get('/activity-logs/personnel-consultations', [ActivityLogController::class, 'personnelConsultations'])->name('activity-logs.personnel-consultations');
         Route::get('/activity-logs/{activity}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
 
         // Paramètres système de l'application

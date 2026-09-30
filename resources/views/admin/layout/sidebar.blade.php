@@ -5,10 +5,11 @@
   $sidebarTitle = '';
   $sidebarNav = [];
 
-  if (request()->routeIs('personnels.*') || request()->routeIs('pieces.*')) {
+  if (request()->routeIs('personnels.*') || request()->routeIs('pieces.*') || request()->routeIs('activity-logs.personnel-consultations')) {
       $sidebarTitle = 'GESTION DU PERSONNEL';
       $sidebarNav = [
           ['title' => 'Dossiers du personnel', 'route' => route('personnels.index'), 'active' => request()->routeIs('personnels.index') || request()->routeIs('personnels.show') || request()->routeIs('personnels.edit'), 'icon' => 'users', 'badge' => 'Actif'],
+          ['title' => 'Historique des consultations', 'route' => route('activity-logs.personnel-consultations'), 'active' => request()->routeIs('activity-logs.personnel-consultations'), 'icon' => 'default', 'badge' => 'Actif'],
           ['title' => 'Pièces d\'intégration', 'route' => route('pieces.index'), 'active' => request()->routeIs('pieces.*'), 'icon' => 'default', 'badge' => 'Actif'],
           ['title' => 'Nouveau dossier agent', 'route' => route('personnels.create'), 'active' => request()->routeIs('personnels.create'), 'icon' => 'default', 'badge' => 'Actif'],
       ];
@@ -20,13 +21,13 @@
           ['title' => 'Emplacements', 'route' => route('archive-locations.index'), 'active' => request()->routeIs('archive-locations.*'), 'icon' => 'default', 'badge' => 'Actif'],
           ['title' => 'Groupes d\'accès / Départements', 'route' => route('departments.index'), 'active' => request()->routeIs('departments.*'), 'icon' => 'default', 'badge' => 'Actif'],
       ];
-  } elseif (request()->routeIs('archives.search') || request()->routeIs('archives.show')) {
+  } elseif (request()->routeIs('archives.search') || request()->routeIs('archives.show') || request()->routeIs('activity-logs.archives-consultations')) {
       $sidebarTitle = 'CONSULTATION';
       $sidebarNav = [
           ['title' => 'Consulter les archives', 'route' => route('archives.search'), 'active' => request()->routeIs('archives.search') || request()->routeIs('archives.show'), 'icon' => 'search', 'badge' => 'Actif'],
-          ['title' => 'Historique des consultations', 'route' => '#', 'active' => false, 'icon' => 'default', 'badge' => 'Bientôt'],
+          ['title' => 'Historique des consultations', 'route' => route('activity-logs.archives-consultations'), 'active' => request()->routeIs('activity-logs.archives-consultations'), 'icon' => 'default', 'badge' => 'Actif'],
       ];
-  } elseif (request()->routeIs('users.*') || request()->routeIs('activity-logs.*') || request()->routeIs('settings.*')) {
+  } elseif (request()->routeIs('users.*') || request()->routeIs('activity-logs.index') || request()->routeIs('activity-logs.auth') || request()->routeIs('activity-logs.system') || request()->routeIs('settings.*')) {
       $sidebarTitle = 'ADMINISTRATION';
       $sidebarNav = [
           ['title' => 'Comptes utilisateurs', 'route' => route('users.index'), 'active' => request()->routeIs('users.*'), 'icon' => 'users', 'badge' => 'Actif'],
