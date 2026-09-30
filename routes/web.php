@@ -39,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/activity-logs/export', [ActivityLogController::class, 'export'])->name('activity-logs.export');
         Route::get('/activity-logs/auth', [ActivityLogController::class, 'auth'])->name('activity-logs.auth');
         Route::get('/activity-logs/system', [ActivityLogController::class, 'system'])->name('activity-logs.system');
+        Route::get('/activity-logs/archives-consultations', [ActivityLogController::class, 'archivesConsultations'])->name('activity-logs.archives-consultations');
         Route::get('/activity-logs/{activity}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
 
         // Paramètres système de l'application

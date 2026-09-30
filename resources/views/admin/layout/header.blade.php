@@ -141,7 +141,7 @@
 
         <!-- 3. Menu Consultation -->
         @php
-          $isConsultationActive = request()->routeIs('archives.search') || request()->routeIs('archives.show');
+          $isConsultationActive = request()->routeIs('archives.search') || request()->routeIs('archives.show') || request()->routeIs('activity-logs.archives-consultations');
         @endphp
         <div class="relative">
           <button id="consultations-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="consultations-menu"
@@ -165,12 +165,12 @@
                 </a>
               </li>
               <li>
-                <a href="#" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-gray-500 hover:bg-gray-50">
+                <a href="{{ route('activity-logs.archives-consultations') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.archives-consultations') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
-                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <svg class="h-4 w-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     <span>Historique des consultations</span>
                   </div>
-                  <span class="text-[10px] text-gray-400 font-medium">Bientôt</span>
+                  <span class="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-800">Analytics</span>
                 </a>
               </li>
             </ul>
@@ -293,6 +293,15 @@
                     <span>Paramètres du système</span>
                   </div>
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
+                </a>
+              </li>
+              <li>
+                <a href="{{ route('activity-logs.archives-consultations') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.archives-consultations') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                  <div class="flex items-center gap-2.5">
+                    <svg class="h-4 w-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    <span>Consultations Archives</span>
+                  </div>
+                  <span class="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-800">Analytics</span>
                 </a>
               </li>
               <li>

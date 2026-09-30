@@ -22,6 +22,7 @@ beforeEach(function () {
     $this->user = User::factory()->create([
         'email' => 'testlog@archidoc.cm',
         'password' => bcrypt('password123'),
+        'roles' => 'super privilégé',
     ]);
 });
 
@@ -177,4 +178,61 @@ test('downloading a personnel ZIP dossier logs personnel.download event asynchro
     expect($activity->causer_id)->toBe($this->user->id);
     expect($activity->properties['name'])->toBe('FOUDA Joseph');
     expect($activity->properties['matricule'])->toBe('MAT-9988');
+});
+
+test('archives consultations dashboard page renders correctly with KPI statistics and filters', function () {
+    $archive = Archive::factory()->create(['description' => 'DOC-HISTORIQUE-TEST']);
+
+    activity('archive')
+        ->performedOn($archive)
+        ->causedBy($this->user)
+        ->event('archive.consultation')
+        ->withProperties([
+            'archive_id' => $archive->id,
+            'description' => $archive->description,
+            'format' => 'pdf',
+            'departement' => 'DGB-DSI',
+            'ip' => '127.0.0.1',
+            'user_agent' => 'PHPUnit Test Agent',
+        ])
+        ->log('Consultation archive PDF: DOC-HISTORIQUE-TEST');
+
+    $response = $this->actingAs($this->user)->get(route('activity-logs.archives-consultations'));
+
+    $response->assertOk();
+    $response->assertViewIs('admin.pages.activity_logs.archives_consultations');
+    $response->assertSee('DOC-HISTORIQUE-TEST');
+});
+
+test('archives consultations export outputs csv, json, and txt formats', function () {
+    $archive = Archive::factory()->create(['description' => 'DOC-EXPORT-TEST']);
+
+    activity('archive')
+        ->performedOn($archive)
+        ->causedBy($this->user)
+        ->event('archive.consultation')
+        ->withProperties([
+            'archive_id' => $archive->id,
+            'description' => $archive->description,
+            'format' => 'pdf',
+            'departement' => 'DGB-DGB',
+            'ip' => '127.0.0.1',
+            'user_agent' => 'PHPUnit Test Agent',
+        ])
+        ->log('Consultation archive PDF: DOC-EXPORT-TEST');
+
+    // Test CSV export
+    $csvResponse = $this->actingAs($this->user)->get(route('activity-logs.archives-consultations', ['export' => 'csv']));
+    $csvResponse->assertOk();
+    $csvResponse->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+    // Test JSON export
+    $jsonResponse = $this->actingAs($this->user)->get(route('activity-logs.archives-consultations', ['export' => 'json']));
+    $jsonResponse->assertOk();
+    $jsonResponse->assertHeader('content-type', 'application/json; charset=UTF-8');
+
+    // Test TXT export
+    $txtResponse = $this->actingAs($this->user)->get(route('activity-logs.archives-consultations', ['export' => 'txt']));
+    $txtResponse->assertOk();
+    $txtResponse->assertHeader('content-type', 'text/plain; charset=UTF-8');
 });

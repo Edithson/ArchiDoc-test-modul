@@ -20,11 +20,11 @@
           ['title' => 'Emplacements', 'route' => route('archive-locations.index'), 'active' => request()->routeIs('archive-locations.*'), 'icon' => 'default', 'badge' => 'Actif'],
           ['title' => 'Groupes d\'accès / Départements', 'route' => route('departments.index'), 'active' => request()->routeIs('departments.*'), 'icon' => 'default', 'badge' => 'Actif'],
       ];
-  } elseif (request()->routeIs('archives.search') || request()->routeIs('archives.show')) {
+  } elseif (request()->routeIs('archives.search') || request()->routeIs('archives.show') || request()->routeIs('activity-logs.archives-consultations')) {
       $sidebarTitle = 'CONSULTATION';
       $sidebarNav = [
           ['title' => 'Consulter les archives', 'route' => route('archives.search'), 'active' => request()->routeIs('archives.search') || request()->routeIs('archives.show'), 'icon' => 'search', 'badge' => 'Actif'],
-          ['title' => 'Historique des consultations', 'route' => '#', 'active' => false, 'icon' => 'default', 'badge' => 'Bientôt'],
+          ['title' => 'Historique des consultations', 'route' => route('activity-logs.archives-consultations'), 'active' => request()->routeIs('activity-logs.archives-consultations'), 'icon' => 'default', 'badge' => 'Actif'],
       ];
   } elseif (request()->routeIs('users.*') || request()->routeIs('activity-logs.*') || request()->routeIs('settings.*')) {
       $sidebarTitle = 'ADMINISTRATION';
