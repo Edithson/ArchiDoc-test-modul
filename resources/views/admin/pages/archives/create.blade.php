@@ -67,7 +67,13 @@
                 <div id="dropzone"
                   class="group relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-6 text-center transition-all hover:border-brand-600 hover:bg-brand-50/30 cursor-pointer">
                   
-                  <input type="file" id="file" name="file" accept=".pdf,image/*" required class="sr-only">
+                  @php
+                    $allowedExtStr = (string) setting('archivage.allowed_extensions', 'pdf, docx, xlsx, png, jpg, zip');
+                    $allowedExtArr = array_values(array_filter(array_map('trim', explode(',', str_replace(['.', ' '], ['', ''], strtolower($allowedExtStr))))));
+                    $acceptAttr = !empty($allowedExtArr) ? '.' . implode(',.', $allowedExtArr) : '.pdf,.docx,.xlsx,.png,.jpg,.zip';
+                    $maxMbSetting = (int) setting('archivage.max_upload_size_mb', 20);
+                  @endphp
+                  <input type="file" id="file" name="file" accept="{{ $acceptAttr }}" required class="sr-only">
 
                   <!-- Prompt par défaut -->
                   <div id="dropzone-prompt" class="flex flex-col items-center">
@@ -79,7 +85,7 @@
                     <p class="text-sm font-medium text-gray-700">
                       <span class="font-bold text-brand-700 underline underline-offset-2 hover:text-brand-800">Glissez-déposez un fichier ici</span> ou parcourez
                     </p>
-                    <p class="mt-1 text-xs text-gray-400">Formats acceptés : PDF, PNG, JPG, WEBP (jusqu'à 20 Mo)</p>
+                    <p class="mt-1 text-xs text-gray-400">Formats acceptés : {{ strtoupper($allowedExtStr) }} (jusqu'à {{ $maxMbSetting }} Mo)</p>
                   </div>
 
                   <!-- Badge Fichier sélectionné (Masqué par défaut) -->
@@ -360,6 +366,8 @@
   window.ArchiDoc = window.ArchiDoc || {};
   window.ArchiDoc.archiveTypes = @json($archiveTypes);
   window.ArchiDoc.groupesAcces = @json($groupesAcces);
+  window.ArchiDoc.maxUploadSizeMb = @json($maxMbSetting);
+  window.ArchiDoc.allowedExtensions = @json($allowedExtArr);
 </script>
 @vite('resources/js/archives/create.js')
 @endpush

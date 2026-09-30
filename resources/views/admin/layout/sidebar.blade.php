@@ -26,10 +26,11 @@
           ['title' => 'Consulter les archives', 'route' => route('archives.search'), 'active' => request()->routeIs('archives.search') || request()->routeIs('archives.show'), 'icon' => 'search', 'badge' => 'Actif'],
           ['title' => 'Historique des consultations', 'route' => '#', 'active' => false, 'icon' => 'default', 'badge' => 'Bientôt'],
       ];
-  } elseif (request()->routeIs('users.*') || request()->routeIs('activity-logs.*')) {
+  } elseif (request()->routeIs('users.*') || request()->routeIs('activity-logs.*') || request()->routeIs('settings.*')) {
       $sidebarTitle = 'ADMINISTRATION';
       $sidebarNav = [
           ['title' => 'Comptes utilisateurs', 'route' => route('users.index'), 'active' => request()->routeIs('users.*'), 'icon' => 'users', 'badge' => 'Actif'],
+          ['title' => 'Paramètres du système', 'route' => route('settings.index'), 'active' => request()->routeIs('settings.*'), 'icon' => 'default', 'badge' => 'Actif'],
           ['title' => 'Arbre des événements', 'route' => route('activity-logs.index'), 'active' => request()->routeIs('activity-logs.index'), 'icon' => 'default', 'badge' => 'Actif'],
           ['title' => 'Sécurité & Accès', 'route' => route('activity-logs.auth'), 'active' => request()->routeIs('activity-logs.auth'), 'icon' => 'default', 'badge' => 'Actif'],
           ['title' => 'Diagnostic Erreurs', 'route' => route('activity-logs.system'), 'active' => request()->routeIs('activity-logs.system'), 'icon' => 'default', 'badge' => 'Actif'],

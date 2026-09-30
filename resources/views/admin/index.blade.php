@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Accueil — ArchiDoc DGB')
-@section('meta_description', 'Tableau de bord et gestion des archives — Direction Générale du Budget')
+@section('title', 'Accueil — ' . setting('app_name', 'ArchiDoc') . ' ' . setting('structure_acronym', 'DGB'))
+@section('meta_description', 'Tableau de bord et gestion des archives — ' . setting('structure_name', 'Direction Générale du Budget'))
 
 @section('content')
 <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -11,11 +11,11 @@
     <div class="relative z-10 max-w-2xl">
       <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-brand-100 backdrop-blur-sm mb-3">
         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        Logiciel d'archivage DGB v1.0
+        Logiciel d'archivage {{ setting('structure_acronym', 'DGB') }} v1.0
       </span>
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Bienvenue sur ArchiDoc</h1>
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Bienvenue sur {{ setting('app_name', 'ArchiDoc') }}</h1>
       <p class="mt-2 text-sm sm:text-base text-brand-100/90 leading-relaxed">
-        Plateforme centralisée pour la gestion, la numérisation et la conservation des archives de la Direction Générale du Budget.
+        Plateforme centralisée pour la gestion, la numérisation et la conservation des archives de la {{ setting('structure_name', 'Direction Générale du Budget') }}.
       </p>
 
       <div class="mt-6 flex flex-wrap gap-3">

@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
         types: [
             {
                 type: 'success',
-                background: '#297a75',
+                background: getComputedStyle(document.documentElement).getPropertyValue('--color-emerald-500').trim() || '#10b981',
                 icon: {
                     className: 'notyf__icon--success',
                     tagName: 'i',
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             {
                 type: 'error',
-                background: '#e11d48',
+                background: getComputedStyle(document.documentElement).getPropertyValue('--color-rose-500').trim() || '#f43f5e',
                 icon: {
                     className: 'notyf__icon--error',
                     tagName: 'i',
@@ -107,6 +107,25 @@ document.addEventListener('DOMContentLoaded', () => {
     /* Traitement et pré-remplissage automatique lors de la sélection du fichier */
     function handleFileSelected(file) {
         if (!file) {
+            clearPreview();
+            return;
+        }
+
+        // Validation dynamique de la taille et des extensions autorisées
+        const maxMb = (window.ArchiDoc && window.ArchiDoc.maxUploadSizeMb) || 20;
+        const allowedExts = (window.ArchiDoc && window.ArchiDoc.allowedExtensions) || ['pdf', 'docx', 'xlsx', 'png', 'jpg', 'zip'];
+        const ext = file.name.split('.').pop().toLowerCase();
+
+        if (allowedExts.length > 0 && !allowedExts.includes(ext)) {
+            notyf.error(`Format de fichier non autorisé (.${ext}). Formats acceptés : ${allowedExts.join(', ').toUpperCase()}`);
+            fileInput.value = '';
+            clearPreview();
+            return;
+        }
+
+        if (file.size > maxMb * 1024 * 1024) {
+            notyf.error(`Fichier trop volumineux (${formatBytes(file.size)}). La taille maximale autorisée est de ${maxMb} Mo.`);
+            fileInput.value = '';
             clearPreview();
             return;
         }

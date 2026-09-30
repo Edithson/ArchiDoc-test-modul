@@ -100,4 +100,13 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     }
 }
 
+/* Dynamisation des notifications Notyf Toasts */
+.notyf__toast--success {
+    background-color: var(--color-emerald-500, #10b981) !important;
+}
+.notyf__toast--error {
+    background-color: var(--color-rose-500, #f43f5e) !important;
+}
+
+
 
