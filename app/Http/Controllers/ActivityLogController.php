@@ -250,6 +250,14 @@ class ActivityLogController extends Controller
             $query->where('causer_id', $request->input('causer_id'));
         }
 
+        if ($request->filled('subject_type')) {
+            $query->where('subject_type', $request->input('subject_type'));
+        }
+
+        if ($request->filled('subject_id')) {
+            $query->where('subject_id', $request->input('subject_id'));
+        }
+
         $activities = $query->orderBy('created_at', 'desc')->get();
 
         $format = strtolower($request->input('format', 'csv'));

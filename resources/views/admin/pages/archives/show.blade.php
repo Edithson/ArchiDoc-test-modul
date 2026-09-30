@@ -226,7 +226,7 @@
   <!-- ==================== SECTION COMPTEURS ET HISTORIQUE D'ACTIONS ==================== -->
   <div class="mt-8 space-y-6">
 
-    <!-- En-tête de section avec compteurs KPI -->
+    <!-- En-tête de section avec compteurs KPI & Exportation -->
     <div class="rounded-2xl border border-gray-200/90 bg-white p-6 shadow-sm">
       <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-100 pb-4">
         <div>
@@ -238,10 +238,37 @@
           </h2>
           <p class="text-xs text-gray-500 font-medium">Bilan statistique et journal individuel des accès, téléchargements et modifications pour ce document.</p>
         </div>
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-800 border border-brand-200">
-          <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          {{ number_format($stats['total']) }} action(s) enregistrée(s)
-        </span>
+
+        <div class="flex items-center gap-2.5">
+          <!-- Dropdown d'exportation de l'historique de cette archive -->
+          <div class="relative inline-block text-left">
+            <button id="export-archive-trigger" type="button" onclick="toggleExportMenuArchive()" class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition shadow-2xs focus:outline-none">
+              <svg class="h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Exporter cet historique
+              <svg class="h-3 w-3 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div id="export-archive-menu" class="absolute right-0 z-30 mt-1.5 hidden w-48 origin-top-right rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl ring-1 ring-black/5">
+              <div class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-400">Choisir le Format</div>
+              <a href="{{ route('activity-logs.export', ['subject_type' => get_class($archive), 'subject_id' => $archive->id, 'format' => 'csv']) }}" class="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-bold text-gray-700 hover:bg-emerald-50 hover:text-emerald-800">
+                <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-extrabold text-emerald-800">CSV</span>
+                Export Excel (CSV)
+              </a>
+              <a href="{{ route('activity-logs.export', ['subject_type' => get_class($archive), 'subject_id' => $archive->id, 'format' => 'json']) }}" class="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-800">
+                <span class="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-extrabold text-blue-800">JSON</span>
+                Payload API (JSON)
+              </a>
+              <a href="{{ route('activity-logs.export', ['subject_type' => get_class($archive), 'subject_id' => $archive->id, 'format' => 'txt']) }}" class="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+                <span class="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-extrabold text-gray-800">TXT</span>
+                Journal Texte (Syslog)
+              </a>
+            </div>
+          </div>
+
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-800 border border-brand-200">
+            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            {{ number_format($stats['total']) }} action(s)
+          </span>
+        </div>
       </div>
 
       <!-- Grille des 4 Compteurs KPI -->
@@ -304,7 +331,8 @@
                 <th scope="col" class="px-5 py-3">Événement</th>
                 <th scope="col" class="px-5 py-3">Auteur / Agent</th>
                 <th scope="col" class="px-5 py-3">Description de l'opération</th>
-                <th scope="col" class="px-5 py-3 text-right">Adresse IP</th>
+                <th scope="col" class="px-5 py-3">Adresse IP</th>
+                <th scope="col" class="px-5 py-3 text-right">Détails</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 text-gray-700">
@@ -325,7 +353,7 @@
                       $badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
                   }
                 @endphp
-                <tr class="hover:bg-gray-50/50 transition-colors">
+                <tr class="hover:bg-gray-50/50 transition-colors cursor-pointer" onclick="inspectActivity({{ $act->id }})">
                   <td class="px-5 py-3.5 whitespace-nowrap font-medium text-gray-900">
                     <div>{{ $act->created_at->format('d/m/Y H:i:s') }}</div>
                     <div class="text-[10px] text-gray-400 font-normal">{{ $act->created_at->diffForHumans() }}</div>
@@ -344,8 +372,14 @@
                   <td class="px-5 py-3.5 text-gray-600 max-w-md truncate" title="{{ $act->description }}">
                     {{ $act->description }}
                   </td>
-                  <td class="px-5 py-3.5 whitespace-nowrap text-right font-mono text-[11px] text-gray-500">
+                  <td class="px-5 py-3.5 whitespace-nowrap font-mono text-[11px] text-gray-500">
                     {{ $act->properties['ip'] ?? '-' }}
+                  </td>
+                  <td class="px-5 py-3.5 whitespace-nowrap text-right" onclick="event.stopPropagation()">
+                    <button type="button" onclick="inspectActivity({{ $act->id }})" class="inline-flex items-center gap-1 rounded-lg border border-brand-200 bg-brand-50/70 px-2.5 py-1 text-xs font-bold text-brand-700 hover:bg-brand-100 transition focus:outline-none shadow-2xs">
+                      <svg class="h-3.5 w-3.5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                      Inspecter
+                    </button>
                   </td>
                 </tr>
               @endforeach
@@ -364,4 +398,133 @@
   </div>
 
 </div>
+
+<!-- Modal Inspecteur d'Événement (JSON / Diff) -->
+<div id="inspector-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900/60 backdrop-blur-xs transition-opacity" aria-modal="true" role="dialog">
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <div class="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl transition-all">
+      
+      <!-- En-tête du Modal -->
+      <div class="flex items-center justify-between border-b border-gray-100 bg-brand-900 px-6 py-4 text-white">
+        <div class="flex items-center gap-2.5">
+          <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-700 text-brand-200">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          </span>
+          <div>
+            <h3 class="text-base font-bold text-white" id="modal-title">Inspection de l'Événement</h3>
+            <p class="text-xs text-brand-200" id="modal-subtitle">Variations détaillées et données système</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeInspectorModal()" class="rounded-lg p-1.5 text-brand-200 hover:bg-brand-800 hover:text-white focus:outline-none">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Corps du Modal -->
+      <div class="p-6 space-y-6">
+        
+        <div class="grid grid-cols-2 gap-4 rounded-xl bg-gray-50 p-4 text-xs sm:grid-cols-4">
+          <div>
+            <span class="block font-bold text-gray-500 uppercase">Auteur</span>
+            <span class="font-bold text-gray-900" id="modal-causer">—</span>
+          </div>
+          <div>
+            <span class="block font-bold text-gray-500 uppercase">Horodatage</span>
+            <span class="font-bold text-gray-900" id="modal-date">—</span>
+          </div>
+          <div>
+            <span class="block font-bold text-gray-500 uppercase">Catégorie</span>
+            <span class="font-bold text-gray-900" id="modal-logname">—</span>
+          </div>
+          <div>
+            <span class="block font-bold text-gray-500 uppercase">Entité</span>
+            <span class="font-bold text-gray-900" id="modal-subject">—</span>
+          </div>
+        </div>
+
+        <!-- Section Diff de variation -->
+        <div id="diff-section" class="hidden space-y-3">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-2">
+            <svg class="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+            Différence des Données (Anciennes vs Nouvelles Valeurs)
+          </h4>
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div class="rounded-xl border border-rose-200 bg-rose-50/50 p-4">
+              <span class="block mb-2 text-xs font-bold uppercase text-rose-800">Ancienne Valeur (Avant)</span>
+              <pre id="modal-old-json" class="styled-scroll max-h-60 overflow-x-auto rounded-lg bg-white p-3 font-mono text-xs text-rose-900 shadow-xs border border-rose-100">{}</pre>
+            </div>
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
+              <span class="block mb-2 text-xs font-bold uppercase text-emerald-800">Nouvelle Valeur (Après)</span>
+              <pre id="modal-new-json" class="styled-scroll max-h-60 overflow-x-auto rounded-lg bg-white p-3 font-mono text-xs text-emerald-900 shadow-xs border border-emerald-100">{}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-gray-700">Payload Complet & Métadonnées Propriétés (JSON)</h4>
+          <pre id="modal-properties-json" class="styled-scroll max-h-72 overflow-x-auto rounded-xl bg-gray-900 p-4 font-mono text-xs text-emerald-400 shadow-inner">{}</pre>
+        </div>
+
+      </div>
+
+      <div class="flex items-center justify-end border-t border-gray-100 bg-gray-50 px-6 py-3">
+        <button type="button" onclick="closeInspectorModal()" class="rounded-xl bg-gray-200 px-5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-300">
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleExportMenuArchive() {
+  const menu = document.getElementById('export-archive-menu');
+  menu.classList.toggle('hidden');
+}
+
+document.addEventListener('click', function(e) {
+  const trigger = document.getElementById('export-archive-trigger');
+  const menu = document.getElementById('export-archive-menu');
+  if (trigger && menu && !trigger.contains(e.target) && !menu.contains(e.target)) {
+    menu.classList.add('hidden');
+  }
+});
+
+function inspectActivity(activityId) {
+  fetch(`/activity-logs/${activityId}`)
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('modal-title').textContent = data.description || 'Inspection de l\'Événement';
+      document.getElementById('modal-subtitle').textContent = `ID Événement #${data.id} • ${data.event || 'action'}`;
+      document.getElementById('modal-causer').textContent = data.causer ? `${data.causer.name} (${data.causer.matricule})` : 'Système';
+      document.getElementById('modal-date').textContent = `${data.created_at} (${data.created_at_human})`;
+      document.getElementById('modal-logname').textContent = data.log_name || 'default';
+      document.getElementById('modal-subject').textContent = data.subject ? `${data.subject.type} #${data.subject.id}` : 'Système';
+
+      const properties = data.properties || {};
+      const diffSection = document.getElementById('diff-section');
+      
+      if (properties.old || properties.attributes) {
+        diffSection.classList.remove('hidden');
+        document.getElementById('modal-old-json').textContent = JSON.stringify(properties.old || {}, null, 2);
+        document.getElementById('modal-new-json').textContent = JSON.stringify(properties.attributes || {}, null, 2);
+      } else {
+        diffSection.classList.add('hidden');
+      }
+
+      document.getElementById('modal-properties-json').textContent = JSON.stringify(properties, null, 2);
+
+      const modal = document.getElementById('inspector-modal');
+      modal.classList.remove('hidden');
+    })
+    .catch(error => {
+      alert('Erreur lors du chargement des détails de l\'événement.');
+      console.error(error);
+    });
+}
+
+function closeInspectorModal() {
+  document.getElementById('inspector-modal').classList.add('hidden');
+}
+</script>
 @endsection
