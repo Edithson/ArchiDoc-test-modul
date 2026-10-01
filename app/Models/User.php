@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\Auditable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -28,13 +29,21 @@ class User extends Authenticatable
         'phone',
         'roles',
         'statut',
-        'departement',
+        'department_id',
         'avatar',
         'password',
         'created_by',
         'updated_by',
         'deleted_by',
     ];
+
+    /**
+     * Department associated with the user.
+     */
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
 
     /**
      * Options for activity logging.

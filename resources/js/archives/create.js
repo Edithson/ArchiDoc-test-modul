@@ -462,12 +462,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const REQUIRED_FIELDS = [
         { id: 'format', message: 'Veuillez sélectionner un format de document.' },
-        { id: 'typearchive', message: "Veuillez indiquer un type d'archives." },
+        { id: 'archive_type_id', message: "Veuillez indiquer un type d'archives." },
         { id: 'description', message: "Veuillez renseigner l'objet de l'archive." },
         { id: 'date_doc', message: 'Veuillez indiquer la date de signature.' },
         { id: 'emplacement', message: "Veuillez sélectionner l'emplacement physique." },
         { id: 'emplacement2', message: "Veuillez sélectionner l'emplacement virtuel." },
-        { id: 'departement', message: "Veuillez sélectionner un groupe d'accès." },
+        { id: 'department_id', message: "Veuillez sélectionner un groupe d'accès." },
     ];
 
     function clearErrors() {

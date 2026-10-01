@@ -30,7 +30,7 @@ class StoreArchiveRequest extends FormRequest
         return [
             'file' => ['required', 'file', $mimesRule, "max:{$maxKb}"],
             'format' => ['required', 'string'],
-            'typearchive' => ['required', 'string'],
+            'archive_type_id' => ['required', 'exists:archive_types,id'],
             'description' => ['required', 'string', 'max:250'],
             'date_doc' => ['required', 'string'],
             'emplacement' => ['required', 'string'],
@@ -38,7 +38,7 @@ class StoreArchiveRequest extends FormRequest
             'rayon' => ['nullable', 'string'],
             'travee' => ['nullable', 'string'],
             'cote' => ['nullable', 'string'],
-            'departement' => ['required', 'string'],
+            'department_id' => ['required', 'exists:departments,id'],
         ];
     }
 }

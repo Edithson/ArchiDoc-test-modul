@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('archives', function (Blueprint $table) {
             $table->id();
-            $table->string('typearchive')->nullable();
+            $table->foreignId('archive_type_id')->nullable()->constrained('archive_types')->nullOnDelete();
             $table->string('description', 255)->nullable();
             $table->string('date_doc')->nullable();
             $table->string('emplacement')->nullable();
@@ -22,12 +22,12 @@ return new class extends Migration
             $table->string('travee')->nullable();
             $table->string('cote')->nullable();
             $table->string('format')->nullable();
-            $table->string('departement')->nullable();
+            $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
             $table->string('piece_jointe')->nullable();
             $table->string('orientation')->nullable();
             $table->string('zip_file')->nullable();
             $table->string('filepath')->nullable();
-            $table->unsignedTinyInteger('user_id')->default(1);
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

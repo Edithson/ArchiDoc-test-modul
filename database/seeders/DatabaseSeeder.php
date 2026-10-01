@@ -50,6 +50,8 @@ class DatabaseSeeder extends Seeder
         }
 
         // Création de l'utilisateur administrateur principal
+        $cabDept = Department::where('name', 'CAB DGB')->first();
+
         User::firstOrCreate(
             ['email' => 'admin@archidoc.cm'],
             [
@@ -58,7 +60,7 @@ class DatabaseSeeder extends Seeder
                 'phone' => '+237 699 00 00 01',
                 'roles' => 'super privilégé',
                 'statut' => true,
-                'departement' => 'CAB DGB',
+                'department_id' => $cabDept?->id,
                 'password' => 'password',
             ]
         );

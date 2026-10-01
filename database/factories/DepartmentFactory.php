@@ -18,7 +18,8 @@ class DepartmentFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => strtoupper(fake()->unique()->word()),
+            'description' => fake()->sentence(),
         ];
     }
 }

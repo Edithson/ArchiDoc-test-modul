@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -349,10 +350,7 @@ class ActivityLogController extends Controller
         $topTypes = array_slice($typeCounts, 0, 6, true);
 
         $usersList = User::orderBy('name')->get();
-        $departmentsList = [
-            'CAB DGB', 'DCOB', 'DDPP', 'DI', 'DPB', 'DPC',
-            'DREF', 'PUBLIC', 'S-DAG', 'S-DCF', 'SGCCC', 'SGDB', 'SO',
-        ];
+        $departmentsList = Department::orderBy('name')->pluck('name')->toArray();
 
         return view('admin.pages.activity_logs.archives_consultations', [
             'activities' => $activities,
@@ -540,7 +538,7 @@ class ActivityLogController extends Controller
         ];
 
         foreach ($allConsultations as $act) {
-            $d = $act->properties['departement'] ?? ($act->causer->departement ?? 'Non Spécifié');
+            $d = $act->properties['departement'] ?? ($act->causer?->department?->name ?? 'Non Spécifié');
             $deptCounts[$d] = ($deptCounts[$d] ?? 0) + 1;
 
             if ($act->event === 'personnel.download') {
@@ -555,10 +553,7 @@ class ActivityLogController extends Controller
         $topDepts = array_slice($deptCounts, 0, 6, true);
 
         $usersList = User::orderBy('name')->get();
-        $departmentsList = [
-            'CAB DGB', 'DCOB', 'DDPP', 'DI', 'DPB', 'DPC',
-            'DREF', 'PUBLIC', 'S-DAG', 'S-DCF', 'SGCCC', 'SGDB', 'SO',
-        ];
+        $departmentsList = Department::orderBy('name')->pluck('name')->toArray();
 
         return view('admin.pages.activity_logs.personnel_consultations', [
             'activities' => $activities,

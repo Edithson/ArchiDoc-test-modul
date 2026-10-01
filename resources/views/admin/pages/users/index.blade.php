@@ -86,16 +86,16 @@
 
         <!-- Filtre Département -->
         <div>
-          <label for="departement" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+          <label for="department_id" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
             Département / Groupe
           </label>
           <div class="relative">
-            <select id="departement" name="departement" onchange="this.form.submit()"
+            <select id="department_id" name="department_id" onchange="this.form.submit()"
               class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-8 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
               <option value="">Tous les départements</option>
               @foreach($departments as $dept)
-                <option value="{{ $dept['sigle'] }}" {{ ($filters['departement'] ?? '') === $dept['sigle'] ? 'selected' : '' }}>
-                  {{ $dept['sigle'] }} — {{ $dept['nom'] }}
+                <option value="{{ $dept->id }}" {{ (string) ($filters['department_id'] ?? '') === (string) $dept->id ? 'selected' : '' }}>
+                  {{ $dept->name }}
                 </option>
               @endforeach
             </select>
@@ -190,7 +190,7 @@
 
               <!-- Département -->
               <td class="px-6 py-4 whitespace-nowrap text-xs font-semibold text-gray-700">
-                {{ $userItem->departement }}
+                {{ $userItem->department?->name ?? 'N/A' }}
               </td>
 
               <!-- Rôle -->

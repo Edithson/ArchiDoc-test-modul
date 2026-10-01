@@ -46,16 +46,16 @@
 
         <!-- 1. Type d'archive -->
         <div>
-          <label for="typearchive" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-700">
+          <label for="archive_type_id" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-700">
             Type d'archive
           </label>
           <div class="relative">
-            <select id="typearchive" name="typearchive"
+            <select id="archive_type_id" name="archive_type_id"
               class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
               <option value="">Tous les types</option>
               @foreach($archiveTypes as $type)
-                <option value="{{ $type }}" {{ ($filters['typearchive'] ?? '') === $type ? 'selected' : '' }}>
-                  {{ $type }}
+                <option value="{{ $type->id }}" {{ (string) ($filters['archive_type_id'] ?? '') === (string) $type->id ? 'selected' : '' }}>
+                  {{ $type->name }}
                 </option>
               @endforeach
             </select>
@@ -181,7 +181,7 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex flex-col gap-1">
                   <span class="inline-flex w-fit items-center rounded-md bg-brand-50 px-2 py-0.5 text-xs font-bold text-brand-700">
-                    {{ $archive->typearchive ?? 'NON SPÉCIFIÉ' }}
+                    {{ $archive->archiveType?->name ?? 'NON SPÉCIFIÉ' }}
                   </span>
                   <span class="text-xs text-gray-500 font-medium flex items-center gap-1">
                     @if(str_contains(strtolower($archive->format ?? ''), 'pdf'))
@@ -224,7 +224,7 @@
               <!-- Groupe d'accès -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class="inline-flex items-center rounded border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs font-semibold text-gray-700">
-                  {{ $archive->departement ?? 'GLOBAL' }}
+                  {{ $archive->department?->name ?? 'GLOBAL' }}
                 </span>
               </td>
 

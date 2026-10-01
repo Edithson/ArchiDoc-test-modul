@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\ArchiveType;
+use App\Models\Department;
 use App\Models\User;
 use App\Services\SettingService;
 use Database\Seeders\SettingSeeder;
@@ -143,17 +145,20 @@ test('archive file upload enforces dynamic max size and allowed extensions from 
         'allowed_extensions' => 'pdf',
     ]);
 
+    $dept = Department::factory()->create();
+    $type = ArchiveType::factory()->create();
+
     // Tentative avec un fichier PNG (non autorisé)
     $filePng = UploadedFile::fake()->create('document.png', 500);
     $res1 = $this->post(route('archives.store'), [
         'file' => $filePng,
         'format' => 'Numérique',
-        'typearchive' => 'Facture',
+        'archive_type_id' => $type->id,
         'description' => 'Test PNG',
         'date_doc' => '2026-09-29',
         'emplacement' => 'Serveur A',
         'emplacement2' => 'Magasin 1',
-        'departement' => 'DGB',
+        'department_id' => $dept->id,
     ]);
     $res1->assertSessionHasErrors(['file']);
 
@@ -162,12 +167,12 @@ test('archive file upload enforces dynamic max size and allowed extensions from 
     $res2 = $this->post(route('archives.store'), [
         'file' => $filePdfBig,
         'format' => 'Numérique',
-        'typearchive' => 'Facture',
+        'archive_type_id' => $type->id,
         'description' => 'Test Big PDF',
         'date_doc' => '2026-09-29',
         'emplacement' => 'Serveur A',
         'emplacement2' => 'Magasin 1',
-        'departement' => 'DGB',
+        'department_id' => $dept->id,
     ]);
     $res2->assertSessionHasErrors(['file']);
 });

@@ -365,7 +365,7 @@
           <div id="avatar-menu" class="absolute right-0 z-40 mt-2 hidden w-60 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl">
             <div class="border-b border-gray-100 px-3 py-2.5">
               <p class="text-sm font-bold text-gray-900 truncate">{{ auth()->user()->name }}</p>
-              <p class="text-xs text-gray-500 truncate">{{ auth()->user()->departement ?? 'DGB' }} · {{ ucfirst(auth()->user()->roles ?? 'Classique') }}</p>
+              <p class="text-xs text-gray-500 truncate">{{ auth()->user()->department?->name ?? 'DGB' }} · {{ ucfirst(auth()->user()->roles ?? 'Classique') }}</p>
               @if(auth()->user()->matricule)
                 <p class="mt-0.5 text-[10px] font-mono text-brand-700">Matricule: {{ auth()->user()->matricule }}</p>
               @endif

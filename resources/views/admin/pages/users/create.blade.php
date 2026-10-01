@@ -92,22 +92,22 @@
 
         <!-- Département / Groupe d'accès -->
         <div>
-          <label for="departement" class="block text-sm font-semibold text-gray-800 mb-1">
+          <label for="department_id" class="block text-sm font-semibold text-gray-800 mb-1">
             Département / Groupe d'accès <span class="text-red-500">*</span>
           </label>
           <div class="relative">
-            <select id="departement" name="departement" required
+            <select id="department_id" name="department_id" required
               class="block w-full appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-3.5 pr-8 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
               <option value="" disabled selected>Sélectionnez un groupe...</option>
               @foreach($departments as $dept)
-                <option value="{{ $dept['sigle'] }}" {{ old('departement') === $dept['sigle'] ? 'selected' : '' }}>
-                  {{ $dept['sigle'] }} — {{ $dept['nom'] }}
+                <option value="{{ $dept->id }}" {{ (string) old('department_id') === (string) $dept->id ? 'selected' : '' }}>
+                  {{ $dept->name }} {{ $dept->description ? '— '.$dept->description : '' }}
                 </option>
               @endforeach
             </select>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
           </div>
-          @error('departement')
+          @error('department_id')
             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
           @enderror
         </div>

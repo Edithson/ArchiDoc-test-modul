@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\Department;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -17,7 +18,7 @@ class UserController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = User::query();
+        $query = User::with('department');
 
         if ($request->filled('search')) {
             $search = trim((string) $request->input('search'));
@@ -26,7 +27,9 @@ class UserController extends Controller
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('matricule', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhere('departement', 'like', "%{$search}%");
+                    ->orWhereHas('department', function ($dq) use ($search) {
+                        $dq->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -44,9 +47,14 @@ class UserController extends Controller
             }
         }
 
-        if ($request->filled('departement')) {
-            $dept = (string) $request->input('departement');
-            $query->where('departement', 'like', "%{$dept}%");
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->input('department_id'));
+        } elseif ($request->filled('departement')) {
+            // Backward compatibility fallback
+            $deptVal = $request->input('departement');
+            $query->whereHas('department', function ($dq) use ($deptVal) {
+                $dq->where('id', $deptVal)->orWhere('name', 'like', "%{$deptVal}%");
+            });
         }
 
         if ($request->has('statut') && $request->input('statut') !== null && $request->input('statut') !== '') {
@@ -64,12 +72,12 @@ class UserController extends Controller
 
         return view('admin.pages.users.index', [
             'users' => $users,
-            'departments' => $this->getDepartmentsList(),
+            'departments' => Department::orderBy('name')->get(),
             'roleOptions' => $this->getRoleOptions(),
             'filters' => [
                 'search' => (string) $request->input('search', ''),
                 'roles' => (string) $request->input('roles', ''),
-                'departement' => (string) $request->input('departement', ''),
+                'department_id' => (string) $request->input('department_id', $request->input('departement', '')),
                 'statut' => (string) $request->input('statut', ''),
             ],
         ]);
@@ -81,7 +89,7 @@ class UserController extends Controller
     public function create(): View
     {
         return view('admin.pages.users.create', [
-            'departments' => $this->getDepartmentsList(),
+            'departments' => Department::orderBy('name')->get(),
             'roleOptions' => $this->getRoleOptions(),
         ]);
     }
@@ -105,8 +113,8 @@ class UserController extends Controller
     public function edit(User $user): View
     {
         return view('admin.pages.users.edit', [
-            'user' => $user,
-            'departments' => $this->getDepartmentsList(),
+            'user' => $user->load('department'),
+            'departments' => Department::orderBy('name')->get(),
             'roleOptions' => $this->getRoleOptions(),
         ]);
     }
