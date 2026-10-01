@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Archive;
+use App\Models\ArchiveType;
 use App\Models\User;
 
 test('search page returns status 200 and renders search view with archives', function () {
@@ -11,25 +12,27 @@ test('search page returns status 200 and renders search view with archives', fun
 
     $response->assertStatus(200);
     $response->assertViewIs('admin.pages.archives.search');
-    $response->assertViewHasAll(['archives', 'archiveTypes', 'users', 'filters']);
+    $response->assertViewHasAll(['archives', 'archiveTypes', 'departments', 'users', 'filters']);
 });
 
 test('search page filters archives by criteria', function () {
     $user = User::factory()->create();
+    $typeArrete = ArchiveType::factory()->create(['name' => 'ARRETE']);
+    $typeCirculaire = ArchiveType::factory()->create(['name' => 'CIRCULAIRE']);
 
     Archive::factory()->create([
-        'typearchive' => 'ARRETE',
+        'archive_type_id' => $typeArrete->id,
         'description' => 'Nomination de directeurs specifiques',
         'date_doc' => '2026-01-15',
     ]);
 
     Archive::factory()->create([
-        'typearchive' => 'CIRCULAIRE',
+        'archive_type_id' => $typeCirculaire->id,
         'description' => 'Directives financieres annuelles',
         'date_doc' => '2026-02-20',
     ]);
 
-    $response = $this->actingAs($user)->get('/consultations?typearchive=ARRETE&description=Nomination');
+    $response = $this->actingAs($user)->get("/consultations?archive_type_id={$typeArrete->id}&description=Nomination");
 
     $response->assertStatus(200);
     $response->assertSee('Nomination de directeurs specifiques');
@@ -58,9 +61,10 @@ test('search page sorts archives correctly', function () {
 
 test('show page displays single archive details', function () {
     $user = User::factory()->create();
+    $type = ArchiveType::factory()->create(['name' => 'DECISIONS']);
 
     $archive = Archive::factory()->create([
-        'typearchive' => 'DECISIONS',
+        'archive_type_id' => $type->id,
         'description' => 'Decision relative au controle budgetaire',
         'emplacement' => 'FOUDA',
     ]);

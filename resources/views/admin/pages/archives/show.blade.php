@@ -1,6 +1,6 @@
 @extends('admin.layout.app')
 
-@section('title', 'Consultation archive — ' . ($archive->typearchive ?? 'ArchiDoc'))
+@section('title', 'Consultation archive — ' . ($archive->archiveType?->name ?? 'ArchiDoc'))
 @section('meta_description', 'Consultation détaillée et visualisation du document d\'archive — ArchiDoc DGB')
 
 @section('content')
@@ -16,7 +16,7 @@
         </a>
       </div>
       <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
-        {{ $archive->typearchive ?? 'Archive' }}
+        {{ $archive->archiveType?->name ?? 'Archive' }}
       </h1>
       <p class="text-sm text-gray-500">Détails de classement et visualisation intégrée du document numérique.</p>
     </div>
@@ -55,7 +55,7 @@
           <!-- Badges Type et Format -->
           <div class="flex flex-wrap items-center gap-2">
             <span class="inline-flex items-center rounded-lg bg-brand-100 px-3 py-1 text-xs font-bold text-brand-800">
-              {{ $archive->typearchive ?? 'N/A' }}
+              {{ $archive->archiveType?->name ?? 'N/A' }}
             </span>
             <span class="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700">
               Format: {{ $archive->format ?? 'Standard' }}
@@ -129,7 +129,7 @@
               </div>
               <div>
                 <span class="block text-xs text-gray-400">Groupe d'accès (Direction)</span>
-                <span class="font-semibold text-gray-800">{{ $archive->departement ?? 'Public' }}</span>
+                <span class="font-semibold text-gray-800">{{ $archive->department?->name ?? 'Public' }}</span>
               </div>
             </div>
           </div>

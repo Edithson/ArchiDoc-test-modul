@@ -64,7 +64,7 @@
         Département / Groupe d'accès
       </label>
       <div class="rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm font-semibold text-gray-800">
-        {{ $user->departement ?? 'CAB DGB' }}
+        {{ $user->department?->name ?? 'CAB DGB' }}
       </div>
     </div>
 

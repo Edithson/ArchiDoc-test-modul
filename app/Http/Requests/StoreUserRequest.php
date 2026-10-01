@@ -30,7 +30,7 @@ class StoreUserRequest extends FormRequest
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)],
             'phone' => ['nullable', 'string', 'max:255'],
             'roles' => ['required', 'string', Rule::in(['classique', 'privilégié', 'super privilégé'])],
-            'departement' => ['required', 'string', 'max:255'],
+            'department_id' => ['required', 'exists:departments,id'],
             'statut' => ['required', 'boolean'],
             'password' => ['required', 'string', 'min:8'],
         ];

@@ -137,20 +137,22 @@
                 <p id="format-error" class="mt-1 hidden text-sm text-red-600" role="alert"></p>
               </div>
 
-              <!-- Type d'archives (combobox avec autocomplétion) -->
+              <!-- Type d'archives -->
               <div>
-                <label for="typearchive" class="mb-1.5 block text-sm font-medium text-gray-700">
+                <label for="archive_type_id" class="mb-1.5 block text-sm font-medium text-gray-700">
                   Type d'archives <span class="text-red-500" aria-hidden="true">*</span><span class="sr-only">(obligatoire)</span>
                 </label>
                 <div class="relative">
-                  <input type="text" id="typearchive" name="typearchive" autocomplete="off" required aria-required="true"
-                    role="combobox" aria-expanded="false" aria-controls="typearchive-listbox" aria-autocomplete="list"
-                    placeholder="Rechercher ou saisir un type d'archive..."
-                    class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
-                  <ul id="typearchive-listbox" role="listbox" aria-label="Types d'archives" class="styled-scroll absolute z-20 mt-1 hidden max-h-56 w-full overflow-auto rounded-lg border border-gray-200 bg-white py-1 text-sm shadow-lg"></ul>
+                  <select id="archive_type_id" name="archive_type_id" required aria-required="true"
+                    class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+                    <option value="" disabled selected>Sélectionner le type d'archive...</option>
+                    @foreach($archiveTypes as $type)
+                      <option value="{{ $type->id }}">{{ $type->name }}</option>
+                    @endforeach
+                  </select>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                 </div>
-                <p id="typearchive-hint" class="mt-1 hidden text-xs text-gray-500"></p>
-                <p id="typearchive-error" class="mt-1 hidden text-sm text-red-600" role="alert"></p>
+                <p id="archive_type_id-error" class="mt-1 hidden text-sm text-red-600" role="alert"></p>
               </div>
 
               <!-- Objet de l'archive -->
@@ -243,20 +245,20 @@
 
               <!-- Groupe d'accès -->
               <div>
-                <label for="departement" class="mb-1.5 block text-sm font-medium text-gray-700">
+                <label for="department_id" class="mb-1.5 block text-sm font-medium text-gray-700">
                   Groupe d'accès <span class="text-red-500" aria-hidden="true">*</span><span class="sr-only">(obligatoire)</span>
                 </label>
                 <div class="relative">
-                  <select id="departement" name="departement" required aria-required="true"
+                  <select id="department_id" name="department_id" required aria-required="true"
                     class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
                     <option value="" disabled selected>Sélectionner le groupe d'accès...</option>
-                    @foreach($groupesAcces as $grp)
-                      <option value="{{ $grp['sigle'] }}">{{ $grp['sigle'] }} — {{ $grp['nom'] }}</option>
+                    @foreach($departments as $dept)
+                      <option value="{{ $dept->id }}">{{ $dept->name }} {{ $dept->description ? '— '.$dept->description : '' }}</option>
                     @endforeach
                   </select>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                 </div>
-                <p id="departement-error" class="mt-1 hidden text-sm text-red-600" role="alert"></p>
+                <p id="department_id-error" class="mt-1 hidden text-sm text-red-600" role="alert"></p>
               </div>
 
             </div>
@@ -365,7 +367,7 @@
 <script>
   window.ArchiDoc = window.ArchiDoc || {};
   window.ArchiDoc.archiveTypes = @json($archiveTypes);
-  window.ArchiDoc.groupesAcces = @json($groupesAcces);
+  window.ArchiDoc.departments = @json($departments);
   window.ArchiDoc.maxUploadSizeMb = @json($maxMbSetting);
   window.ArchiDoc.allowedExtensions = @json($allowedExtArr);
 </script>

@@ -179,7 +179,7 @@
             <div class="min-w-0 flex-1">
               <p class="font-extrabold text-xs text-gray-900 truncate">{{ $arch->description }}</p>
               <p class="text-[10px] text-gray-500 font-medium">
-                {{ $arch->typearchive ?? 'Document' }} · <span class="font-bold text-brand-700">{{ $arch->departement ?? 'DGB' }}</span>
+                {{ $arch->archiveType?->name ?? 'Document' }} · <span class="font-bold text-brand-700">{{ $arch->department?->name ?? 'DGB' }}</span>
               </p>
             </div>
             <a href="{{ route('archives.show', $arch) }}" class="shrink-0 rounded-lg bg-gray-100 px-2.5 py-1 text-[11px] font-bold text-gray-700 hover:bg-brand-100 hover:text-brand-800 transition">

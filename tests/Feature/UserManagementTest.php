@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Department;
 use App\Models\User;
 
 test('super privileged user can view user list', function () {
@@ -21,12 +22,15 @@ test('user list can be filtered by search, role, department, and status', functi
         'roles' => 'super privilégé',
     ]);
 
+    $dept1 = Department::factory()->create(['name' => 'DI']);
+    $dept2 = Department::factory()->create(['name' => 'DCOB']);
+
     $activeUser = User::factory()->create([
         'name' => 'Filtre Cible Active',
         'email' => 'cible.active@archidoc.cm',
         'matricule' => 'MAT-CIBLE-01',
         'roles' => 'privilégié',
-        'departement' => 'DI',
+        'department_id' => $dept1->id,
         'statut' => true,
     ]);
 
@@ -35,7 +39,7 @@ test('user list can be filtered by search, role, department, and status', functi
         'email' => 'cible.suspendue@archidoc.cm',
         'matricule' => 'MAT-CIBLE-02',
         'roles' => 'classique',
-        'departement' => 'DCOB',
+        'department_id' => $dept2->id,
         'statut' => false,
     ]);
 
@@ -69,6 +73,7 @@ test('super privileged user can create a user account', function () {
     $superUser = User::factory()->create([
         'roles' => 'super privilégé',
     ]);
+    $dept = Department::factory()->create(['name' => 'DI']);
 
     $userData = [
         'name' => 'Jean Dupont',
@@ -76,7 +81,7 @@ test('super privileged user can create a user account', function () {
         'email' => 'j.dupont@archidoc.cm',
         'phone' => '+237 655 44 33 22',
         'roles' => 'privilégié',
-        'departement' => 'DI',
+        'department_id' => $dept->id,
         'statut' => '1',
         'password' => 'password123',
     ];
@@ -87,7 +92,7 @@ test('super privileged user can create a user account', function () {
     $this->assertDatabaseHas('users', [
         'email' => 'j.dupont@archidoc.cm',
         'matricule' => 'MAT-9999',
-        'departement' => 'DI',
+        'department_id' => $dept->id,
         'roles' => 'privilégié',
         'statut' => true,
     ]);
@@ -102,6 +107,7 @@ test('super privileged user can update a user account', function () {
         'name' => 'Ancien Nom',
         'roles' => 'classique',
     ]);
+    $newDept = Department::factory()->create(['name' => 'DCOB']);
 
     $response = $this->actingAs($superUser)->put("/users/{$targetUser->id}", [
         'name' => 'Nom Mis a Jour',
@@ -109,7 +115,7 @@ test('super privileged user can update a user account', function () {
         'email' => $targetUser->email,
         'phone' => $targetUser->phone,
         'roles' => 'privilégié',
-        'departement' => 'DCOB',
+        'department_id' => $newDept->id,
         'statut' => '1',
     ]);
 

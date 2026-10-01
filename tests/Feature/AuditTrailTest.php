@@ -96,11 +96,13 @@ test('soft deleting an archive purges physical file on disk while preserving met
 test('user model records audit fields on creation, update and soft delete', function () {
     $this->actingAs($this->user);
 
+    $dept = Department::factory()->create(['name' => 'DI']);
+
     $newUser = User::create([
         'name' => 'New User Audit',
         'matricule' => 'MAT-AUDIT',
         'email' => 'audit@archidoc.cm',
-        'departement' => 'DI',
+        'department_id' => $dept->id,
         'password' => 'password',
     ]);
 

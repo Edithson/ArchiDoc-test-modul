@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\ArchiveType;
+use App\Models\Department;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -23,9 +25,9 @@ test('create page returns success and passes dynamic dataset', function () {
     $response->assertViewHasAll([
         'formats',
         'archiveTypes',
+        'departments',
         'emplacementsPhysiques',
         'emplacementsVirtuels',
-        'groupesAcces',
     ]);
 });
 
@@ -33,12 +35,14 @@ test('storing an archive saves file and creates database record', function () {
     Storage::fake('public');
 
     $user = User::factory()->create();
+    $dept = Department::factory()->create();
+    $type = ArchiveType::factory()->create();
     $file = UploadedFile::fake()->create('ARRETE_01022026.pdf', 500, 'application/pdf');
 
     $data = [
         'file' => $file,
         'format' => 'Document PDF',
-        'typearchive' => 'ARRETE',
+        'archive_type_id' => $type->id,
         'description' => 'ARRETE 01022026',
         'date_doc' => '2026-02-01',
         'emplacement' => 'FOUDA',
@@ -46,7 +50,7 @@ test('storing an archive saves file and creates database record', function () {
         'rayon' => 'B1',
         'travee' => 'T2',
         'cote' => 'C-2026-001',
-        'departement' => 'CAB DGB',
+        'department_id' => $dept->id,
     ];
 
     $response = $this->actingAs($user)->postJson('/archives', $data);
@@ -57,12 +61,12 @@ test('storing an archive saves file and creates database record', function () {
     ]);
 
     $this->assertDatabaseHas('archives', [
-        'typearchive' => 'ARRETE',
+        'archive_type_id' => $type->id,
         'description' => 'ARRETE 01022026',
         'date_doc' => '2026-02-01',
         'emplacement' => 'FOUDA',
         'emplacement2' => 'Serveur',
-        'departement' => 'CAB DGB',
+        'department_id' => $dept->id,
         'user_id' => $user->id,
     ]);
 

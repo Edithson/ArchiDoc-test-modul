@@ -26,12 +26,28 @@ class Archive extends Model
     }
 
     /**
+     * Department associated with the archive.
+     */
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    /**
+     * Type of archive associated with the archive.
+     */
+    public function archiveType(): BelongsTo
+    {
+        return $this->belongsTo(ArchiveType::class, 'archive_type_id');
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'typearchive',
+        'archive_type_id',
         'description',
         'date_doc',
         'emplacement',
@@ -40,7 +56,7 @@ class Archive extends Model
         'travee',
         'cote',
         'format',
-        'departement',
+        'department_id',
         'piece_jointe',
         'orientation',
         'zip_file',

@@ -6,6 +6,7 @@ use App\Traits\Auditable;
 use Database\Factories\DepartmentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -22,6 +23,22 @@ class Department extends Model
         'updated_by',
         'deleted_by',
     ];
+
+    /**
+     * Users belonging to this department.
+     */
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class, 'department_id');
+    }
+
+    /**
+     * Archives belonging to this department.
+     */
+    public function archives(): HasMany
+    {
+        return $this->hasMany(Archive::class, 'department_id');
+    }
 
     /**
      * Options for activity logging.

@@ -55,6 +55,6 @@ class ArchiveType extends Model
      */
     public function archives(): HasMany
     {
-        return $this->hasMany(Archive::class, 'typearchive', 'name');
+        return $this->hasMany(Archive::class, 'archive_type_id');
     }
 }

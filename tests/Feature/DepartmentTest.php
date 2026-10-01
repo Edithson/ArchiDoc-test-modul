@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->user = User::factory()->create(['departement' => 'CAB DGB']);
+    $this->user = User::factory()->create();
 });
 
 test('user can view department list page', function () {
@@ -103,7 +103,8 @@ test('user can soft delete department', function () {
 test('department seeder seeds all default 13 departments', function () {
     $this->seed(DepartmentSeeder::class);
 
-    expect(Department::count())->toBe(13);
+    $defaultDepts = ['CAB DGB', 'DCOB', 'DDPP', 'DI', 'DPB', 'DPC', 'DREF', 'PUBLIC', 'S-DAG', 'S-DCF', 'SGCCC', 'SGDB', 'SO'];
+    expect(Department::whereIn('name', $defaultDepts)->count())->toBe(13);
     $this->assertDatabaseHas('departments', ['name' => 'CAB DGB']);
     $this->assertDatabaseHas('departments', ['name' => 'SGCCC']);
 });

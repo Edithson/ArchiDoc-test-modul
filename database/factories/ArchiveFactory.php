@@ -3,6 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\Archive;
+use App\Models\ArchiveType;
+use App\Models\Department;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,38 +20,8 @@ class ArchiveFactory extends Factory
      */
     public function definition(): array
     {
-        $types = [
-            'ARRETE',
-            'ATTESTATION',
-            'DECISIONS',
-            'NOTE',
-            'PROCES-VERBAL',
-            'COURRIERS',
-            'CIRCULAIRE',
-            'DECRET',
-            'LETTRE DE MISSION',
-            'MESSAGE-FAX',
-            'BORDEREAUX',
-            'NOTE DE SERVICE',
-        ];
-
         $formats = ['Document PDF', 'Image', 'Document Papier'];
         $emplacements = ['FOUDA', 'DGB', 'IMPRIMERIE NATIONALE'];
-        $departements = [
-            'CAB DGB',
-            'DCOB',
-            'DDPP',
-            'DI',
-            'DPB',
-            'DPC',
-            'DREF',
-            'PUBLIC',
-            'S-DAG',
-            'S-DCF',
-            'SGCCC',
-            'SGDB',
-            'SO',
-        ];
 
         $descriptions = [
             'Portant nomination de responsables dans les services centraux du Ministère des Finances',
@@ -64,7 +37,7 @@ class ArchiveFactory extends Factory
         ];
 
         return [
-            'typearchive' => fake()->randomElement($types),
+            'archive_type_id' => ArchiveType::factory(),
             'description' => fake()->randomElement($descriptions).' '.fake()->unique()->numberBetween(100, 999),
             'date_doc' => fake()->dateTimeBetween('-2 years', 'now')->format('Y-m-d'),
             'emplacement' => fake()->randomElement($emplacements),
@@ -73,9 +46,9 @@ class ArchiveFactory extends Factory
             'travee' => 'T'.fake()->numberBetween(1, 20),
             'cote' => 'COT-'.fake()->numberBetween(1000, 9999),
             'format' => fake()->randomElement($formats),
-            'departement' => fake()->randomElement($departements),
+            'department_id' => Department::factory(),
             'filepath' => null,
-            'user_id' => 1,
+            'user_id' => User::factory(),
         ];
     }
 }
