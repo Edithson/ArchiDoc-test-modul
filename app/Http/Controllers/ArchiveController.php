@@ -7,6 +7,8 @@ use App\Http\Requests\UpdateArchiveRequest;
 use App\Models\Archive;
 use App\Models\ArchiveLocation;
 use App\Models\ArchiveType;
+use App\Models\Department;
+use App\Models\Personnel;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -20,11 +22,85 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class ArchiveController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource (Main Dynamic Dashboard).
      */
     public function index(): View
     {
-        return view('admin.index');
+        // Statistiques globales dynamiques
+        $totalArchives = Archive::count();
+        $totalPersonnel = Personnel::count();
+        $totalConsultations = Activity::whereIn('event', [
+            'archive.consultation',
+            'archive.download',
+            'personnel.consultation',
+            'personnel.download',
+        ])->count();
+        $totalUsers = User::where('statut', true)->count();
+
+        $archiveTypesCount = ArchiveType::count();
+        $locationsCount = ArchiveLocation::count();
+        $departmentsCount = Department::count();
+
+        // Récentes archives numérisées
+        $recentArchives = Archive::with('user')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Récents dossiers agents personnel
+        $recentPersonnels = Personnel::orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Flux en direct de la Boîte Noire
+        $recentActivities = Activity::with(['causer', 'subject'])
+            ->orderBy('created_at', 'desc')
+            ->take(6)
+            ->get();
+
+        // Tendance sur les 14 derniers jours pour le graphique
+        $dailyTrend = [
+            'labels' => [],
+            'archives' => [],
+            'personnel' => [],
+        ];
+
+        for ($i = 13; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $label = now()->subDays($i)->format('d/m');
+
+            $dailyTrend['labels'][] = $label;
+            $dailyTrend['archives'][] = Activity::whereIn('event', ['archive.consultation', 'archive.download'])
+                ->whereDate('created_at', $date)
+                ->count();
+            $dailyTrend['personnel'][] = Activity::whereIn('event', ['personnel.consultation', 'personnel.download'])
+                ->whereDate('created_at', $date)
+                ->count();
+        }
+
+        // Répartition des archives par département
+        $archivesByDept = Archive::selectRaw('departement, COUNT(*) as count')
+            ->whereNotNull('departement')
+            ->groupBy('departement')
+            ->orderByDesc('count')
+            ->take(5)
+            ->pluck('count', 'departement')
+            ->toArray();
+
+        return view('admin.index', [
+            'totalArchives' => $totalArchives,
+            'totalPersonnel' => $totalPersonnel,
+            'totalConsultations' => $totalConsultations,
+            'totalUsers' => $totalUsers,
+            'archiveTypesCount' => $archiveTypesCount,
+            'locationsCount' => $locationsCount,
+            'departmentsCount' => $departmentsCount,
+            'recentArchives' => $recentArchives,
+            'recentPersonnels' => $recentPersonnels,
+            'recentActivities' => $recentActivities,
+            'dailyTrend' => $dailyTrend,
+            'archivesByDept' => $archivesByDept,
+        ]);
     }
 
     /**
