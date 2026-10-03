@@ -243,22 +243,49 @@
                   class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
               </div>
 
-              <!-- Groupe d'accès -->
+              <!-- Direction Principale (Groupe d'Accès Général) -->
               <div>
                 <label for="department_id" class="mb-1.5 block text-sm font-medium text-gray-700">
-                  Groupe d'accès <span class="text-red-500" aria-hidden="true">*</span><span class="sr-only">(obligatoire)</span>
+                  Direction Principale MINFI <span class="text-red-500" aria-hidden="true">*</span><span class="sr-only">(obligatoire)</span>
                 </label>
                 <div class="relative">
                   <select id="department_id" name="department_id" required aria-required="true"
-                    class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
-                    <option value="" disabled selected>Sélectionner le groupe d'accès...</option>
-                    @foreach($departments as $dept)
-                      <option value="{{ $dept->id }}">{{ $dept->name }} {{ $dept->description ? '— '.$dept->description : '' }}</option>
+                    class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm font-semibold text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+                    <option value="" disabled selected>Sélectionner la Direction Principale...</option>
+                    @foreach($mainDepartments as $mDept)
+                      <option value="{{ $mDept->id }}">{{ $mDept->name }} — {{ $mDept->description }}</option>
                     @endforeach
                   </select>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                 </div>
                 <p id="department_id-error" class="mt-1 hidden text-sm text-red-600" role="alert"></p>
+              </div>
+
+              <!-- Sous-Département / Service Rattaché (Optionnel) -->
+              <div>
+                <label for="sub_department_id" class="mb-1.5 block text-sm font-medium text-gray-700">
+                  Sous-Département / Service rattaché <span class="text-gray-400">(optionnel)</span>
+                </label>
+                <div class="relative">
+                  <select id="sub_department_id" name="sub_department_id"
+                    class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+                    <option value="">Tous les sous-départements (Accès global à la Direction)</option>
+                    @foreach($mainDepartments as $mDept)
+                      @if($mDept->children->isNotEmpty())
+                        <optgroup label="Services rattachés à : {{ $mDept->name }}" data-parent-id="{{ $mDept->id }}">
+                          @foreach($mDept->children as $sDept)
+                            <option value="{{ $sDept->id }}" data-parent-id="{{ $mDept->id }}">
+                              {{ $sDept->name }} — {{ $sDept->description }}
+                            </option>
+                          @endforeach
+                        </optgroup>
+                      @endif
+                    @endforeach
+                  </select>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Laissez vide si l'archive est accessible à l'ensemble de la Direction Principale.</p>
+                <p id="sub_department_id-error" class="mt-1 hidden text-sm text-red-600" role="alert"></p>
               </div>
 
             </div>

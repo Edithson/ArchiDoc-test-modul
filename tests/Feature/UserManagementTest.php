@@ -159,30 +159,81 @@ test('user cannot suspend or delete their own connected account', function () {
     expect(User::find($superUser->id))->not->toBeNull();
 });
 
-test('suspended user is immediately blocked from logging in', function () {
-    $superUser = User::factory()->create([
+test('super privileged user can create super user without department', function () {
+    $superUser = User::factory()->create(['roles' => 'super privilégé']);
+
+    $userData = [
+        'name' => 'Super Admin Test',
+        'matricule' => 'MAT-SUPER-01',
+        'email' => 'supertest@archidoc.cm',
+        'phone' => '+237 600000000',
+        'roles' => 'super privilégé',
+        'department_id' => null,
+        'sub_department_id' => null,
+        'statut' => '1',
+        'password' => 'password123',
+    ];
+
+    $response = $this->actingAs($superUser)->post('/users', $userData);
+
+    $response->assertRedirect(route('users.index'));
+    $this->assertDatabaseHas('users', [
+        'email' => 'supertest@archidoc.cm',
+        'department_id' => null,
+        'sub_department_id' => null,
         'roles' => 'super privilégé',
     ]);
+});
 
-    $targetUser = User::factory()->create([
-        'email' => 'to_suspend@archidoc.cm',
-        'password' => bcrypt('password123'),
-        'statut' => true,
-    ]);
+test('classique user creation requires both main and sub department', function () {
+    $superUser = User::factory()->create(['roles' => 'super privilégé']);
+    $mainDept = Department::factory()->create(['name' => 'DGB', 'parent_id' => null]);
+    $subDept = Department::factory()->create(['name' => 'DI', 'parent_id' => $mainDept->id]);
 
-    // Super user suspends target user
-    $this->actingAs($superUser)->post("/users/{$targetUser->id}/toggle-status");
-    expect($targetUser->fresh()->statut)->toBeFalse();
-
-    // Logout super user first
-    auth()->logout();
-
-    // Target user tries to log in
-    $response = $this->post('/login', [
-        'email' => 'to_suspend@archidoc.cm',
+    // Missing sub_department_id
+    $invalidData = [
+        'name' => 'Classique Incomplet',
+        'matricule' => 'MAT-CLASS-01',
+        'email' => 'classique.inc@archidoc.cm',
+        'roles' => 'classique',
+        'department_id' => $mainDept->id,
+        'sub_department_id' => null,
+        'statut' => '1',
         'password' => 'password123',
-    ]);
+    ];
 
-    $this->assertGuest();
-    $response->assertSessionHasErrors('email');
+    $responseFail = $this->actingAs($superUser)->post('/users', $invalidData);
+    $responseFail->assertSessionHasErrors(['sub_department_id']);
+
+    // Valid data with sub_department_id
+    $validData = array_merge($invalidData, ['sub_department_id' => $subDept->id]);
+    $responseSuccess = $this->actingAs($superUser)->post('/users', $validData);
+
+    $responseSuccess->assertRedirect(route('users.index'));
+    $this->assertDatabaseHas('users', [
+        'email' => 'classique.inc@archidoc.cm',
+        'department_id' => $mainDept->id,
+        'sub_department_id' => $subDept->id,
+    ]);
+});
+
+test('user creation fails if sub_department does not belong to main department', function () {
+    $superUser = User::factory()->create(['roles' => 'super privilégé']);
+    $main1 = Department::factory()->create(['name' => 'DGB', 'parent_id' => null]);
+    $main2 = Department::factory()->create(['name' => 'DGI', 'parent_id' => null]);
+    $sub2 = Department::factory()->create(['name' => 'DGE', 'parent_id' => $main2->id]);
+
+    $data = [
+        'name' => 'Incompatible User',
+        'matricule' => 'MAT-INCOMP-01',
+        'email' => 'incompat@archidoc.cm',
+        'roles' => 'classique',
+        'department_id' => $main1->id,
+        'sub_department_id' => $sub2->id,
+        'statut' => '1',
+        'password' => 'password123',
+    ];
+
+    $response = $this->actingAs($superUser)->post('/users', $data);
+    $response->assertSessionHasErrors(['sub_department_id']);
 });

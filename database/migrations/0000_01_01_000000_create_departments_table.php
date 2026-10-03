@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->foreignId('parent_id')->nullable()->constrained('departments')->onDelete('set null');
             $table->timestamps();
             // intégration du soft delete pour permettre la suppression logique des départements
             $table->softDeletes();

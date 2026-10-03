@@ -467,8 +467,52 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'date_doc', message: 'Veuillez indiquer la date de signature.' },
         { id: 'emplacement', message: "Veuillez sélectionner l'emplacement physique." },
         { id: 'emplacement2', message: "Veuillez sélectionner l'emplacement virtuel." },
-        { id: 'department_id', message: "Veuillez sélectionner un groupe d'accès." },
+        { id: 'department_id', message: "Veuillez sélectionner une Direction Principale MINFI." },
     ];
+
+    const deptSelect = document.getElementById('department_id');
+    const subDeptSelect = document.getElementById('sub_department_id');
+
+    if (deptSelect && subDeptSelect) {
+        function filterSubDept(selectedParentId) {
+            const optgroups = subDeptSelect.querySelectorAll('optgroup');
+            optgroups.forEach((group) => {
+                const parentId = group.getAttribute('data-parent-id');
+                if (!selectedParentId || parentId === selectedParentId) {
+                    group.style.display = '';
+                    group.disabled = false;
+                } else {
+                    group.style.display = 'none';
+                    group.disabled = true;
+                }
+            });
+
+            const selectedOption = subDeptSelect.options[subDeptSelect.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                const optionParentId = selectedOption.getAttribute('data-parent-id');
+                if (selectedParentId && optionParentId !== selectedParentId) {
+                    subDeptSelect.value = '';
+                }
+            } else if (!selectedParentId) {
+                subDeptSelect.value = '';
+            }
+        }
+
+        deptSelect.addEventListener('change', function () {
+            filterSubDept(this.value);
+        });
+
+        subDeptSelect.addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                const parentId = selectedOption.getAttribute('data-parent-id');
+                if (parentId) {
+                    deptSelect.value = parentId;
+                    filterSubDept(parentId);
+                }
+            }
+        });
+    }
 
     function clearErrors() {
         REQUIRED_FIELDS.forEach((f) => {

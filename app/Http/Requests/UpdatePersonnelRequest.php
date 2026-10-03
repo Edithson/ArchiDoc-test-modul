@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Department;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
@@ -33,6 +34,8 @@ class UpdatePersonnelRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255', Rule::unique('personnels', 'email')->ignore($personnelId)],
             'phone' => ['nullable', 'string', 'max:50'],
             'address' => ['nullable', 'string', 'max:255'],
+            'department_id' => ['nullable', 'exists:departments,id'],
+            'sub_department_id' => ['nullable', 'exists:departments,id'],
             'remove_files' => ['nullable', 'array'],
             'remove_files.*' => ['nullable', 'string'],
             'pieces' => ['nullable', 'array'],
@@ -83,5 +86,25 @@ class UpdatePersonnelRequest extends FormRequest
             'matricule.unique' => 'Ce matricule appartient déjà à un autre agent.',
             'email.unique' => 'Cette adresse email est déjà utilisée.',
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $departmentId = $this->input('department_id');
+            $subDepartmentId = $this->input('sub_department_id');
+
+            if ($subDepartmentId) {
+                $subDept = Department::find($subDepartmentId);
+                if ($subDept && $subDept->parent_id) {
+                    if ($departmentId && (int) $departmentId !== (int) $subDept->parent_id) {
+                        $validator->errors()->add('sub_department_id', 'Le sous-département choisi n\'appartient pas à la Direction Principale sélectionnée.');
+                    }
+                }
+            }
+        });
     }
 }

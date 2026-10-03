@@ -20,6 +20,7 @@ class DepartmentFactory extends Factory
         return [
             'name' => strtoupper(fake()->unique()->word()),
             'description' => fake()->sentence(),
+            'parent_id' => null,
         ];
     }
 }

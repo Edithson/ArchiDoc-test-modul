@@ -100,7 +100,62 @@
           </div>
         </div>
 
+        <!-- 5. Direction Principale MINFI -->
+        <div>
+          <label for="department_id" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-700">
+            Direction Principale
+          </label>
+          <div class="relative">
+            <select id="department_id" name="department_id" onchange="handleArchiveDeptChange(this)"
+              class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+              <option value="">Toutes les directions</option>
+              @foreach($mainDepartments as $mDept)
+                <option value="{{ $mDept->id }}" {{ (string) ($filters['department_id'] ?? '') === (string) $mDept->id ? 'selected' : '' }}>
+                  {{ $mDept->name }}
+                </option>
+              @endforeach
+            </select>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+
+        <!-- 6. Sous-Département / Service -->
+        <div>
+          <label for="sub_department_id" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-700">
+            Sous-Département / Service
+          </label>
+          <div class="relative">
+            <select id="sub_department_id" name="sub_department_id"
+              class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+              <option value="">Tous les services</option>
+              @foreach($mainDepartments as $mDept)
+                @if($mDept->children->isNotEmpty())
+                  @if(empty($filters['department_id']) || (string)($filters['department_id']) === (string)$mDept->id)
+                    <optgroup label="Services : {{ $mDept->name }}" data-parent-id="{{ $mDept->id }}">
+                      @foreach($mDept->children as $sDept)
+                        <option value="{{ $sDept->id }}" {{ (string) ($filters['sub_department_id'] ?? '') === (string) $sDept->id ? 'selected' : '' }}>
+                          {{ $sDept->name }} — {{ $sDept->description }}
+                        </option>
+                      @endforeach
+                    </optgroup>
+                  @endif
+                @endif
+              @endforeach
+            </select>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+
       </div>
+
+      <script>
+        function handleArchiveDeptChange(selectEl) {
+          const subDeptSelect = document.getElementById('sub_department_id');
+          if (subDeptSelect) {
+            subDeptSelect.value = '';
+          }
+        }
+      </script>
 
       <!-- Preservations du Tri lors de la soumission -->
       <input type="hidden" name="sort_by" value="{{ $filters['sort_by'] ?? 'created_at' }}">
@@ -223,9 +278,19 @@
 
               <!-- Groupe d'accès -->
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center rounded border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs font-semibold text-gray-700">
-                  {{ $archive->department?->name ?? 'GLOBAL' }}
-                </span>
+                <div class="flex flex-col gap-1 items-start">
+                  <span class="inline-flex items-center rounded border border-purple-200 bg-purple-50 px-2 py-0.5 text-xs font-bold text-purple-700">
+                    {{ $archive->department?->name ?? 'MINFI' }}
+                  </span>
+                  @if($archive->subDepartment)
+                    <span class="inline-flex items-center gap-1 rounded border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
+                      <svg class="h-3 w-3 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                      {{ $archive->subDepartment->name }}
+                    </span>
+                  @else
+                    <span class="text-[11px] font-normal text-gray-400">Tous les services</span>
+                  @endif
+                </div>
               </td>
 
               <!-- Action Consulter -->

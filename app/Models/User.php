@@ -30,6 +30,7 @@ class User extends Authenticatable
         'roles',
         'statut',
         'department_id',
+        'sub_department_id',
         'avatar',
         'password',
         'created_by',
@@ -38,11 +39,19 @@ class User extends Authenticatable
     ];
 
     /**
-     * Department associated with the user.
+     * Main Department associated with the user.
      */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    /**
+     * Sub-Department / Service associated with the user (optional).
+     */
+    public function subDepartment(): BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'sub_department_id');
     }
 
     /**

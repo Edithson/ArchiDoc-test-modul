@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Department;
 use App\Models\Personnel;
 use App\Models\PersonnelFiles;
 use App\Models\Piece;
@@ -179,4 +180,38 @@ test('user can soft delete personnel record', function () {
     $this->assertSoftDeleted('personnels', [
         'id' => $personnel->id,
     ]);
+});
+
+test('user can create personnel with optional department and sub_department', function () {
+    $mainDept = Department::factory()->create(['parent_id' => null]);
+    $subDept = Department::factory()->create(['parent_id' => $mainDept->id]);
+
+    $response = $this->actingAs($this->user)->post(route('personnels.store'), [
+        'name' => 'KOUAM Henri',
+        'matricule' => 'MAT-8811',
+        'department_id' => $mainDept->id,
+        'sub_department_id' => $subDept->id,
+    ]);
+
+    $personnel = Personnel::where('matricule', 'MAT-8811')->first();
+    expect($personnel)->not->toBeNull();
+    expect($personnel->department_id)->toBe($mainDept->id);
+    expect($personnel->sub_department_id)->toBe($subDept->id);
+
+    $response->assertRedirect(route('personnels.show', $personnel));
+});
+
+test('validation fails if personnel sub_department does not belong to department', function () {
+    $mainDept1 = Department::factory()->create(['parent_id' => null]);
+    $mainDept2 = Department::factory()->create(['parent_id' => null]);
+    $subDept2 = Department::factory()->create(['parent_id' => $mainDept2->id]);
+
+    $response = $this->actingAs($this->user)->post(route('personnels.store'), [
+        'name' => 'BAD SUB DEPT AGENT',
+        'matricule' => 'MAT-BAD',
+        'department_id' => $mainDept1->id,
+        'sub_department_id' => $subDept2->id,
+    ]);
+
+    $response->assertSessionHasErrors(['sub_department_id']);
 });

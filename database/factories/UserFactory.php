@@ -32,7 +32,12 @@ class UserFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'roles' => fake()->randomElement(['classique', 'privilégié', 'super privilégé']),
             'statut' => true,
-            'department_id' => Department::factory(),
+            'department_id' => function () {
+                $main = Department::whereNull('parent_id')->first();
+
+                return $main ? $main->id : Department::factory()->create(['parent_id' => null])->id;
+            },
+            'sub_department_id' => null,
             'avatar' => null,
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),

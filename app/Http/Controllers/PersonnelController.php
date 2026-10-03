@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePersonnelRequest;
 use App\Http\Requests\UpdatePersonnelRequest;
+use App\Models\Department;
 use App\Models\Personnel;
 use App\Models\PersonnelFiles;
 use App\Models\Piece;
@@ -24,7 +25,7 @@ class PersonnelController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Personnel::with(['personnelFiles.piece']);
+        $query = Personnel::with(['department', 'subDepartment', 'personnelFiles.piece']);
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -34,6 +35,14 @@ class PersonnelController extends Controller
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%");
             });
+        }
+
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->input('department_id'));
+        }
+
+        if ($request->filled('sub_department_id')) {
+            $query->where('sub_department_id', $request->input('sub_department_id'));
         }
 
         $personnelsList = $query->orderBy('name', 'asc')->get();
@@ -48,7 +57,7 @@ class PersonnelController extends Controller
 
         // Statistiques globales
         $totalPersonnel = Personnel::count();
-        $allPersonnels = $request->filled('search') ? Personnel::with(['personnelFiles.piece'])->get() : $personnelsList;
+        $allPersonnels = $request->filled('search') ? Personnel::with(['department', 'subDepartment', 'personnelFiles.piece'])->get() : $personnelsList;
         $completeCount = $allPersonnels->filter(fn ($p) => $p->is_complete)->count();
         $incompleteCount = max(0, $totalPersonnel - $completeCount);
 
@@ -63,8 +72,11 @@ class PersonnelController extends Controller
             ['path' => route('personnels.index'), 'query' => $request->query()]
         );
 
+        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
         return view('admin.pages.personnels.index', [
             'personnels' => $paginatedItems,
+            'mainDepartments' => $mainDepartments,
             'search' => $request->input('search'),
             'statusFilter' => $statusFilter,
             'totalPersonnel' => $totalPersonnel,
@@ -80,10 +92,12 @@ class PersonnelController extends Controller
     {
         $obligatoryPieces = Piece::where('obligatory', true)->orderBy('name')->get();
         $optionalPieces = Piece::where('obligatory', false)->orderBy('name')->get();
+        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
 
         return view('admin.pages.personnels.create', [
             'obligatoryPieces' => $obligatoryPieces,
             'optionalPieces' => $optionalPieces,
+            'mainDepartments' => $mainDepartments,
         ]);
     }
 
@@ -100,6 +114,8 @@ class PersonnelController extends Controller
             'email' => $validated['email'] ?? null,
             'phone' => $validated['phone'] ?? null,
             'address' => $validated['address'] ?? null,
+            'department_id' => $validated['department_id'] ?? null,
+            'sub_department_id' => $validated['sub_department_id'] ?? null,
         ]);
 
         // Traitement des pièces jointes déposées (support des uploads multiples)
@@ -134,7 +150,7 @@ class PersonnelController extends Controller
      */
     public function show(Personnel $personnel): View
     {
-        $personnel->load(['personnelFiles.piece', 'creator', 'updater']);
+        $personnel->load(['department', 'subDepartment', 'personnelFiles.piece', 'creator', 'updater']);
         $user = auth()->user();
         $ip = request()->ip();
         $userAgent = request()->userAgent();
@@ -189,16 +205,18 @@ class PersonnelController extends Controller
      */
     public function edit(Personnel $personnel): View
     {
-        $personnel->load(['personnelFiles.piece']);
+        $personnel->load(['department', 'subDepartment', 'personnelFiles.piece']);
         $obligatoryPieces = Piece::where('obligatory', true)->orderBy('name')->get();
         $optionalPieces = Piece::where('obligatory', false)->orderBy('name')->get();
         $uploadedFiles = $personnel->personnelFiles->keyBy('pieces_id');
+        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
 
         return view('admin.pages.personnels.edit', [
             'personnel' => $personnel,
             'obligatoryPieces' => $obligatoryPieces,
             'optionalPieces' => $optionalPieces,
             'uploadedFiles' => $uploadedFiles,
+            'mainDepartments' => $mainDepartments,
         ]);
     }
 
@@ -215,6 +233,8 @@ class PersonnelController extends Controller
             'email' => $validated['email'] ?? null,
             'phone' => $validated['phone'] ?? null,
             'address' => $validated['address'] ?? null,
+            'department_id' => $validated['department_id'] ?? null,
+            'sub_department_id' => $validated['sub_department_id'] ?? null,
         ]);
 
         // 1. Prise en charge de la suppression sélective des anciens fichiers

@@ -33,6 +33,7 @@ class UpdateDepartmentRequest extends FormRequest
                 Rule::unique('departments', 'name')->ignore($departmentId),
             ],
             'description' => ['nullable', 'string'],
+            'parent_id' => ['nullable', 'integer', 'exists:departments,id', Rule::notIn([$departmentId])],
         ];
     }
 }
