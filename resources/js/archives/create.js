@@ -467,8 +467,30 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'date_doc', message: 'Veuillez indiquer la date de signature.' },
         { id: 'emplacement', message: "Veuillez sélectionner l'emplacement physique." },
         { id: 'emplacement2', message: "Veuillez sélectionner l'emplacement virtuel." },
-        { id: 'department_id', message: "Veuillez sélectionner un groupe d'accès." },
+        { id: 'department_id', message: "Veuillez sélectionner une Direction Principale MINFI." },
     ];
+
+    const deptSelect = document.getElementById('department_id');
+    const subDeptSelect = document.getElementById('sub_department_id');
+
+    if (deptSelect && subDeptSelect) {
+        deptSelect.addEventListener('change', function () {
+            const selectedParentId = this.value;
+            const optgroups = subDeptSelect.querySelectorAll('optgroup');
+            subDeptSelect.value = '';
+
+            optgroups.forEach((group) => {
+                const parentId = group.getAttribute('data-parent-id');
+                if (!selectedParentId || parentId === selectedParentId) {
+                    group.style.display = '';
+                    group.disabled = false;
+                } else {
+                    group.style.display = 'none';
+                    group.disabled = true;
+                }
+            });
+        });
+    }
 
     function clearErrors() {
         REQUIRED_FIELDS.forEach((f) => {

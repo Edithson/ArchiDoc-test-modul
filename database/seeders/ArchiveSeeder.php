@@ -15,12 +15,20 @@ class ArchiveSeeder extends Seeder
      */
     public function run(): void
     {
-        $departments = Department::all();
+        $mainDepartments = Department::whereNull('parent_id')->with('children')->get();
         $archiveTypes = ArchiveType::all();
         $user = User::first();
 
-        Archive::factory(25)->make()->each(function ($archive) use ($departments, $archiveTypes, $user) {
-            $archive->department_id = $departments->isNotEmpty() ? $departments->random()->id : null;
+        Archive::factory(40)->make()->each(function ($archive) use ($mainDepartments, $archiveTypes, $user) {
+            if ($mainDepartments->isNotEmpty()) {
+                $main = $mainDepartments->random();
+                $archive->department_id = $main->id;
+                if ($main->children->isNotEmpty() && fake()->boolean(65)) {
+                    $archive->sub_department_id = $main->children->random()->id;
+                } else {
+                    $archive->sub_department_id = null;
+                }
+            }
             $archive->archive_type_id = $archiveTypes->isNotEmpty() ? $archiveTypes->random()->id : null;
             $archive->user_id = $user?->id;
             $archive->save();

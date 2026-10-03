@@ -114,7 +114,7 @@ class ArchiveController extends Controller
      */
     public function search(Request $request): View
     {
-        $query = Archive::with(['archiveType', 'department', 'user']);
+        $query = Archive::with(['archiveType', 'department', 'subDepartment', 'user']);
 
         if ($request->filled('archive_type_id')) {
             $query->where('archive_type_id', $request->input('archive_type_id'));
@@ -134,6 +134,10 @@ class ArchiveController extends Controller
             });
         }
 
+        if ($request->filled('sub_department_id')) {
+            $query->where('sub_department_id', $request->input('sub_department_id'));
+        }
+
         if ($request->filled('date_doc')) {
             $query->where('date_doc', 'like', '%'.$request->input('date_doc').'%');
         }
@@ -147,7 +151,7 @@ class ArchiveController extends Controller
         }
 
         $sortBy = $request->input('sort_by', 'created_at');
-        $allowedSorts = ['archive_type_id', 'department_id', 'description', 'date_doc', 'created_at'];
+        $allowedSorts = ['archive_type_id', 'department_id', 'sub_department_id', 'description', 'date_doc', 'created_at'];
         if (! in_array($sortBy, $allowedSorts, true)) {
             $sortBy = 'created_at';
         }
@@ -158,12 +162,15 @@ class ArchiveController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
         return view('admin.pages.archives.search', [
             'archives' => $archives,
             'archiveTypes' => ArchiveType::orderBy('name')->get(),
+            'mainDepartments' => $mainDepartments,
             'departments' => Department::orderBy('name')->get(),
             'users' => User::all(['id', 'name']),
-            'filters' => $request->only(['archive_type_id', 'department_id', 'typearchive', 'departement', 'date_doc', 'description', 'user_id', 'sort_by', 'sort_order']),
+            'filters' => $request->only(['archive_type_id', 'department_id', 'sub_department_id', 'typearchive', 'departement', 'date_doc', 'description', 'user_id', 'sort_by', 'sort_order']),
         ]);
     }
 
@@ -172,9 +179,12 @@ class ArchiveController extends Controller
      */
     public function create(): View
     {
+        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
         return view('admin.pages.archives.create', [
             'formats' => $this->getFormats(),
             'archiveTypes' => ArchiveType::orderBy('name')->get(),
+            'mainDepartments' => $mainDepartments,
             'departments' => Department::orderBy('name')->get(),
             'emplacementsPhysiques' => $this->getEmplacementsPhysiques(),
             'emplacementsVirtuels' => $this->getEmplacementsVirtuels(),
@@ -204,6 +214,7 @@ class ArchiveController extends Controller
             'cote' => $validated['cote'] ?? null,
             'format' => $validated['format'] ?? null,
             'department_id' => $validated['department_id'] ?? null,
+            'sub_department_id' => $validated['sub_department_id'] ?? null,
             'filepath' => $filePath,
             'user_id' => auth()->id() ?? 1,
         ]);
@@ -211,7 +222,7 @@ class ArchiveController extends Controller
         return response()->json([
             'success' => true,
             'message' => "L'archive « {$archive->description} » a été enregistrée avec succès !",
-            'archive' => $archive->load(['department', 'archiveType']),
+            'archive' => $archive->load(['department', 'subDepartment', 'archiveType']),
         ], 201);
     }
 
@@ -220,7 +231,7 @@ class ArchiveController extends Controller
      */
     public function show(Archive $archive): View
     {
-        $archive->load(['user', 'department', 'archiveType', 'creator', 'updater']);
+        $archive->load(['user', 'department', 'subDepartment', 'archiveType', 'creator', 'updater']);
         $user = auth()->user();
         $ip = request()->ip();
         $userAgent = request()->userAgent();
@@ -238,7 +249,9 @@ class ArchiveController extends Controller
                     'description' => $archive->description,
                     'format' => $archive->format,
                     'department_id' => $archive->department_id,
+                    'sub_department_id' => $archive->sub_department_id,
                     'departement' => $archive->department?->name,
+                    'sub_departement' => $archive->subDepartment?->name,
                     'ip' => $ip,
                     'user_agent' => $userAgent,
                 ])

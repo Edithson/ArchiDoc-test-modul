@@ -223,9 +223,19 @@
 
               <!-- Groupe d'accès -->
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center rounded border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs font-semibold text-gray-700">
-                  {{ $archive->department?->name ?? 'GLOBAL' }}
-                </span>
+                <div class="flex flex-col gap-1 items-start">
+                  <span class="inline-flex items-center rounded border border-purple-200 bg-purple-50 px-2 py-0.5 text-xs font-bold text-purple-700">
+                    {{ $archive->department?->name ?? 'MINFI' }}
+                  </span>
+                  @if($archive->subDepartment)
+                    <span class="inline-flex items-center gap-1 rounded border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
+                      <svg class="h-3 w-3 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                      {{ $archive->subDepartment->name }}
+                    </span>
+                  @else
+                    <span class="text-[11px] font-normal text-gray-400">Tous les services</span>
+                  @endif
+                </div>
               </td>
 
               <!-- Action Consulter -->

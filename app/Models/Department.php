@@ -75,11 +75,19 @@ class Department extends Model
     }
 
     /**
-     * Archives belonging to this department.
+     * Archives belonging to this department as Main Direction.
      */
     public function archives(): HasMany
     {
         return $this->hasMany(Archive::class, 'department_id');
+    }
+
+    /**
+     * Archives belonging specifically to this department as Sub-Department.
+     */
+    public function subDepartmentArchives(): HasMany
+    {
+        return $this->hasMany(Archive::class, 'sub_department_id');
     }
 
     /**

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('cote')->nullable();
             $table->string('format')->nullable();
             $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
+            $table->foreignId('sub_department_id')->nullable()->constrained('departments')->nullOnDelete();
             $table->string('piece_jointe')->nullable();
             $table->string('orientation')->nullable();
             $table->string('zip_file')->nullable();
@@ -30,6 +31,8 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->index(['department_id', 'sub_department_id']);
         });
     }
 
