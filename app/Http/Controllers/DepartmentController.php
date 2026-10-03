@@ -16,23 +16,47 @@ class DepartmentController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Department::query();
+        $query = Department::with(['parent', 'children'])->withCount('children');
 
         if ($request->filled('search')) {
-            $search = $request->input('search');
+            $search = trim((string) $request->input('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhereHas('parent', function ($pq) use ($search) {
+                        $pq->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
-        $departments = $query->orderBy('name', 'asc')->paginate(12)->withQueryString();
+        if ($request->filled('type')) {
+            $type = $request->input('type');
+            if ($type === 'main') {
+                $query->whereNull('parent_id');
+            } elseif ($type === 'sub') {
+                $query->whereNotNull('parent_id');
+            }
+        }
+
+        if ($request->filled('parent_id')) {
+            $query->where('parent_id', $request->input('parent_id'));
+        }
+
+        $departments = $query->orderBy('name', 'asc')->paginate(15)->withQueryString();
         $totalDepartments = Department::count();
+        $mainCount = Department::whereNull('parent_id')->count();
+        $subCount = Department::whereNotNull('parent_id')->count();
+        $mainDepartments = Department::whereNull('parent_id')->orderBy('name')->get();
 
         return view('admin.pages.departments.index', [
             'departments' => $departments,
             'search' => $request->input('search'),
+            'typeFilter' => $request->input('type', 'all'),
+            'parentIdFilter' => $request->input('parent_id', ''),
             'totalDepartments' => $totalDepartments,
+            'mainCount' => $mainCount,
+            'subCount' => $subCount,
+            'mainDepartments' => $mainDepartments,
         ]);
     }
 
@@ -41,7 +65,11 @@ class DepartmentController extends Controller
      */
     public function create(): View
     {
-        return view('admin.pages.departments.create');
+        $parentDepartments = Department::whereNull('parent_id')->orderBy('name')->get();
+
+        return view('admin.pages.departments.create', [
+            'parentDepartments' => $parentDepartments,
+        ]);
     }
 
     /**
@@ -68,8 +96,14 @@ class DepartmentController extends Controller
      */
     public function edit(Department $department): View
     {
+        $parentDepartments = Department::whereNull('parent_id')
+            ->where('id', '!=', $department->id)
+            ->orderBy('name')
+            ->get();
+
         return view('admin.pages.departments.edit', [
             'department' => $department,
+            'parentDepartments' => $parentDepartments,
         ]);
     }
 
