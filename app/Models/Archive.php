@@ -26,11 +26,19 @@ class Archive extends Model
     }
 
     /**
-     * Department associated with the archive.
+     * Main Department associated with the archive.
      */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    /**
+     * Sub-Department / Service associated with the archive (optional).
+     */
+    public function subDepartment(): BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'sub_department_id');
     }
 
     /**
@@ -57,6 +65,7 @@ class Archive extends Model
         'cote',
         'format',
         'department_id',
+        'sub_department_id',
         'piece_jointe',
         'orientation',
         'zip_file',

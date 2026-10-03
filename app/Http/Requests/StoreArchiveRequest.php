@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Department;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -39,6 +40,27 @@ class StoreArchiveRequest extends FormRequest
             'travee' => ['nullable', 'string'],
             'cote' => ['nullable', 'string'],
             'department_id' => ['required', 'exists:departments,id'],
+            'sub_department_id' => ['nullable', 'exists:departments,id'],
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $departmentId = $this->input('department_id');
+            $subDepartmentId = $this->input('sub_department_id');
+
+            if ($subDepartmentId) {
+                $subDept = Department::find($subDepartmentId);
+                if ($subDept && $subDept->parent_id) {
+                    if ($departmentId && (int) $departmentId !== (int) $subDept->parent_id) {
+                        $validator->errors()->add('sub_department_id', 'Le sous-département choisi n\'appartient pas à la Direction Principale sélectionnée.');
+                    }
+                }
+            }
+        });
     }
 }

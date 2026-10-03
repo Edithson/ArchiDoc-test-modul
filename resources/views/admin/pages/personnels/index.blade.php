@@ -100,10 +100,10 @@
   <!-- Carte de Filtres -->
   <div class="mb-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
     <form method="GET" action="{{ route('personnels.index') }}" class="p-4 sm:p-6">
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-4 items-end">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 items-end">
         
         <!-- Recherche par nom / matricule -->
-        <div class="sm:col-span-2">
+        <div class="sm:col-span-2 lg:col-span-2">
           <label for="search" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Recherche agent (Nom, Matricule, Email)</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
@@ -115,28 +115,76 @@
           </div>
         </div>
 
+        <!-- Direction Principale MINFI -->
+        <div>
+          <label for="department_id" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Direction Principale</label>
+          <select name="department_id" id="department_id" onchange="handleFilterDeptChange(this)" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600">
+            <option value="">Toutes les directions</option>
+            @foreach($mainDepartments as $mDept)
+              <option value="{{ $mDept->id }}" {{ (string) request('department_id') === (string) $mDept->id ? 'selected' : '' }}>
+                {{ $mDept->name }}
+              </option>
+            @endforeach
+          </select>
+        </div>
+
+        <!-- Sous-Département / Service -->
+        <div>
+          <label for="sub_department_id" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Sous-Département</label>
+          <select name="sub_department_id" id="sub_department_id" onchange="this.form.submit()" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600">
+            <option value="">Tous les services</option>
+            @foreach($mainDepartments as $mDept)
+              @if($mDept->children->isNotEmpty())
+                @if(!request('department_id') || (string)request('department_id') === (string)$mDept->id)
+                  <optgroup label="Services : {{ $mDept->name }}" data-parent-id="{{ $mDept->id }}">
+                    @foreach($mDept->children as $sDept)
+                      <option value="{{ $sDept->id }}" {{ (string) request('sub_department_id') === (string) $sDept->id ? 'selected' : '' }}>
+                        {{ $sDept->name }}
+                      </option>
+                    @endforeach
+                  </optgroup>
+                @endif
+              @endif
+            @endforeach
+          </select>
+        </div>
+
+        <script>
+          function handleFilterDeptChange(selectEl) {
+            const subDeptSelect = document.getElementById('sub_department_id');
+            if (subDeptSelect) {
+              subDeptSelect.value = '';
+            }
+            selectEl.form.submit();
+          }
+        </script>
+
         <!-- Filtre de statut de complétude -->
         <div>
           <label for="status" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Statut du dossier</label>
-          <select name="status" id="status" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600">
+          <select name="status" id="status" onchange="this.form.submit()" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600">
             <option value="">Tous les dossiers</option>
             <option value="complete" {{ $statusFilter === 'complete' ? 'selected' : '' }}>Dossiers Complets (100%)</option>
             <option value="incomplete" {{ $statusFilter === 'incomplete' ? 'selected' : '' }}>Dossiers Incomplets (< 100%)</option>
           </select>
         </div>
 
-        <!-- Boutons -->
+      </div>
+
+      <div class="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+        <div class="text-xs text-gray-500">
+          Affichage des résultats filtrés
+        </div>
         <div class="flex items-center gap-2">
-          <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
-            Filtrer
-          </button>
-          @if($search || $statusFilter)
-            <a href="{{ route('personnels.index') }}" class="inline-flex items-center gap-1 rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+          @if($search || $statusFilter || request('department_id') || request('sub_department_id'))
+            <a href="{{ route('personnels.index') }}" class="inline-flex items-center gap-1 rounded-xl border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">
               Réinitialiser
             </a>
           @endif
+          <button type="submit" class="inline-flex items-center gap-1 rounded-xl bg-gray-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-gray-800">
+            Filtrer
+          </button>
         </div>
-
       </div>
     </form>
   </div>
@@ -149,6 +197,7 @@
           <tr>
             <th scope="col" class="px-6 py-4">Agent / Nom complet</th>
             <th scope="col" class="px-6 py-4">Matricule</th>
+            <th scope="col" class="px-6 py-4">Structure rattachée</th>
             <th scope="col" class="px-6 py-4">Contact</th>
             <th scope="col" class="px-6 py-4">Taux d'Achèvement</th>
             <th scope="col" class="px-6 py-4">Statut du Dossier</th>
@@ -172,12 +221,32 @@
                     <a href="{{ route('personnels.show', $agent) }}" class="font-extrabold text-brand-900 hover:underline">
                       {{ $agent->name }}
                     </a>
-                    <div class="text-xs font-normal text-gray-500">{{ $agent->address ?? 'DGB' }}</div>
+                    <div class="text-xs font-normal text-gray-500">{{ $agent->address ?? 'MINFI' }}</div>
                   </div>
                 </div>
               </td>
               <td class="px-6 py-4 font-mono font-bold text-brand-800 text-xs">
                 {{ $agent->matricule }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex flex-col gap-1 items-start">
+                  @if($agent->department)
+                    <span class="inline-flex items-center rounded border border-purple-200 bg-purple-50 px-2 py-0.5 text-xs font-bold text-purple-700">
+                      {{ $agent->department->name }}
+                    </span>
+                  @else
+                    <span class="text-xs text-gray-400 italic">Non rattaché</span>
+                  @endif
+
+                  @if($agent->subDepartment)
+                    <span class="inline-flex items-center gap-1 rounded border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
+                      <svg class="h-3 w-3 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                      {{ $agent->subDepartment->name }}
+                    </span>
+                  @elseif($agent->department)
+                    <span class="text-[11px] font-normal text-gray-400">Tous les services</span>
+                  @endif
+                </div>
               </td>
               <td class="px-6 py-4 text-xs text-gray-600">
                 <div>{{ $agent->email ?? '—' }}</div>

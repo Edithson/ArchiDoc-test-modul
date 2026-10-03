@@ -6,6 +6,7 @@ use App\Traits\Auditable;
 use Database\Factories\DepartmentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -19,13 +20,54 @@ class Department extends Model
     protected $fillable = [
         'name',
         'description',
+        'parent_id',
         'created_by',
         'updated_by',
         'deleted_by',
     ];
 
     /**
-     * Users belonging to this department.
+     * Parent department (e.g. Direction Générale MINFI).
+     */
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'parent_id');
+    }
+
+    /**
+     * Sub-departments belonging to this parent department.
+     */
+    public function children(): HasMany
+    {
+        return $this->hasMany(Department::class, 'parent_id');
+    }
+
+    /**
+     * Alias for children relationship.
+     */
+    public function subDepartments(): HasMany
+    {
+        return $this->children();
+    }
+
+    /**
+     * Check if department is a main top-level MINFI department.
+     */
+    public function isMain(): bool
+    {
+        return $this->parent_id === null;
+    }
+
+    /**
+     * Check if department is a sub-department.
+     */
+    public function isSub(): bool
+    {
+        return $this->parent_id !== null;
+    }
+
+    /**
+     * Users belonging to this department as Main Direction.
      */
     public function users(): HasMany
     {
@@ -33,11 +75,43 @@ class Department extends Model
     }
 
     /**
-     * Archives belonging to this department.
+     * Users belonging specifically to this department as Sub-Department.
+     */
+    public function subDepartmentUsers(): HasMany
+    {
+        return $this->hasMany(User::class, 'sub_department_id');
+    }
+
+    /**
+     * Archives belonging to this department as Main Direction.
      */
     public function archives(): HasMany
     {
         return $this->hasMany(Archive::class, 'department_id');
+    }
+
+    /**
+     * Archives belonging specifically to this department as Sub-Department.
+     */
+    public function subDepartmentArchives(): HasMany
+    {
+        return $this->hasMany(Archive::class, 'sub_department_id');
+    }
+
+    /**
+     * Personnel dossiers belonging to this department as Main Direction.
+     */
+    public function personnels(): HasMany
+    {
+        return $this->hasMany(Personnel::class, 'department_id');
+    }
+
+    /**
+     * Personnel dossiers belonging specifically to this department as Sub-Department.
+     */
+    public function subDepartmentPersonnels(): HasMany
+    {
+        return $this->hasMany(Personnel::class, 'sub_department_id');
     }
 
     /**

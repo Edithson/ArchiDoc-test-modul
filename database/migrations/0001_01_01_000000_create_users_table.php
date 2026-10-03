@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('roles')->nullable();
             $table->boolean('statut')->nullable()->default(true);
             $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
+            $table->foreignId('sub_department_id')->nullable()->constrained('departments')->nullOnDelete();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('avatar')->nullable();
             $table->string('password')->nullable();

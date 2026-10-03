@@ -128,8 +128,20 @@
                 <span class="font-semibold text-gray-800">{{ $archive->emplacement2 ?? 'Serveur' }}</span>
               </div>
               <div>
-                <span class="block text-xs text-gray-400">Groupe d'accès (Direction)</span>
-                <span class="font-semibold text-gray-800">{{ $archive->department?->name ?? 'Public' }}</span>
+                <span class="block text-xs text-gray-400">Direction Principale</span>
+                <span class="font-semibold text-gray-800">{{ $archive->department?->name ?? 'MINFI' }}</span>
+                @if($archive->department?->description)
+                  <span class="block text-[11px] text-gray-500">{{ $archive->department->description }}</span>
+                @endif
+              </div>
+              <div>
+                <span class="block text-xs text-gray-400">Sous-département / Service</span>
+                @if($archive->subDepartment)
+                  <span class="font-semibold text-indigo-700">{{ $archive->subDepartment->name }}</span>
+                  <span class="block text-[11px] text-gray-500">{{ $archive->subDepartment->description }}</span>
+                @else
+                  <span class="font-medium text-gray-500 italic">Global (Tous les sous-départements)</span>
+                @endif
               </div>
             </div>
           </div>
