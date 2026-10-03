@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
         $this->call(DepartmentSeeder::class);
 
         // Création de l'utilisateur administrateur principal
+        $dgbMain = Department::where('name', 'DGB')->whereNull('parent_id')->first();
         $cabDept = Department::where('name', 'CAB DGB')->first();
 
         User::firstOrCreate(
@@ -42,7 +43,8 @@ class DatabaseSeeder extends Seeder
                 'phone' => '+237 699 00 00 01',
                 'roles' => 'super privilégé',
                 'statut' => true,
-                'department_id' => $cabDept?->id,
+                'department_id' => $dgbMain?->id,
+                'sub_department_id' => $cabDept?->id,
                 'password' => 'password',
             ]
         );

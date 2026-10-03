@@ -67,11 +67,19 @@ class Department extends Model
     }
 
     /**
-     * Users belonging to this department.
+     * Users belonging to this department as Main Direction.
      */
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'department_id');
+    }
+
+    /**
+     * Users belonging specifically to this department as Sub-Department.
+     */
+    public function subDepartmentUsers(): HasMany
+    {
+        return $this->hasMany(User::class, 'sub_department_id');
     }
 
     /**

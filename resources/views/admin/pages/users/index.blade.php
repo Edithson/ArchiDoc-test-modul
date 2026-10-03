@@ -84,24 +84,61 @@
           </div>
         </div>
 
-        <!-- Filtre Département -->
+        <!-- Filtre Direction Principale -->
         <div>
           <label for="department_id" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
-            Département / Groupe
+            Direction Principale
           </label>
           <div class="relative">
-            <select id="department_id" name="department_id" onchange="this.form.submit()"
-              class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-8 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
-              <option value="">Tous les départements</option>
-              @foreach($departments as $dept)
-                <option value="{{ $dept->id }}" {{ (string) ($filters['department_id'] ?? '') === (string) $dept->id ? 'selected' : '' }}>
-                  {{ $dept->name }}
+            <select id="department_id" name="department_id" onchange="handleFilterDeptChange(this)"
+              class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-8 text-sm font-semibold text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+              <option value="">Toutes les directions</option>
+              @foreach($mainDepartments as $mDept)
+                <option value="{{ $mDept->id }}" {{ (string) ($filters['department_id'] ?? '') === (string) $mDept->id ? 'selected' : '' }}>
+                  {{ $mDept->name }}
                 </option>
               @endforeach
             </select>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
           </div>
         </div>
+
+        <!-- Filtre Sous-Département -->
+        <div>
+          <label for="sub_department_id" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+            Sous-Département / Service
+          </label>
+          <div class="relative">
+            <select id="sub_department_id" name="sub_department_id" onchange="this.form.submit()"
+              class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-8 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+              <option value="">Tous les services</option>
+              @foreach($mainDepartments as $mDept)
+                @if($mDept->children->isNotEmpty())
+                  @if(empty($filters['department_id']) || (string)($filters['department_id']) === (string)$mDept->id)
+                    <optgroup label="Services : {{ $mDept->name }}" data-parent-id="{{ $mDept->id }}">
+                      @foreach($mDept->children as $sDept)
+                        <option value="{{ $sDept->id }}" {{ (string) ($filters['sub_department_id'] ?? '') === (string) $sDept->id ? 'selected' : '' }}>
+                          {{ $sDept->name }} — {{ $sDept->description }}
+                        </option>
+                      @endforeach
+                    </optgroup>
+                  @endif
+                @endif
+              @endforeach
+            </select>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+
+        <script>
+          function handleFilterDeptChange(selectEl) {
+            const subDeptSelect = document.getElementById('sub_department_id');
+            if (subDeptSelect) {
+              subDeptSelect.value = '';
+            }
+            selectEl.form.submit();
+          }
+        </script>
 
         <!-- Filtre Statut -->
         <div>
@@ -146,7 +183,7 @@
           <tr>
             <th scope="col" class="px-6 py-3.5">Utilisateur</th>
             <th scope="col" class="px-6 py-3.5">Matricule</th>
-            <th scope="col" class="px-6 py-3.5">Département</th>
+            <th scope="col" class="px-6 py-3.5">Structure & Services</th>
             <th scope="col" class="px-6 py-3.5">Rôle</th>
             <th scope="col" class="px-6 py-3.5">Statut</th>
             <th scope="col" class="px-6 py-3.5 text-right">Actions</th>
@@ -188,9 +225,30 @@
                 </span>
               </td>
 
-              <!-- Département -->
-              <td class="px-6 py-4 whitespace-nowrap text-xs font-semibold text-gray-700">
-                {{ $userItem->department?->name ?? 'N/A' }}
+              <!-- Structure & Services -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex flex-col gap-1 items-start">
+                  @if($userItem->department)
+                    <span class="inline-flex items-center rounded border border-purple-200 bg-purple-50 px-2 py-0.5 text-xs font-bold text-purple-700">
+                      {{ $userItem->department->name }}
+                    </span>
+                  @elseif($userItem->isSuper())
+                    <span class="inline-flex items-center rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
+                      Accès Système Global
+                    </span>
+                  @else
+                    <span class="text-xs text-gray-400 italic">Non spécifié</span>
+                  @endif
+
+                  @if($userItem->subDepartment)
+                    <span class="inline-flex items-center gap-1 rounded border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
+                      <svg class="h-3 w-3 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                      {{ $userItem->subDepartment->name }}
+                    </span>
+                  @elseif($userItem->department)
+                    <span class="text-[11px] font-normal text-gray-400">Tous les services</span>
+                  @endif
+                </div>
               </td>
 
               <!-- Rôle -->

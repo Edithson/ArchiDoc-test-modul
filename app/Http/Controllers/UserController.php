@@ -18,7 +18,7 @@ class UserController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = User::with('department');
+        $query = User::with(['department', 'subDepartment']);
 
         if ($request->filled('search')) {
             $search = trim((string) $request->input('search'));
@@ -29,6 +29,9 @@ class UserController extends Controller
                     ->orWhere('phone', 'like', "%{$search}%")
                     ->orWhereHas('department', function ($dq) use ($search) {
                         $dq->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('subDepartment', function ($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%");
                     });
             });
         }
@@ -49,12 +52,10 @@ class UserController extends Controller
 
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->input('department_id'));
-        } elseif ($request->filled('departement')) {
-            // Backward compatibility fallback
-            $deptVal = $request->input('departement');
-            $query->whereHas('department', function ($dq) use ($deptVal) {
-                $dq->where('id', $deptVal)->orWhere('name', 'like', "%{$deptVal}%");
-            });
+        }
+
+        if ($request->filled('sub_department_id')) {
+            $query->where('sub_department_id', $request->input('sub_department_id'));
         }
 
         if ($request->has('statut') && $request->input('statut') !== null && $request->input('statut') !== '') {
@@ -70,14 +71,18 @@ class UserController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
         return view('admin.pages.users.index', [
             'users' => $users,
+            'mainDepartments' => $mainDepartments,
             'departments' => Department::orderBy('name')->get(),
             'roleOptions' => $this->getRoleOptions(),
             'filters' => [
                 'search' => (string) $request->input('search', ''),
                 'roles' => (string) $request->input('roles', ''),
-                'department_id' => (string) $request->input('department_id', $request->input('departement', '')),
+                'department_id' => (string) $request->input('department_id', ''),
+                'sub_department_id' => (string) $request->input('sub_department_id', ''),
                 'statut' => (string) $request->input('statut', ''),
             ],
         ]);
@@ -88,7 +93,10 @@ class UserController extends Controller
      */
     public function create(): View
     {
+        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
         return view('admin.pages.users.create', [
+            'mainDepartments' => $mainDepartments,
             'departments' => Department::orderBy('name')->get(),
             'roleOptions' => $this->getRoleOptions(),
         ]);
@@ -112,8 +120,11 @@ class UserController extends Controller
      */
     public function edit(User $user): View
     {
+        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
         return view('admin.pages.users.edit', [
-            'user' => $user->load('department'),
+            'user' => $user->load(['department', 'subDepartment']),
+            'mainDepartments' => $mainDepartments,
             'departments' => Department::orderBy('name')->get(),
             'roleOptions' => $this->getRoleOptions(),
         ]);

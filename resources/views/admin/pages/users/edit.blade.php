@@ -91,35 +91,14 @@
           @enderror
         </div>
 
-        <!-- Département / Groupe d'accès -->
-        <div>
-          <label for="department_id" class="block text-sm font-semibold text-gray-800 mb-1">
-            Département / Groupe d'accès <span class="text-red-500">*</span>
-          </label>
-          <div class="relative">
-            <select id="department_id" name="department_id" required
-              class="block w-full appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-3.5 pr-8 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
-              @foreach($departments as $dept)
-                <option value="{{ $dept->id }}" {{ (int) old('department_id', $user->department_id) === (int) $dept->id ? 'selected' : '' }}>
-                  {{ $dept->name }} {{ $dept->description ? '— '.$dept->description : '' }}
-                </option>
-              @endforeach
-            </select>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
-          </div>
-          @error('department_id')
-            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-          @enderror
-        </div>
-
         <!-- Rôle / Niveau d'accès -->
         <div>
           <label for="roles" class="block text-sm font-semibold text-gray-800 mb-1">
             Niveau d'accès (Rôle) <span class="text-red-500">*</span>
           </label>
           <div class="relative">
-            <select id="roles" name="roles" required
-              class="block w-full appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-3.5 pr-8 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+            <select id="roles" name="roles" required onchange="handleRoleChange(this.value)"
+              class="block w-full appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-3.5 pr-8 text-sm font-bold text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
               @foreach($roleOptions as $val => $label)
                 <option value="{{ $val }}" {{ old('roles', $user->roles) === $val ? 'selected' : '' }}>
                   {{ $label }}
@@ -129,6 +108,58 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
           </div>
           @error('roles')
+            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+          @enderror
+        </div>
+
+        <!-- Direction Principale MINFI -->
+        <div>
+          <label for="department_id" class="block text-sm font-semibold text-gray-800 mb-1">
+            Direction Principale MINFI <span id="dept_asterisk" class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <select id="department_id" name="department_id" onchange="handleDepartmentChange(this.value)"
+              class="block w-full appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-3.5 pr-8 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+              <option value="">-- Aucune (Accès système global pour Super Privilégié) --</option>
+              @foreach($mainDepartments as $mDept)
+                <option value="{{ $mDept->id }}" {{ (int) old('department_id', $user->department_id) === (int) $mDept->id ? 'selected' : '' }}>
+                  {{ $mDept->name }} — {{ $mDept->description }}
+                </option>
+              @endforeach
+            </select>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <p id="dept_help" class="mt-1 text-xs text-gray-500">Obligatoire pour les rôles Privilégié et Classique.</p>
+          @error('department_id')
+            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+          @enderror
+        </div>
+
+        <!-- Sous-Département / Service -->
+        <div>
+          <label for="sub_department_id" class="block text-sm font-semibold text-gray-800 mb-1">
+            Sous-Département / Service <span id="sub_dept_asterisk" class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <select id="sub_department_id" name="sub_department_id"
+              class="block w-full appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-3.5 pr-8 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+              <option value="">-- Tous les services (Accès global à la Direction) --</option>
+              @foreach($mainDepartments as $mDept)
+                @if($mDept->children->isNotEmpty())
+                  <optgroup label="Services rattachés à : {{ $mDept->name }}" data-parent-id="{{ $mDept->id }}">
+                    @foreach($mDept->children as $sDept)
+                      <option value="{{ $sDept->id }}" data-parent-id="{{ $mDept->id }}" {{ (int) old('sub_department_id', $user->sub_department_id) === (int) $sDept->id ? 'selected' : '' }}>
+                        {{ $sDept->name }} — {{ $sDept->description }}
+                      </option>
+                    @endforeach
+                  </optgroup>
+                @endif
+              @endforeach
+            </select>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <p id="sub_dept_help" class="mt-1 text-xs text-gray-500">Obligatoire pour les utilisateurs ordinaires (Classique).</p>
+          @error('sub_department_id')
             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
           @enderror
         </div>
@@ -162,6 +193,62 @@
             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
           @enderror
         </div>
+
+      </div>
+
+      <script>
+        function handleRoleChange(role) {
+          const deptSelect = document.getElementById('department_id');
+          const subDeptSelect = document.getElementById('sub_department_id');
+          const deptAsterisk = document.getElementById('dept_asterisk');
+          const subDeptAsterisk = document.getElementById('sub_dept_asterisk');
+
+          const isSuper = role.toLowerCase().includes('super');
+          const isPrivileged = !isSuper && role.toLowerCase().includes('privilég');
+          const isClassique = !isSuper && !isPrivileged;
+
+          if (isSuper) {
+            deptSelect.removeAttribute('required');
+            subDeptSelect.removeAttribute('required');
+            deptAsterisk.style.display = 'none';
+            subDeptAsterisk.style.display = 'none';
+          } else if (isPrivileged) {
+            deptSelect.setAttribute('required', 'required');
+            subDeptSelect.removeAttribute('required');
+            deptAsterisk.style.display = 'inline';
+            subDeptAsterisk.style.display = 'none';
+          } else {
+            // Classique
+            deptSelect.setAttribute('required', 'required');
+            subDeptSelect.setAttribute('required', 'required');
+            deptAsterisk.style.display = 'inline';
+            subDeptAsterisk.style.display = 'inline';
+          }
+        }
+
+        function handleDepartmentChange(selectedParentId) {
+          const subDeptSelect = document.getElementById('sub_department_id');
+          const optgroups = subDeptSelect.querySelectorAll('optgroup');
+
+          optgroups.forEach((group) => {
+            const parentId = group.getAttribute('data-parent-id');
+            if (!selectedParentId || parentId === selectedParentId) {
+              group.style.display = '';
+              group.disabled = false;
+            } else {
+              group.style.display = 'none';
+              group.disabled = true;
+            }
+          });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+          const roleSelect = document.getElementById('roles');
+          const deptSelect = document.getElementById('department_id');
+          if (roleSelect && roleSelect.value) handleRoleChange(roleSelect.value);
+          if (deptSelect && deptSelect.value) handleDepartmentChange(deptSelect.value);
+        });
+      </script>
 
       </div>
 
