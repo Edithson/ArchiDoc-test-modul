@@ -99,6 +99,22 @@ class Department extends Model
     }
 
     /**
+     * Personnel dossiers belonging to this department as Main Direction.
+     */
+    public function personnels(): HasMany
+    {
+        return $this->hasMany(Personnel::class, 'department_id');
+    }
+
+    /**
+     * Personnel dossiers belonging specifically to this department as Sub-Department.
+     */
+    public function subDepartmentPersonnels(): HasMany
+    {
+        return $this->hasMany(Personnel::class, 'sub_department_id');
+    }
+
+    /**
      * Options for activity logging.
      */
     public function getActivitylogOptions(): LogOptions

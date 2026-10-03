@@ -474,11 +474,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const subDeptSelect = document.getElementById('sub_department_id');
 
     if (deptSelect && subDeptSelect) {
-        deptSelect.addEventListener('change', function () {
-            const selectedParentId = this.value;
+        function filterSubDept(selectedParentId) {
             const optgroups = subDeptSelect.querySelectorAll('optgroup');
-            subDeptSelect.value = '';
-
             optgroups.forEach((group) => {
                 const parentId = group.getAttribute('data-parent-id');
                 if (!selectedParentId || parentId === selectedParentId) {
@@ -489,6 +486,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     group.disabled = true;
                 }
             });
+
+            const selectedOption = subDeptSelect.options[subDeptSelect.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                const optionParentId = selectedOption.getAttribute('data-parent-id');
+                if (selectedParentId && optionParentId !== selectedParentId) {
+                    subDeptSelect.value = '';
+                }
+            } else if (!selectedParentId) {
+                subDeptSelect.value = '';
+            }
+        }
+
+        deptSelect.addEventListener('change', function () {
+            filterSubDept(this.value);
+        });
+
+        subDeptSelect.addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                const parentId = selectedOption.getAttribute('data-parent-id');
+                if (parentId) {
+                    deptSelect.value = parentId;
+                    filterSubDept(parentId);
+                }
+            }
         });
     }
 

@@ -114,6 +114,54 @@
           <input type="text" name="address" id="address" value="{{ old('address') }}" placeholder="Ex: Bastos, Yaoundé" class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 @error('address') border-red-500 @enderror">
         </div>
 
+        <!-- Direction Principale (MINFI) -->
+        <div>
+          <label for="department_id" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+            Direction Principale (MINFI) <span class="text-xs text-gray-400 font-normal">(Optionnel)</span>
+          </label>
+          <div class="relative">
+            <select id="department_id" name="department_id" onchange="handleDepartmentChange(this.value)"
+              class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 @error('department_id') border-red-500 @enderror">
+              <option value="">-- Aucune direction rattachée --</option>
+              @foreach($mainDepartments as $mDept)
+                <option value="{{ $mDept->id }}" {{ (string) old('department_id') === (string) $mDept->id ? 'selected' : '' }}>
+                  {{ $mDept->name }} — {{ $mDept->description }}
+                </option>
+              @endforeach
+            </select>
+          </div>
+          @error('department_id')
+            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+          @enderror
+        </div>
+
+        <!-- Sous-Département / Service -->
+        <div>
+          <label for="sub_department_id" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+            Sous-Département / Service <span class="text-xs text-gray-400 font-normal">(Optionnel)</span>
+          </label>
+          <div class="relative">
+            <select id="sub_department_id" name="sub_department_id" onchange="handleSubDepartmentChange(this)"
+              class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 @error('sub_department_id') border-red-500 @enderror">
+              <option value="">-- Aucun sous-département --</option>
+              @foreach($mainDepartments as $mDept)
+                @if($mDept->children->isNotEmpty())
+                  <optgroup label="Services rattachés à : {{ $mDept->name }}" data-parent-id="{{ $mDept->id }}">
+                    @foreach($mDept->children as $sDept)
+                      <option value="{{ $sDept->id }}" data-parent-id="{{ $mDept->id }}" {{ (string) old('sub_department_id') === (string) $sDept->id ? 'selected' : '' }}>
+                        {{ $sDept->name }} — {{ $sDept->description }}
+                      </option>
+                    @endforeach
+                  </optgroup>
+                @endif
+              @endforeach
+            </select>
+          </div>
+          @error('sub_department_id')
+            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+          @enderror
+        </div>
+
       </div>
     </div>
 
@@ -291,6 +339,57 @@
 
 @push('scripts')
 <script>
+function handleDepartmentChange(selectedParentId) {
+  const subDeptSelect = document.getElementById('sub_department_id');
+  if (!subDeptSelect) return;
+  const optgroups = subDeptSelect.querySelectorAll('optgroup');
+
+  optgroups.forEach((group) => {
+    const parentId = group.getAttribute('data-parent-id');
+    if (!selectedParentId || parentId === selectedParentId) {
+      group.style.display = '';
+      group.disabled = false;
+    } else {
+      group.style.display = 'none';
+      group.disabled = true;
+    }
+  });
+
+  const selectedOption = subDeptSelect.options[subDeptSelect.selectedIndex];
+  if (selectedOption && selectedOption.value) {
+    const optionParentId = selectedOption.getAttribute('data-parent-id');
+    if (selectedParentId && optionParentId !== selectedParentId) {
+      subDeptSelect.value = '';
+    }
+  } else if (!selectedParentId) {
+    subDeptSelect.value = '';
+  }
+}
+
+function handleSubDepartmentChange(subDeptSelect) {
+  if (!subDeptSelect) return;
+  const selectedOption = subDeptSelect.options[subDeptSelect.selectedIndex];
+  if (!selectedOption || !selectedOption.value) return;
+
+  const parentId = selectedOption.getAttribute('data-parent-id');
+  const deptSelect = document.getElementById('department_id');
+  if (deptSelect && parentId) {
+    deptSelect.value = parentId;
+    handleDepartmentChange(parentId);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const deptSelect = document.getElementById('department_id');
+  const subDeptSelect = document.getElementById('sub_department_id');
+
+  if (subDeptSelect && subDeptSelect.value) {
+    handleSubDepartmentChange(subDeptSelect);
+  } else if (deptSelect && deptSelect.value) {
+    handleDepartmentChange(deptSelect.value);
+  }
+});
+
 (function () {
   const MAX_SIZE = 5 * 1024 * 1024; // 5 Mo
 

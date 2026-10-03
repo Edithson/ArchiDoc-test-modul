@@ -138,16 +138,16 @@ test('updating department to be its own parent fails validation', function () {
 });
 
 test('user can filter departments by type and parent_id', function () {
-    $mainDept = Department::factory()->create(['name' => 'DGB', 'parent_id' => null]);
-    $subDept = Department::factory()->create(['name' => 'DI', 'parent_id' => $mainDept->id]);
+    $mainDept = Department::factory()->create(['name' => 'DGB_MAIN_DEPT', 'parent_id' => null]);
+    $subDept = Department::factory()->create(['name' => 'SERVICE_INFORMATIQUE', 'parent_id' => $mainDept->id]);
 
     $responseMain = $this->actingAs($this->user)->get(route('departments.index', ['type' => 'main']));
-    $responseMain->assertSee('DGB');
-    $responseMain->assertDontSee('DI');
+    $responseMain->assertSee('DGB_MAIN_DEPT');
+    $responseMain->assertDontSee('SERVICE_INFORMATIQUE');
 
     $responseSub = $this->actingAs($this->user)->get(route('departments.index', ['type' => 'sub']));
-    $responseSub->assertSee('DI');
+    $responseSub->assertSee('SERVICE_INFORMATIQUE');
 
     $responseParent = $this->actingAs($this->user)->get(route('departments.index', ['parent_id' => $mainDept->id]));
-    $responseParent->assertSee('DI');
+    $responseParent->assertSee('SERVICE_INFORMATIQUE');
 });

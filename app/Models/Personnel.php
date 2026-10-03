@@ -6,6 +6,7 @@ use App\Traits\Auditable;
 use Database\Factories\PersonnelFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -28,10 +29,28 @@ class Personnel extends Model
         'matricule',
         'phone',
         'address',
+        'department_id',
+        'sub_department_id',
         'created_by',
         'updated_by',
         'deleted_by',
     ];
+
+    /**
+     * Main Department associated with the personnel dossier.
+     */
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    /**
+     * Sub-Department / Service associated with the personnel dossier (optional).
+     */
+    public function subDepartment(): BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'sub_department_id');
+    }
 
     /**
      * Options for activity logging.

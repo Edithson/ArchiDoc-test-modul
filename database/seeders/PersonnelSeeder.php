@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Department;
 use App\Models\Personnel;
 use App\Models\PersonnelFiles;
 use App\Models\Piece;
@@ -41,7 +42,14 @@ class PersonnelSeeder extends Seeder
         $obligatoryPieces = Piece::where('obligatory', true)->get();
         $optionalPieces = Piece::where('obligatory', false)->get();
 
+        $dgb = Department::where('name', 'DGB')->whereNull('parent_id')->first();
+        $di = Department::where('name', 'DI')->first();
+        $ddpp = Department::where('name', 'DDPP')->first();
+
         foreach ($personnels as $index => $pData) {
+            $pData['department_id'] = $dgb?->id;
+            $pData['sub_department_id'] = ($index === 0 || $index === 2) ? $di?->id : $ddpp?->id;
+
             $personnel = Personnel::firstOrCreate(
                 ['matricule' => $pData['matricule']],
                 $pData

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Department;
 use App\Models\Personnel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,6 +24,12 @@ class PersonnelFactory extends Factory
             'matricule' => 'MAT-'.fake()->unique()->numberBetween(1000, 9999),
             'phone' => '+237 '.fake()->numberBetween(650000000, 699999999),
             'address' => fake()->address(),
+            'department_id' => function () {
+                $main = Department::whereNull('parent_id')->first();
+
+                return $main ? $main->id : Department::factory()->create(['parent_id' => null])->id;
+            },
+            'sub_department_id' => null,
         ];
     }
 }

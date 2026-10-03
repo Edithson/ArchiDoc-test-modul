@@ -51,6 +51,21 @@
               {{ $personnel->matricule }}
             </span>
           </div>
+          <div class="mt-1.5 flex flex-wrap items-center gap-2">
+            @if($personnel->department)
+              <span class="inline-flex items-center rounded border border-purple-200 bg-purple-50 px-2 py-0.5 text-xs font-bold text-purple-700">
+                {{ $personnel->department->name }}
+              </span>
+            @endif
+            @if($personnel->subDepartment)
+              <span class="inline-flex items-center gap-1 rounded border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
+                <svg class="h-3 w-3 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                {{ $personnel->subDepartment->name }}
+              </span>
+            @elseif($personnel->department)
+              <span class="text-[11px] font-normal text-gray-400">Tous les services</span>
+            @endif
+          </div>
           <div class="mt-1 flex flex-wrap items-center gap-4 text-xs text-gray-500">
             @if($personnel->email)
               <span class="flex items-center gap-1">

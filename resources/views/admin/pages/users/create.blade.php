@@ -141,7 +141,7 @@
             Sous-Département / Service <span id="sub_dept_asterisk" class="text-red-500">*</span>
           </label>
           <div class="relative">
-            <select id="sub_department_id" name="sub_department_id"
+        <select id="sub_department_id" name="sub_department_id" onchange="handleSubDepartmentChange(this)"
               class="block w-full appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-3.5 pr-8 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
               <option value="">-- Tous les services (Accès global à la Direction) --</option>
               @foreach($mainDepartments as $mDept)
@@ -228,6 +228,7 @@
 
         function handleDepartmentChange(selectedParentId) {
           const subDeptSelect = document.getElementById('sub_department_id');
+          if (!subDeptSelect) return;
           const optgroups = subDeptSelect.querySelectorAll('optgroup');
 
           optgroups.forEach((group) => {
@@ -240,13 +241,41 @@
               group.disabled = true;
             }
           });
+
+          const selectedOption = subDeptSelect.options[subDeptSelect.selectedIndex];
+          if (selectedOption && selectedOption.value) {
+            const optionParentId = selectedOption.getAttribute('data-parent-id');
+            if (selectedParentId && optionParentId !== selectedParentId) {
+              subDeptSelect.value = '';
+            }
+          } else if (!selectedParentId) {
+            subDeptSelect.value = '';
+          }
+        }
+
+        function handleSubDepartmentChange(subDeptSelect) {
+          if (!subDeptSelect) return;
+          const selectedOption = subDeptSelect.options[subDeptSelect.selectedIndex];
+          if (!selectedOption || !selectedOption.value) return;
+
+          const parentId = selectedOption.getAttribute('data-parent-id');
+          const deptSelect = document.getElementById('department_id');
+          if (deptSelect && parentId) {
+            deptSelect.value = parentId;
+            handleDepartmentChange(parentId);
+          }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
           const roleSelect = document.getElementById('roles');
           const deptSelect = document.getElementById('department_id');
+          const subDeptSelect = document.getElementById('sub_department_id');
           if (roleSelect && roleSelect.value) handleRoleChange(roleSelect.value);
-          if (deptSelect && deptSelect.value) handleDepartmentChange(deptSelect.value);
+          if (subDeptSelect && subDeptSelect.value) {
+            handleSubDepartmentChange(subDeptSelect);
+          } else if (deptSelect && deptSelect.value) {
+            handleDepartmentChange(deptSelect.value);
+          }
         });
       </script>
 
