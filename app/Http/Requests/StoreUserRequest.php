@@ -63,8 +63,7 @@ class StoreUserRequest extends FormRequest
         $roleName = $roleObj ? strtolower($roleObj->name) : '';
 
         $isSuper = str_contains($roleName, 'super');
-        $isPrivileged = ! $isSuper && (str_contains($roleName, 'privilég') || str_contains($roleName, 'privileg'));
-        $isClassique = ! $isSuper && ! $isPrivileged;
+        $isClassique = str_contains($roleName, 'classic') || str_contains($roleName, 'classique');
 
         $deptRule = $isSuper ? ['nullable', 'exists:departments,id'] : ['required', 'exists:departments,id'];
         $subDeptRule = $isClassique ? ['required', 'exists:departments,id'] : ['nullable', 'exists:departments,id'];

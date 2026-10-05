@@ -27,17 +27,19 @@ class ArchiveController extends Controller
      */
     public function index(): View
     {
-        Gate::authorize('archive.read');
-
         $user = auth()->user();
+        $hasArchiveRead = $user?->hasPermission('Archive', 'read') ?? false;
 
         // 1. Archives Totales (Scopées par département/sous-département)
-        $archivesCountQuery = Archive::query();
-        $this->applyStructuralScopeFilter($archivesCountQuery, $user);
-        $totalArchives = $archivesCountQuery->count();
+        $totalArchives = null;
+        if ($hasArchiveRead) {
+            $archivesCountQuery = Archive::query();
+            $this->applyStructuralScopeFilter($archivesCountQuery, $user);
+            $totalArchives = $archivesCountQuery->count();
+        }
 
         // 2. Dossiers du Personnel (Selon permission Personnel:read)
-        $hasPersonnelRead = $user->hasPermission('Personnel', 'read');
+        $hasPersonnelRead = $user?->hasPermission('Personnel', 'read') ?? false;
         $totalPersonnel = $hasPersonnelRead ? Personnel::count() : null;
 
         // 3. Consultations Cumulées (Super = Tout, Privilégié = Département, Classique = Compte individuel)
@@ -51,7 +53,7 @@ class ArchiveController extends Controller
         $totalConsultations = $consultationsQuery->count();
 
         // 4. Comptes Utilisateurs (Selon permission User:read)
-        $hasUserRead = $user->hasPermission('User', 'read');
+        $hasUserRead = $user?->hasPermission('User', 'read') ?? false;
         $totalUsers = null;
         if ($hasUserRead) {
             $usersQuery = User::where('statut', true);
@@ -61,16 +63,19 @@ class ArchiveController extends Controller
             $totalUsers = $usersQuery->count();
         }
 
-        $archiveTypesCount = ArchiveType::count();
-        $locationsCount = ArchiveLocation::count();
+        $archiveTypesCount = $hasArchiveRead ? ArchiveType::count() : null;
+        $locationsCount = $hasArchiveRead ? ArchiveLocation::count() : null;
         $departmentsCount = Department::count();
 
         // Récentes archives numérisées (Filtrées par périmètre structurel)
-        $recentArchivesQuery = Archive::with(['user', 'department', 'archiveType']);
-        $this->applyStructuralScopeFilter($recentArchivesQuery, $user);
-        $recentArchives = $recentArchivesQuery->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        $recentArchives = collect();
+        if ($hasArchiveRead) {
+            $recentArchivesQuery = Archive::with(['user', 'department', 'archiveType']);
+            $this->applyStructuralScopeFilter($recentArchivesQuery, $user);
+            $recentArchives = $recentArchivesQuery->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get();
+        }
 
         // Récents dossiers agents personnel (Conditionnés par permission)
         $recentPersonnels = $hasPersonnelRead
@@ -110,32 +115,34 @@ class ArchiveController extends Controller
 
         // Répartition des archives par département / sous-département
         $archivesByDept = [];
-        if ($user->isSuper()) {
-            $archivesByDeptRaw = Archive::with('department')
-                ->selectRaw('department_id, COUNT(*) as count')
-                ->whereNotNull('department_id')
-                ->groupBy('department_id')
-                ->orderByDesc('count')
-                ->take(5)
-                ->get();
+        if ($hasArchiveRead) {
+            if ($user->isSuper()) {
+                $archivesByDeptRaw = Archive::with('department')
+                    ->selectRaw('department_id, COUNT(*) as count')
+                    ->whereNotNull('department_id')
+                    ->groupBy('department_id')
+                    ->orderByDesc('count')
+                    ->take(5)
+                    ->get();
 
-            foreach ($archivesByDeptRaw as $item) {
-                $name = $item->department?->name ?? 'Non Spécifié';
-                $archivesByDept[$name] = $item->count;
-            }
-        } else {
-            // Utilisateur non-super: répartition par sous-département de sa Direction
-            $archivesByDeptRaw = Archive::with('subDepartment')
-                ->where('department_id', $user->department_id)
-                ->selectRaw('sub_department_id, COUNT(*) as count')
-                ->groupBy('sub_department_id')
-                ->orderByDesc('count')
-                ->take(5)
-                ->get();
+                foreach ($archivesByDeptRaw as $item) {
+                    $name = $item->department?->name ?? 'Non Spécifié';
+                    $archivesByDept[$name] = $item->count;
+                }
+            } else {
+                // Utilisateur non-super: répartition par sous-département de sa Direction
+                $archivesByDeptRaw = Archive::with('subDepartment')
+                    ->where('department_id', $user->department_id)
+                    ->selectRaw('sub_department_id, COUNT(*) as count')
+                    ->groupBy('sub_department_id')
+                    ->orderByDesc('count')
+                    ->take(5)
+                    ->get();
 
-            foreach ($archivesByDeptRaw as $item) {
-                $name = $item->subDepartment?->name ?? 'Direction / Tous services';
-                $archivesByDept[$name] = $item->count;
+                foreach ($archivesByDeptRaw as $item) {
+                    $name = $item->subDepartment?->name ?? 'Direction / Tous services';
+                    $archivesByDept[$name] = $item->count;
+                }
             }
         }
 

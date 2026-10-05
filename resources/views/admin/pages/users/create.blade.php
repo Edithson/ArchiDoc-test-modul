@@ -217,25 +217,24 @@
           const subDeptAsterisk = document.getElementById('sub_dept_asterisk');
 
           const isSuper = roleName.includes('super');
-          const isPrivileged = !isSuper && (roleName.includes('privilég') || roleName.includes('privileg'));
-          const isClassique = !isSuper && !isPrivileged;
+          const isClassique = roleName.includes('classic') || roleName.includes('classique');
 
           if (isSuper) {
             deptSelect.removeAttribute('required');
             subDeptSelect.removeAttribute('required');
             deptAsterisk.style.display = 'none';
             subDeptAsterisk.style.display = 'none';
-          } else if (isPrivileged) {
-            deptSelect.setAttribute('required', 'required');
-            subDeptSelect.removeAttribute('required');
-            deptAsterisk.style.display = 'inline';
-            subDeptAsterisk.style.display = 'none';
-          } else {
-            // Classique
+          } else if (isClassique) {
             deptSelect.setAttribute('required', 'required');
             subDeptSelect.setAttribute('required', 'required');
             deptAsterisk.style.display = 'inline';
             subDeptAsterisk.style.display = 'inline';
+          } else {
+            // Privilégié ou Rôles personnalisés
+            deptSelect.setAttribute('required', 'required');
+            subDeptSelect.removeAttribute('required');
+            deptAsterisk.style.display = 'inline';
+            subDeptAsterisk.style.display = 'none';
           }
         }
 

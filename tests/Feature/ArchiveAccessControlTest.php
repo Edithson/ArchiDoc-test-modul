@@ -52,7 +52,8 @@ test('user without archive permissions is denied access (403)', function () {
         'user_id' => $user->id,
     ]);
 
-    $this->actingAs($user)->get(route('archives.index'))->assertStatus(403);
+    // Dashboard home (archives.index) allows access (200) for all connected users, displaying scoped metrics
+    $this->actingAs($user)->get(route('archives.index'))->assertStatus(200);
     $this->actingAs($user)->get(route('archives.create'))->assertStatus(403);
     $this->actingAs($user)->get(route('archives.show', $archive->id))->assertStatus(403);
     $this->actingAs($user)->get(route('archives.download', $archive->id))->assertStatus(403);

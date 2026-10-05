@@ -20,18 +20,28 @@
       }
   } elseif (request()->routeIs('archives.create') || request()->routeIs('archive-types.*') || request()->routeIs('archive-locations.*') || request()->routeIs('departments.*')) {
       $sidebarTitle = 'CRÉATION';
-      $sidebarNav = [
-          ['title' => 'Nouvelle Archive', 'route' => route('archives.create'), 'active' => request()->routeIs('archives.create'), 'icon' => 'archive', 'badge' => 'Actif'],
-          ['title' => 'Types d\'archives', 'route' => route('archive-types.index'), 'active' => request()->routeIs('archive-types.*'), 'icon' => 'default', 'badge' => 'Actif'],
-          ['title' => 'Emplacements', 'route' => route('archive-locations.index'), 'active' => request()->routeIs('archive-locations.*'), 'icon' => 'default', 'badge' => 'Actif'],
-          ['title' => 'Groupes d\'accès / Départements', 'route' => route('departments.index'), 'active' => request()->routeIs('departments.*'), 'icon' => 'default', 'badge' => 'Actif'],
-      ];
+      $sidebarNav = [];
+      $user = auth()->user();
+      if ($user?->hasPermission('Archive', 'create')) {
+          $sidebarNav[] = ['title' => 'Nouvelle Archive', 'route' => route('archives.create'), 'active' => request()->routeIs('archives.create'), 'icon' => 'archive', 'badge' => 'Actif'];
+      }
+      if ($user?->hasPermission('ArchiveType', 'read')) {
+          $sidebarNav[] = ['title' => 'Types d\'archives', 'route' => route('archive-types.index'), 'active' => request()->routeIs('archive-types.*'), 'icon' => 'default', 'badge' => 'Actif'];
+      }
+      if ($user?->hasPermission('ArchiveLocation', 'read')) {
+          $sidebarNav[] = ['title' => 'Emplacements', 'route' => route('archive-locations.index'), 'active' => request()->routeIs('archive-locations.*'), 'icon' => 'default', 'badge' => 'Actif'];
+      }
+      if ($user?->hasPermission('Department', 'read')) {
+          $sidebarNav[] = ['title' => 'Groupes d\'accès / Départements', 'route' => route('departments.index'), 'active' => request()->routeIs('departments.*'), 'icon' => 'default', 'badge' => 'Actif'];
+      }
   } elseif (request()->routeIs('archives.search') || request()->routeIs('archives.show') || request()->routeIs('activity-logs.archives-consultations')) {
       $sidebarTitle = 'CONSULTATION';
-      $sidebarNav = [
-          ['title' => 'Consulter les archives', 'route' => route('archives.search'), 'active' => request()->routeIs('archives.search') || request()->routeIs('archives.show'), 'icon' => 'search', 'badge' => 'Actif'],
-          ['title' => 'Historique des consultations', 'route' => route('activity-logs.archives-consultations'), 'active' => request()->routeIs('activity-logs.archives-consultations'), 'icon' => 'default', 'badge' => 'Actif'],
-      ];
+      $sidebarNav = [];
+      $user = auth()->user();
+      if ($user?->hasPermission('Archive', 'read')) {
+          $sidebarNav[] = ['title' => 'Consulter les archives', 'route' => route('archives.search'), 'active' => request()->routeIs('archives.search') || request()->routeIs('archives.show'), 'icon' => 'search', 'badge' => 'Actif'];
+          $sidebarNav[] = ['title' => 'Historique des consultations', 'route' => route('activity-logs.archives-consultations'), 'active' => request()->routeIs('activity-logs.archives-consultations'), 'icon' => 'default', 'badge' => 'Actif'];
+      }
   } elseif (request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('activity-logs.index') || request()->routeIs('activity-logs.auth') || request()->routeIs('activity-logs.system') || request()->routeIs('settings.*')) {
       $sidebarTitle = 'ADMINISTRATION';
       $sidebarNav = [];
