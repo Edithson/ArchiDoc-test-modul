@@ -24,6 +24,20 @@ class Role extends Model
     ];
 
     /**
+     * Model booted lifecycle hooks for cache invalidation.
+     */
+    protected static function booted(): void
+    {
+        static::saved(function () {
+            cache()->increment('sys_permission_ver');
+        });
+
+        static::deleted(function () {
+            cache()->increment('sys_permission_ver');
+        });
+    }
+
+    /**
      * Get the users assigned to this role.
      *
      * @return HasMany<User, $this>

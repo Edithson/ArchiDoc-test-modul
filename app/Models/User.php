@@ -193,25 +193,77 @@ class User extends Authenticatable
     }
 
     /**
+     * Runtime cache array for resolved permissions during the request lifecycle.
+     *
+     * @var array<string, bool>
+     */
+    protected array $resolvedPermissions = [];
+
+    /**
+     * Tracked system permission version for in-memory cache reactivity.
+     */
+    protected ?int $resolvedPermVersion = null;
+
+    /**
+     * Model booted lifecycle hooks for cache invalidation.
+     */
+    protected static function booted(): void
+    {
+        static::saved(function (User $user) {
+            $user->flushPermissionCache();
+            cache()->increment('sys_permission_ver');
+        });
+
+        static::deleted(function (User $user) {
+            $user->flushPermissionCache();
+            cache()->increment('sys_permission_ver');
+        });
+    }
+
+    /**
      * Check functional permission for a model and action.
+     * Explicitly evaluates roles & custom permissions for ALL users (including Super Privileged).
+     * Performance: O(1) in-memory runtime memoization + dynamic cache invalidation on DB changes.
      */
     public function hasPermission(string $model, string $action): bool
     {
-        if ($this->isSuper()) {
-            return true;
+        $currentSysVer = (int) cache()->get('sys_permission_ver', 1);
+
+        if ($this->resolvedPermVersion !== $currentSysVer) {
+            $this->resolvedPermissions = [];
+            $this->resolvedPermVersion = $currentSysVer;
+        }
+
+        $cacheKey = "{$model}:{$action}";
+
+        if (array_key_exists($cacheKey, $this->resolvedPermissions)) {
+            return $this->resolvedPermissions[$cacheKey];
         }
 
         // 1. Specific custom permission override on the user
         if (isset($this->custom_permissions[$model][$action])) {
-            return (bool) $this->custom_permissions[$model][$action];
+            return $this->resolvedPermissions[$cacheKey] = (bool) $this->custom_permissions[$model][$action];
         }
 
         // 2. Fallback to Role default JSON permissions
         if ($this->role && is_array($this->role->permissions)) {
-            return (bool) ($this->role->permissions[$model][$action] ?? false);
+            if (isset($this->role->permissions[$model][$action])) {
+                return $this->resolvedPermissions[$cacheKey] = (bool) $this->role->permissions[$model][$action];
+            }
         }
 
-        return false;
+        return $this->resolvedPermissions[$cacheKey] = false;
+    }
+
+    /**
+     * Flush memory cache for this user instance.
+     */
+    public function flushPermissionCache(): static
+    {
+        $this->resolvedPermissions = [];
+        $this->resolvedPermVersion = null;
+
+        return $this;
     }
 
     /**
