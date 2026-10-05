@@ -29,40 +29,62 @@ class ArchiveController extends Controller
     {
         Gate::authorize('archive.read');
 
-        // Statistiques globales dynamiques
-        $totalArchives = Archive::count();
-        $totalPersonnel = Personnel::count();
-        $totalConsultations = Activity::whereIn('event', [
+        $user = auth()->user();
+
+        // 1. Archives Totales (Scopées par département/sous-département)
+        $archivesCountQuery = Archive::query();
+        $this->applyStructuralScopeFilter($archivesCountQuery, $user);
+        $totalArchives = $archivesCountQuery->count();
+
+        // 2. Dossiers du Personnel (Selon permission Personnel:read)
+        $hasPersonnelRead = $user->hasPermission('Personnel', 'read');
+        $totalPersonnel = $hasPersonnelRead ? Personnel::count() : null;
+
+        // 3. Consultations Cumulées (Super = Tout, Privilégié = Département, Classique = Compte individuel)
+        $consultationsQuery = Activity::whereIn('event', [
             'archive.consultation',
             'archive.download',
             'personnel.consultation',
             'personnel.download',
-        ])->count();
-        $totalUsers = User::where('statut', true)->count();
+        ]);
+        $this->applyActivityScopeFilter($consultationsQuery, $user);
+        $totalConsultations = $consultationsQuery->count();
+
+        // 4. Comptes Utilisateurs (Selon permission User:read)
+        $hasUserRead = $user->hasPermission('User', 'read');
+        $totalUsers = null;
+        if ($hasUserRead) {
+            $usersQuery = User::where('statut', true);
+            if (! $user->isSuper() && $user->department_id) {
+                $usersQuery->where('department_id', $user->department_id);
+            }
+            $totalUsers = $usersQuery->count();
+        }
 
         $archiveTypesCount = ArchiveType::count();
         $locationsCount = ArchiveLocation::count();
         $departmentsCount = Department::count();
 
-        // Récentes archives numérisées
+        // Récentes archives numérisées (Filtrées par périmètre structurel)
         $recentArchivesQuery = Archive::with(['user', 'department', 'archiveType']);
-        $this->applyStructuralScopeFilter($recentArchivesQuery, auth()->user());
+        $this->applyStructuralScopeFilter($recentArchivesQuery, $user);
         $recentArchives = $recentArchivesQuery->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
-        // Récents dossiers agents personnel
-        $recentPersonnels = Personnel::orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        // Récents dossiers agents personnel (Conditionnés par permission)
+        $recentPersonnels = $hasPersonnelRead
+            ? Personnel::orderBy('created_at', 'desc')->take(5)->get()
+            : collect();
 
-        // Flux en direct de la Boîte Noire
-        $recentActivities = Activity::with(['causer', 'subject'])
-            ->orderBy('created_at', 'desc')
+        // Flux en direct de la Boîte Noire (Filtré par privilège & département)
+        $recentActivitiesQuery = Activity::with(['causer', 'subject']);
+        $this->applyActivityScopeFilter($recentActivitiesQuery, $user);
+        $recentActivities = $recentActivitiesQuery->orderBy('created_at', 'desc')
             ->take(6)
             ->get();
 
-        // Tendance sur les 14 derniers jours pour le graphique
+        // Tendance sur les 14 derniers jours (Scopée par privilège & département)
         $dailyTrend = [
             'labels' => [],
             'archives' => [],
@@ -74,27 +96,47 @@ class ArchiveController extends Controller
             $label = now()->subDays($i)->format('d/m');
 
             $dailyTrend['labels'][] = $label;
-            $dailyTrend['archives'][] = Activity::whereIn('event', ['archive.consultation', 'archive.download'])
-                ->whereDate('created_at', $date)
-                ->count();
-            $dailyTrend['personnel'][] = Activity::whereIn('event', ['personnel.consultation', 'personnel.download'])
-                ->whereDate('created_at', $date)
-                ->count();
+
+            $archQuery = Activity::whereIn('event', ['archive.consultation', 'archive.download'])
+                ->whereDate('created_at', $date);
+            $this->applyActivityScopeFilter($archQuery, $user);
+            $dailyTrend['archives'][] = $archQuery->count();
+
+            $persQuery = Activity::whereIn('event', ['personnel.consultation', 'personnel.download'])
+                ->whereDate('created_at', $date);
+            $this->applyActivityScopeFilter($persQuery, $user);
+            $dailyTrend['personnel'][] = $persQuery->count();
         }
 
-        // Répartition des archives par département
-        $archivesByDeptRaw = Archive::with('department')
-            ->selectRaw('department_id, COUNT(*) as count')
-            ->whereNotNull('department_id')
-            ->groupBy('department_id')
-            ->orderByDesc('count')
-            ->take(5)
-            ->get();
-
+        // Répartition des archives par département / sous-département
         $archivesByDept = [];
-        foreach ($archivesByDeptRaw as $item) {
-            $name = $item->department?->name ?? 'Non Spécifié';
-            $archivesByDept[$name] = $item->count;
+        if ($user->isSuper()) {
+            $archivesByDeptRaw = Archive::with('department')
+                ->selectRaw('department_id, COUNT(*) as count')
+                ->whereNotNull('department_id')
+                ->groupBy('department_id')
+                ->orderByDesc('count')
+                ->take(5)
+                ->get();
+
+            foreach ($archivesByDeptRaw as $item) {
+                $name = $item->department?->name ?? 'Non Spécifié';
+                $archivesByDept[$name] = $item->count;
+            }
+        } else {
+            // Utilisateur non-super: répartition par sous-département de sa Direction
+            $archivesByDeptRaw = Archive::with('subDepartment')
+                ->where('department_id', $user->department_id)
+                ->selectRaw('sub_department_id, COUNT(*) as count')
+                ->groupBy('sub_department_id')
+                ->orderByDesc('count')
+                ->take(5)
+                ->get();
+
+            foreach ($archivesByDeptRaw as $item) {
+                $name = $item->subDepartment?->name ?? 'Direction / Tous services';
+                $archivesByDept[$name] = $item->count;
+            }
         }
 
         return view('admin.index', [
@@ -508,6 +550,24 @@ class ArchiveController extends Controller
             $query->where('sub_department_id', $user->sub_department_id);
         } elseif ($user->isPrivileged() && $user->department_id) {
             $query->where('department_id', $user->department_id);
+        }
+    }
+
+    /**
+     * Apply activity/consultation log scope based on user role and department.
+     */
+    protected function applyActivityScopeFilter($query, User $user): void
+    {
+        if ($user->isSuper()) {
+            return;
+        }
+
+        if ($user->isPrivileged() && $user->department_id) {
+            $deptUserIds = User::where('department_id', $user->department_id)->pluck('id');
+            $query->whereIn('causer_id', $deptUserIds);
+        } else {
+            // Classique or default: only their own user account consultations
+            $query->where('causer_id', $user->id);
         }
     }
 
