@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Archive;
 use App\Models\Department;
 use App\Models\Personnel;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Activitylog\Models\Activity;
@@ -16,11 +17,12 @@ class ActivityLogSeeder extends Seeder
      */
     public function run(): void
     {
+        $superRole = Role::firstOrCreate(['name' => 'Super privilégié'], ['permissions' => Role::defaultPermissionsFor('Super privilégié')]);
         $admin = User::first() ?? User::factory()->create([
             'name' => 'Admin ArchiDoc',
             'email' => 'admin@archidoc.cm',
             'matricule' => 'MAT-0001',
-            'roles' => 'super privilégé',
+            'role_id' => $superRole->id,
         ]);
 
         $users = User::all();

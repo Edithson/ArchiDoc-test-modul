@@ -8,6 +8,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PersonnelController;
 use App\Http\Controllers\PieceController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\EnsureSuperPrivileged;
@@ -33,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware([EnsureSuperPrivileged::class])->group(function () {
         Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
         Route::resource('users', UserController::class);
+        Route::resource('roles', RoleController::class);
 
         // Journal d'événements (Boîte noire)
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');

@@ -14,7 +14,9 @@ class SettingSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = User::where('roles', 'super privilégé')->first() ?? User::first();
+        $admin = User::whereHas('role', function ($q) {
+            $q->where('name', 'like', '%super%');
+        })->first() ?? User::first();
         $adminId = $admin ? $admin->id : null;
 
         $settings = [

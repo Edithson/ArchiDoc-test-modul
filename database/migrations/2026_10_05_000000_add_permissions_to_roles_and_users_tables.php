@@ -16,7 +16,7 @@ return new class extends Migration
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->json('custom_permissions')->nullable()->after('roles');
+            $table->json('custom_permissions')->nullable()->after('role_id');
         });
     }
 

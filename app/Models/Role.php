@@ -6,6 +6,7 @@ use App\Traits\Auditable;
 use Database\Factories\RoleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -21,6 +22,62 @@ class Role extends Model
         'created_by',
         'updated_by',
     ];
+
+    /**
+     * Get the users assigned to this role.
+     *
+     * @return HasMany<User, $this>
+     */
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class, 'role_id');
+    }
+
+    /**
+     * Helper to find a role by name (accent and case insensitive).
+     */
+    public static function findByName(?string $name): ?Role
+    {
+        if (blank($name)) {
+            return null;
+        }
+
+        $normalized = strtolower(trim($name));
+
+        return static::all()->first(function ($r) use ($normalized) {
+            $rName = strtolower(trim($r->name));
+            if ($rName === $normalized) {
+                return true;
+            }
+
+            // Also match common variations like classic / classique
+            if (str_contains($normalized, 'super') && str_contains($rName, 'super')) {
+                return true;
+            }
+            if (! str_contains($normalized, 'super') && (str_contains($normalized, 'privilég') || str_contains($normalized, 'privileg')) && (str_contains($rName, 'privilég') || str_contains($rName, 'privileg'))) {
+                return true;
+            }
+            if (! str_contains($normalized, 'super') && ! str_contains($normalized, 'privilég') && ! str_contains($normalized, 'privileg') && (str_contains($rName, 'classic') || str_contains($rName, 'classique')) && (str_contains($normalized, 'classic') || str_contains($normalized, 'classique'))) {
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    /**
+     * Determine if this role is a primary system role.
+     */
+    public function isPrimary(): bool
+    {
+        $normalized = strtolower(trim($this->name));
+
+        return str_contains($normalized, 'super')
+            || str_contains($normalized, 'privilég')
+            || str_contains($normalized, 'privileg')
+            || str_contains($normalized, 'classic')
+            || str_contains($normalized, 'classique');
+    }
 
     /**
      * Get the attributes that should be cast.

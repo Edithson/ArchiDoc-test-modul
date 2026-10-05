@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Department;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -29,9 +30,17 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'matricule' => 'MAT-'.fake()->unique()->numberBetween(1000, 9999),
             'email' => fake()->unique()->safeEmail(),
-            'phone' => fake()->phoneNumber(),
-            'roles' => fake()->randomElement(['classique', 'privilégié', 'super privilégé']),
-            'statut' => true,
+            'role_id' => function () {
+                $role = Role::firstOrCreate(
+                    ['name' => 'Classic'],
+                    [
+                        'description' => 'Utilisateur standard',
+                        'permissions' => Role::defaultPermissionsFor('Classic'),
+                    ]
+                );
+
+                return $role->id;
+            },
             'department_id' => function () {
                 $main = Department::whereNull('parent_id')->first();
 

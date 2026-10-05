@@ -24,9 +24,11 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Super privilégié', 'description' => 'Super administrateur du système'],
         ];
 
+        $createdRoles = [];
         foreach ($roles as $roleData) {
             $roleData['permissions'] = Role::defaultPermissionsFor($roleData['name']);
-            Role::updateOrCreate(['name' => $roleData['name']], $roleData);
+            $r = Role::updateOrCreate(['name' => $roleData['name']], $roleData);
+            $createdRoles[$roleData['name']] = $r;
         }
 
         // Création des départements (Hiérarchie MINFI)
@@ -42,7 +44,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Admin ArchiDoc',
                 'matricule' => 'MAT-0001',
                 'phone' => '+237 699 00 00 01',
-                'roles' => 'super privilégé',
+                'role_id' => $createdRoles['Super privilégié']->id,
                 'statut' => true,
                 'department_id' => $dgbMain?->id,
                 'sub_department_id' => $cabDept?->id,

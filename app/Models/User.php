@@ -27,6 +27,7 @@ class User extends Authenticatable
         'matricule',
         'email',
         'phone',
+        'role_id',
         'roles',
         'custom_permissions',
         'statut',
@@ -38,6 +39,48 @@ class User extends Authenticatable
         'updated_by',
         'deleted_by',
     ];
+
+    /**
+     * Accessor for legacy 'roles' attribute.
+     */
+    public function getRolesAttribute(): ?string
+    {
+        return $this->role?->name;
+    }
+
+    /**
+     * Mutator for legacy 'roles' attribute to set role_id.
+     */
+    public function setRolesAttribute($value): void
+    {
+        if (is_numeric($value)) {
+            $this->attributes['role_id'] = (int) $value;
+
+            return;
+        }
+
+        if (is_string($value) && filled($value)) {
+            $roleObj = Role::findByName($value);
+
+            if (! $roleObj) {
+                $normalized = strtolower(trim($value));
+                $roleName = 'Classic';
+                if (str_contains($normalized, 'super')) {
+                    $roleName = 'Super privilégié';
+                } elseif (str_contains($normalized, 'privilég') || str_contains($normalized, 'privileg')) {
+                    $roleName = 'Privilégié';
+                }
+
+                $roleObj = Role::create([
+                    'name' => $roleName,
+                    'description' => "Rôle {$roleName}",
+                    'permissions' => Role::defaultPermissionsFor($roleName),
+                ]);
+            }
+
+            $this->attributes['role_id'] = $roleObj->id;
+        }
+    }
 
     /**
      * Main Department associated with the user.
@@ -58,9 +101,17 @@ class User extends Authenticatable
     /**
      * Get the user's role record.
      */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    /**
+     * Alias for role relationship.
+     */
     public function roleModel(): BelongsTo
     {
-        return $this->belongsTo(Role::class, 'roles', 'name');
+        return $this->role();
     }
 
     /**
@@ -112,17 +163,33 @@ class User extends Authenticatable
      */
     public function isSuper(): bool
     {
-        return strtolower((string) $this->roles) === 'super privilégé' || strtolower((string) $this->roles) === 'super';
+        if (! $this->role) {
+            return false;
+        }
+
+        return $this->role->isPrimary() && str_contains(strtolower($this->role->name), 'super');
     }
 
     public function isPrivileged(): bool
     {
-        return $this->isSuper() || strtolower((string) $this->roles) === 'privilégié';
+        if ($this->isSuper()) {
+            return true;
+        }
+
+        if (! $this->role) {
+            return false;
+        }
+
+        return str_contains(strtolower($this->role->name), 'privilég') || str_contains(strtolower($this->role->name), 'privileg');
     }
 
     public function isClassique(): bool
     {
-        return strtolower((string) $this->roles) === 'classique';
+        if (! $this->role) {
+            return false;
+        }
+
+        return str_contains(strtolower($this->role->name), 'classic') || str_contains(strtolower($this->role->name), 'classique');
     }
 
     /**
@@ -140,9 +207,8 @@ class User extends Authenticatable
         }
 
         // 2. Fallback to Role default JSON permissions
-        $roleObj = Role::where('name', $this->roles)->first();
-        if ($roleObj && is_array($roleObj->permissions)) {
-            return (bool) ($roleObj->permissions[$model][$action] ?? false);
+        if ($this->role && is_array($this->role->permissions)) {
+            return (bool) ($this->role->permissions[$model][$action] ?? false);
         }
 
         return false;

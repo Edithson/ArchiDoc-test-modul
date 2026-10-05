@@ -27,10 +27,11 @@
           ['title' => 'Consulter les archives', 'route' => route('archives.search'), 'active' => request()->routeIs('archives.search') || request()->routeIs('archives.show'), 'icon' => 'search', 'badge' => 'Actif'],
           ['title' => 'Historique des consultations', 'route' => route('activity-logs.archives-consultations'), 'active' => request()->routeIs('activity-logs.archives-consultations'), 'icon' => 'default', 'badge' => 'Actif'],
       ];
-  } elseif (request()->routeIs('users.*') || request()->routeIs('activity-logs.index') || request()->routeIs('activity-logs.auth') || request()->routeIs('activity-logs.system') || request()->routeIs('settings.*')) {
+  } elseif (request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('activity-logs.index') || request()->routeIs('activity-logs.auth') || request()->routeIs('activity-logs.system') || request()->routeIs('settings.*')) {
       $sidebarTitle = 'ADMINISTRATION';
       $sidebarNav = [
           ['title' => 'Comptes utilisateurs', 'route' => route('users.index'), 'active' => request()->routeIs('users.*'), 'icon' => 'users', 'badge' => 'Actif'],
+          ['title' => 'Habilitations & Rôles', 'route' => route('roles.index'), 'active' => request()->routeIs('roles.*'), 'icon' => 'shield', 'badge' => 'Actif'],
           ['title' => 'Paramètres du système', 'route' => route('settings.index'), 'active' => request()->routeIs('settings.*'), 'icon' => 'default', 'badge' => 'Actif'],
           ['title' => 'Arbre des événements', 'route' => route('activity-logs.index'), 'active' => request()->routeIs('activity-logs.index'), 'icon' => 'default', 'badge' => 'Actif'],
           ['title' => 'Sécurité & Accès', 'route' => route('activity-logs.auth'), 'active' => request()->routeIs('activity-logs.auth'), 'icon' => 'default', 'badge' => 'Actif'],

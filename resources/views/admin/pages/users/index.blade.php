@@ -67,16 +67,16 @@
 
         <!-- Filtre Rôle -->
         <div>
-          <label for="roles" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+          <label for="role_id" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
             Niveau d'accès (Rôle)
           </label>
           <div class="relative">
-            <select id="roles" name="roles" onchange="this.form.submit()"
+            <select id="role_id" name="role_id" onchange="this.form.submit()"
               class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-8 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
               <option value="">Tous les rôles</option>
-              @foreach($roleOptions as $val => $label)
-                <option value="{{ $val }}" {{ ($filters['roles'] ?? '') === $val ? 'selected' : '' }}>
-                  {{ ucfirst($val) }}
+              @foreach($rolesList as $roleOption)
+                <option value="{{ $roleOption->id }}" {{ (string) ($filters['role_id'] ?? '') === (string) $roleOption->id ? 'selected' : '' }}>
+                  {{ $roleOption->name }}
                 </option>
               @endforeach
             </select>
@@ -255,15 +255,15 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 @if($userItem->isSuper())
                   <span class="inline-flex items-center rounded-md bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-700 border border-purple-200">
-                    Super Privilégié
+                    {{ $userItem->role?->name ?? 'Super Privilégié' }}
                   </span>
                 @elseif($userItem->isPrivileged())
                   <span class="inline-flex items-center rounded-md bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700 border border-brand-200">
-                    Privilégié
+                    {{ $userItem->role?->name ?? 'Privilégié' }}
                   </span>
                 @else
                   <span class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">
-                    Classique
+                    {{ $userItem->role?->name ?? 'Classique' }}
                   </span>
                 @endif
               </td>

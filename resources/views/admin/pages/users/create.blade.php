@@ -92,22 +92,22 @@
 
         <!-- Rôle / Niveau d'accès -->
         <div>
-          <label for="roles" class="block text-sm font-semibold text-gray-800 mb-1">
+          <label for="role_id" class="block text-sm font-semibold text-gray-800 mb-1">
             Niveau d'accès (Rôle) <span class="text-red-500">*</span>
           </label>
           <div class="relative">
-            <select id="roles" name="roles" required onchange="handleRoleChange(this.value)"
+            <select id="role_id" name="role_id" required onchange="handleRoleChange(this)"
               class="block w-full appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-3.5 pr-8 text-sm font-bold text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
-              <option value="" disabled {{ old('roles') ? '' : 'selected' }}>Sélectionnez un rôle...</option>
-              @foreach($roleOptions as $val => $label)
-                <option value="{{ $val }}" {{ old('roles', 'classique') === $val ? 'selected' : '' }}>
-                  {{ $label }}
+              <option value="" disabled {{ old('role_id') ? '' : 'selected' }}>Sélectionnez un rôle...</option>
+              @foreach($rolesList as $roleOption)
+                <option value="{{ $roleOption->id }}" data-role-name="{{ strtolower($roleOption->name) }}" {{ (string) old('role_id') === (string) $roleOption->id ? 'selected' : '' }}>
+                  {{ $roleOption->name }} — {{ $roleOption->description ?? 'Rôle utilisateur' }}
                 </option>
               @endforeach
             </select>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
           </div>
-          @error('roles')
+          @error('role_id')
             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
           @enderror
         </div>
@@ -197,14 +197,17 @@
       </div>
 
       <script>
-        function handleRoleChange(role) {
+        function handleRoleChange(selectEl) {
+          const selectedOption = selectEl && selectEl.options ? selectEl.options[selectEl.selectedIndex] : null;
+          const roleName = selectedOption ? (selectedOption.getAttribute('data-role-name') || '') : (typeof selectEl === 'string' ? selectEl.toLowerCase() : '');
+
           const deptSelect = document.getElementById('department_id');
           const subDeptSelect = document.getElementById('sub_department_id');
           const deptAsterisk = document.getElementById('dept_asterisk');
           const subDeptAsterisk = document.getElementById('sub_dept_asterisk');
 
-          const isSuper = role.toLowerCase().includes('super');
-          const isPrivileged = !isSuper && role.toLowerCase().includes('privilég');
+          const isSuper = roleName.includes('super');
+          const isPrivileged = !isSuper && (roleName.includes('privilég') || roleName.includes('privileg'));
           const isClassique = !isSuper && !isPrivileged;
 
           if (isSuper) {
@@ -267,10 +270,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-          const roleSelect = document.getElementById('roles');
+          const roleSelect = document.getElementById('role_id');
           const deptSelect = document.getElementById('department_id');
           const subDeptSelect = document.getElementById('sub_department_id');
-          if (roleSelect && roleSelect.value) handleRoleChange(roleSelect.value);
+          if (roleSelect && roleSelect.value) handleRoleChange(roleSelect);
           if (subDeptSelect && subDeptSelect.value) {
             handleSubDepartmentChange(subDeptSelect);
           } else if (deptSelect && deptSelect.value) {

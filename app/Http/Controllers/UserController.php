@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\Department;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -18,7 +19,7 @@ class UserController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = User::with(['department', 'subDepartment']);
+        $query = User::with(['department', 'subDepartment', 'role']);
 
         if ($request->filled('search')) {
             $search = trim((string) $request->input('search'));
@@ -32,21 +33,24 @@ class UserController extends Controller
                     })
                     ->orWhereHas('subDepartment', function ($sq) use ($search) {
                         $sq->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('role', function ($rq) use ($search) {
+                        $rq->where('name', 'like', "%{$search}%");
                     });
             });
         }
 
-        if ($request->filled('roles')) {
+        if ($request->filled('role_id')) {
+            $query->where('role_id', $request->input('role_id'));
+        } elseif ($request->filled('roles')) {
             $roleVal = (string) $request->input('roles');
-            if (str_contains(strtolower($roleVal), 'super')) {
-                $query->where('roles', 'like', '%super%');
-            } elseif (str_contains(strtolower($roleVal), 'privilég') || str_contains(strtolower($roleVal), 'privileg')) {
-                $query->where('roles', 'like', '%privil%')
-                    ->where('roles', 'not like', '%super%');
-            } elseif (str_contains(strtolower($roleVal), 'class')) {
-                $query->where('roles', 'like', '%class%');
+            if (is_numeric($roleVal)) {
+                $query->where('role_id', $roleVal);
             } else {
-                $query->where('roles', 'like', "%{$roleVal}%");
+                $roleObj = Role::findByName($roleVal);
+                if ($roleObj) {
+                    $query->where('role_id', $roleObj->id);
+                }
             }
         }
 
@@ -73,14 +77,17 @@ class UserController extends Controller
 
         $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
 
+        $rolesList = Role::orderBy('name')->get();
+
         return view('admin.pages.users.index', [
             'users' => $users,
             'mainDepartments' => $mainDepartments,
             'departments' => Department::orderBy('name')->get(),
-            'roleOptions' => $this->getRoleOptions(),
+            'rolesList' => $rolesList,
+            'roleOptions' => $rolesList,
             'filters' => [
                 'search' => (string) $request->input('search', ''),
-                'roles' => (string) $request->input('roles', ''),
+                'role_id' => (string) $request->input('role_id', ''),
                 'department_id' => (string) $request->input('department_id', ''),
                 'sub_department_id' => (string) $request->input('sub_department_id', ''),
                 'statut' => (string) $request->input('statut', ''),
@@ -94,11 +101,13 @@ class UserController extends Controller
     public function create(): View
     {
         $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+        $rolesList = Role::orderBy('name')->get();
 
         return view('admin.pages.users.create', [
             'mainDepartments' => $mainDepartments,
             'departments' => Department::orderBy('name')->get(),
-            'roleOptions' => $this->getRoleOptions(),
+            'rolesList' => $rolesList,
+            'roleOptions' => $rolesList,
         ]);
     }
 
@@ -121,12 +130,14 @@ class UserController extends Controller
     public function edit(User $user): View
     {
         $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+        $rolesList = Role::orderBy('name')->get();
 
         return view('admin.pages.users.edit', [
-            'user' => $user->load(['department', 'subDepartment']),
+            'user' => $user->load(['department', 'subDepartment', 'role']),
             'mainDepartments' => $mainDepartments,
             'departments' => Department::orderBy('name')->get(),
-            'roleOptions' => $this->getRoleOptions(),
+            'rolesList' => $rolesList,
+            'roleOptions' => $rolesList,
         ]);
     }
 

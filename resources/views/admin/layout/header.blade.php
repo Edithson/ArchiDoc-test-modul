@@ -256,7 +256,7 @@
 
         <!-- 5. Menu Administration -->
         @php
-          $isAdminActive = request()->routeIs('users.*') || request()->routeIs('activity-logs.index') || request()->routeIs('activity-logs.auth') || request()->routeIs('activity-logs.system') || request()->routeIs('settings.*');
+          $isAdminActive = request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('activity-logs.index') || request()->routeIs('activity-logs.auth') || request()->routeIs('activity-logs.system') || request()->routeIs('settings.*');
         @endphp
         <div class="relative">
           <button id="administration-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="administration-menu"
@@ -279,6 +279,15 @@
                     <span>Comptes utilisateurs</span>
                   </div>
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
+                </a>
+              </li>
+              <li>
+                <a href="{{ route('roles.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('roles.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                  <div class="flex items-center gap-2.5">
+                    <svg class="h-4 w-4 text-brand-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <span>Habilitations & Rôles</span>
+                  </div>
+                  <span class="rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-800">Matrice JSON</span>
                 </a>
               </li>
               <li>
