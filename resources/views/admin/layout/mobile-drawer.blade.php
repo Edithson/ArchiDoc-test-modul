@@ -77,9 +77,16 @@
     </div>
 
     <!-- 3. Personnel -->
+    @php
+      $hasMobilePersonnelRead = auth()->user()?->hasPermission('Personnel', 'read');
+      $hasMobilePersonnelCreate = auth()->user()?->hasPermission('Personnel', 'create');
+      $hasMobilePieceRead = auth()->user()?->hasPermission('Piece', 'read');
+    @endphp
+    @if($hasMobilePersonnelRead || $hasMobilePersonnelCreate || $hasMobilePieceRead)
     <div>
       <div class="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-brand-200/80">Personnel</div>
       <ul class="space-y-1">
+        @if($hasMobilePersonnelRead)
         <li>
           <a href="{{ route('personnels.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('personnels.index') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -98,6 +105,8 @@
             <span class="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-bold text-indigo-900">Analytics</span>
           </a>
         </li>
+        @endif
+        @if($hasMobilePersonnelCreate)
         <li>
           <a href="{{ route('personnels.create') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('personnels.create') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -107,6 +116,8 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @endif
+        @if($hasMobilePieceRead)
         <li>
           <a href="{{ route('pieces.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('pieces.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -116,8 +127,10 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @endif
       </ul>
     </div>
+    @endif
 
     <!-- 3. Consultation -->
     <div>

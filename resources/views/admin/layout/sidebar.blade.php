@@ -7,12 +7,17 @@
 
   if (request()->routeIs('personnels.*') || request()->routeIs('pieces.*') || request()->routeIs('activity-logs.personnel-consultations')) {
       $sidebarTitle = 'GESTION DU PERSONNEL';
-      $sidebarNav = [
-          ['title' => 'Dossiers du personnel', 'route' => route('personnels.index'), 'active' => request()->routeIs('personnels.index') || request()->routeIs('personnels.show') || request()->routeIs('personnels.edit'), 'icon' => 'users', 'badge' => 'Actif'],
-          ['title' => 'Historique des consultations', 'route' => route('activity-logs.personnel-consultations'), 'active' => request()->routeIs('activity-logs.personnel-consultations'), 'icon' => 'default', 'badge' => 'Actif'],
-          ['title' => 'Pièces d\'intégration', 'route' => route('pieces.index'), 'active' => request()->routeIs('pieces.*'), 'icon' => 'default', 'badge' => 'Actif'],
-          ['title' => 'Nouveau dossier agent', 'route' => route('personnels.create'), 'active' => request()->routeIs('personnels.create'), 'icon' => 'default', 'badge' => 'Actif'],
-      ];
+      $sidebarNav = [];
+      if (auth()->user()?->hasPermission('Personnel', 'read')) {
+          $sidebarNav[] = ['title' => 'Dossiers du personnel', 'route' => route('personnels.index'), 'active' => request()->routeIs('personnels.index') || request()->routeIs('personnels.show') || request()->routeIs('personnels.edit'), 'icon' => 'users', 'badge' => 'Actif'];
+          $sidebarNav[] = ['title' => 'Historique des consultations', 'route' => route('activity-logs.personnel-consultations'), 'active' => request()->routeIs('activity-logs.personnel-consultations'), 'icon' => 'default', 'badge' => 'Actif'];
+      }
+      if (auth()->user()?->hasPermission('Piece', 'read')) {
+          $sidebarNav[] = ['title' => 'Pièces d\'intégration', 'route' => route('pieces.index'), 'active' => request()->routeIs('pieces.*'), 'icon' => 'default', 'badge' => 'Actif'];
+      }
+      if (auth()->user()?->hasPermission('Personnel', 'create')) {
+          $sidebarNav[] = ['title' => 'Nouveau dossier agent', 'route' => route('personnels.create'), 'active' => request()->routeIs('personnels.create'), 'icon' => 'default', 'badge' => 'Actif'];
+      }
   } elseif (request()->routeIs('archives.create') || request()->routeIs('archive-types.*') || request()->routeIs('archive-locations.*') || request()->routeIs('departments.*')) {
       $sidebarTitle = 'CRÉATION';
       $sidebarNav = [

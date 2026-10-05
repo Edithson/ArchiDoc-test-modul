@@ -106,7 +106,12 @@
         <!-- 3. Menu Personnel -->
         @php
           $isPersonnelActive = request()->routeIs('personnels.*') || request()->routeIs('pieces.*') || request()->routeIs('activity-logs.personnel-consultations');
+          $hasPersonnelReadAccess = auth()->user()?->hasPermission('Personnel', 'read');
+          $hasPersonnelCreateAccess = auth()->user()?->hasPermission('Personnel', 'create');
+          $hasPieceReadAccess = auth()->user()?->hasPermission('Piece', 'read');
+          $hasPersonnelMenuAccess = $hasPersonnelReadAccess || $hasPieceReadAccess;
         @endphp
+        @if($hasPersonnelMenuAccess)
         <div class="relative">
           <button id="personnel-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="personnel-menu"
             class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isPersonnelActive ? 'bg-brand-50 font-bold text-brand-700 shadow-xs ring-1 ring-brand-700/20' : 'font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
@@ -119,6 +124,7 @@
           <div id="personnel-menu" class="absolute left-0 z-40 mt-2 hidden w-72 origin-top-left rounded-xl border border-gray-100 bg-white p-2 shadow-xl">
             <div class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">Dossiers & Pièces Agent</div>
             <ul id="header-personnel-list" class="space-y-0.5 text-sm">
+              @if($hasPersonnelReadAccess)
               <li>
                 <a href="{{ route('personnels.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('personnels.index') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -137,6 +143,8 @@
                   <span class="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-bold text-indigo-800">Analytics</span>
                 </a>
               </li>
+              @endif
+              @if($hasPersonnelCreateAccess)
               <li>
                 <a href="{{ route('personnels.create') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('personnels.create') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -146,6 +154,8 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endif
+              @if($hasPieceReadAccess)
               <li>
                 <a href="{{ route('pieces.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('pieces.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -155,9 +165,11 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endif
             </ul>
           </div>
         </div>
+        @endif
 
         <!-- 3. Menu Consultation -->
         @php

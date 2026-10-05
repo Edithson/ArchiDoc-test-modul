@@ -90,19 +90,23 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
+        @if(auth()->user()?->hasPermission('Personnel', 'zip_download'))
         <a href="{{ route('personnels.download-zip', $personnel) }}" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 shadow-2xs transition-all">
           <svg class="h-4 w-4 text-brand-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
           </svg>
           Télécharger le dossier (.zip)
         </a>
+        @endif
 
+        @if(auth()->user()?->hasPermission('Personnel', 'update'))
         <a href="{{ route('personnels.edit', $personnel) }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-brand-800 transition-all">
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
           </svg>
           Compléter le dossier
         </a>
+        @endif
       </div>
 
     </div>
