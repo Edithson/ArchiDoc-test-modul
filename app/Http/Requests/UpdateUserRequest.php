@@ -80,6 +80,7 @@ class UpdateUserRequest extends FormRequest
             'sub_department_id' => $subDeptRule,
             'statut' => ['required', 'boolean'],
             'password' => ['nullable', 'string', 'min:8'],
+            'custom_permissions' => ['nullable', 'array'],
         ];
     }
 

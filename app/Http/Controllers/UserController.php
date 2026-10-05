@@ -15,6 +15,59 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     /**
+     * Map of available models and their supported actions for the permission matrix.
+     *
+     * @var array<string, array<string, mixed>>
+     */
+    protected array $modelDefinitions = [
+        'User' => [
+            'label' => 'Comptes Utilisateurs',
+            'icon' => 'users',
+            'actions' => ['read' => 'Consulter les comptes', 'create' => 'Créer des comptes', 'update' => 'Modifier les comptes', 'delete' => 'Supprimer des comptes'],
+        ],
+        'Archive' => [
+            'label' => 'Archives Numérisées',
+            'icon' => 'archive',
+            'actions' => ['read' => 'Consulter les archives', 'create' => 'Verser des archives', 'update' => 'Modifier les fiches', 'delete' => 'Supprimer les archives', 'download' => 'Télécharger les fichiers'],
+        ],
+        'ArchiveLocation' => [
+            'label' => 'Emplacements Physiques & Virtuels',
+            'icon' => 'location',
+            'actions' => ['read' => 'Consulter les emplacements', 'create' => 'Créer des emplacements', 'update' => 'Modifier les emplacements', 'delete' => 'Supprimer des emplacements'],
+        ],
+        'ArchiveType' => [
+            'label' => 'Types d\'Archives',
+            'icon' => 'tag',
+            'actions' => ['read' => 'Consulter les types', 'create' => 'Créer des types', 'update' => 'Modifier les types', 'delete' => 'Supprimer des types'],
+        ],
+        'Department' => [
+            'label' => 'Groupes d\'Accès & Structures MINFI',
+            'icon' => 'building',
+            'actions' => ['read' => 'Consulter les structures', 'create' => 'Créer des structures', 'update' => 'Modifier les structures', 'delete' => 'Supprimer des structures'],
+        ],
+        'Personnel' => [
+            'label' => 'Dossiers du Personnel',
+            'icon' => 'user-check',
+            'actions' => ['read' => 'Consulter les dossiers', 'create' => 'Créer des dossiers', 'update' => 'Modifier les dossiers', 'delete' => 'Supprimer des dossiers', 'zip_download' => 'Télécharger les archives ZIP'],
+        ],
+        'Piece' => [
+            'label' => 'Référentiel des Pièces',
+            'icon' => 'file-text',
+            'actions' => ['read' => 'Consulter les pièces', 'create' => 'Créer des pièces', 'update' => 'Modifier les pièces', 'delete' => 'Supprimer des pièces'],
+        ],
+        'Role' => [
+            'label' => 'Habilitations & Rôles',
+            'icon' => 'shield',
+            'actions' => ['read' => 'Consulter les rôles', 'create' => 'Créer des rôles', 'update' => 'Modifier les habilitations', 'delete' => 'Supprimer des rôles'],
+        ],
+        'Setting' => [
+            'label' => 'Paramètres Système & Sécurité',
+            'icon' => 'settings',
+            'actions' => ['read' => 'Consulter les paramètres', 'update' => 'Modifier la configuration'],
+        ],
+    ];
+
+    /**
      * Display a listing of user accounts.
      */
     public function index(Request $request): View
@@ -138,6 +191,7 @@ class UserController extends Controller
             'departments' => Department::orderBy('name')->get(),
             'rolesList' => $rolesList,
             'roleOptions' => $rolesList,
+            'modelDefinitions' => $this->modelDefinitions,
         ]);
     }
 
@@ -154,9 +208,64 @@ class UserController extends Controller
             unset($validated['password']);
         }
 
+        // Process custom_permissions input matrix (Delta-only logic)
+        if ($request->has('custom_permissions')) {
+            $inputPermissions = $request->input('custom_permissions', []);
+            $roleId = $validated['role_id'] ?? $user->role_id;
+            $role = Role::find($roleId);
+            $rolePermissions = $role ? ($role->permissions ?? []) : [];
+
+            $deltas = [];
+
+            if (is_array($inputPermissions)) {
+                foreach ($this->modelDefinitions as $modelKey => $def) {
+                    foreach (array_keys($def['actions']) as $action) {
+                        if (! isset($inputPermissions[$modelKey][$action])) {
+                            continue;
+                        }
+
+                        $val = $inputPermissions[$modelKey][$action];
+
+                        if ($val === 'inherit' || $val === null || $val === '') {
+                            continue;
+                        }
+
+                        $requestedBool = null;
+                        if ($val === '1' || $val === 1 || $val === true || $val === 'true') {
+                            $requestedBool = true;
+                        } elseif ($val === '0' || $val === 0 || $val === false || $val === 'false') {
+                            $requestedBool = false;
+                        }
+
+                        if ($requestedBool === null) {
+                            continue;
+                        }
+
+                        $roleDefaultBool = (bool) ($rolePermissions[$modelKey][$action] ?? false);
+
+                        if ($requestedBool !== $roleDefaultBool) {
+                            $deltas[$modelKey][$action] = $requestedBool;
+                        }
+                    }
+                }
+            }
+
+            $validated['custom_permissions'] = ! empty($deltas) ? $deltas : null;
+        }
+
         $user->update($validated);
 
         return redirect()->route('users.index')->with('success', "Le compte utilisateur de « {$user->name} » a été mis à jour avec succès.");
+    }
+
+    /**
+     * Revoke all custom permission overrides for a user, restoring 100% role inheritance.
+     */
+    public function revokeCustomPermissions(User $user): RedirectResponse
+    {
+        $user->update(['custom_permissions' => null]);
+
+        return back()->with('success', "Les autorisations personnalisées de « {$user->name} » ont été entièrement révoquées. L'utilisateur réhérite désormais à 100% des droits de son rôle.");
     }
 
     /**

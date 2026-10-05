@@ -33,6 +33,7 @@ Route::middleware(['auth'])->group(function () {
     // Administration & Boîte Noire — Réservé aux Super Privilégiés
     Route::middleware([EnsureSuperPrivileged::class])->group(function () {
         Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+        Route::post('/users/{user}/revoke-custom-permissions', [UserController::class, 'revokeCustomPermissions'])->name('users.revoke-custom-permissions');
         Route::resource('users', UserController::class);
         Route::resource('roles', RoleController::class);
 

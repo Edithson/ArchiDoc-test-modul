@@ -213,4 +213,31 @@ class User extends Authenticatable
 
         return false;
     }
+
+    /**
+     * Check if the user has custom permission overrides active.
+     */
+    public function hasCustomPermissionOverrides(): bool
+    {
+        return ! empty($this->custom_permissions) && is_array($this->custom_permissions);
+    }
+
+    /**
+     * Get total count of active custom permission overrides for the user.
+     */
+    public function customPermissionsCount(): int
+    {
+        if (! $this->hasCustomPermissionOverrides()) {
+            return 0;
+        }
+
+        $count = 0;
+        foreach ($this->custom_permissions as $actions) {
+            if (is_array($actions)) {
+                $count += count($actions);
+            }
+        }
+
+        return $count;
+    }
 }
