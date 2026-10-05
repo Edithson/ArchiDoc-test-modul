@@ -255,6 +255,87 @@ class UserController extends Controller
     }
 
     /**
+     * Show the form for editing custom permission overrides for the specified user.
+     */
+    public function editPermissions(User $user): View
+    {
+        $currentUser = request()->user();
+        abort_if(! $currentUser?->hasPermission('User', 'update'), 403, 'Accès non autorisé à la gestion des autorisations.');
+
+        $this->checkStructuralScope($user);
+
+        return view('admin.pages.users.permissions', [
+            'user' => $user->load(['department', 'subDepartment', 'role']),
+            'modelDefinitions' => $this->modelDefinitions,
+        ]);
+    }
+
+    /**
+     * Update custom permission overrides for the specified user.
+     */
+    public function updatePermissions(Request $request, User $user): RedirectResponse
+    {
+        $currentUser = $request->user();
+        abort_if(! $currentUser?->hasPermission('User', 'update'), 403, 'Accès non autorisé à la gestion des autorisations.');
+
+        $this->checkStructuralScope($user);
+
+        $inputPermissions = $request->input('custom_permissions', []);
+        $deltas = $this->processCustomPermissionsDelta($inputPermissions, $user->role_id);
+
+        $user->update(['custom_permissions' => $deltas]);
+
+        return redirect()->route('users.permissions', $user->id)->with('success', "Les autorisations personnalisées de « {$user->name} » ont été mises à jour avec succès.");
+    }
+
+    /**
+     * Helper to calculate custom permission deltas against base role permissions.
+     *
+     * @param  array<string, mixed>  $inputPermissions
+     * @return array<string, array<string, bool>>|null
+     */
+    protected function processCustomPermissionsDelta(array $inputPermissions, ?int $roleId): ?array
+    {
+        $role = $roleId ? Role::find($roleId) : null;
+        $rolePermissions = $role ? ($role->permissions ?? []) : [];
+
+        $deltas = [];
+
+        foreach ($this->modelDefinitions as $modelKey => $def) {
+            foreach (array_keys($def['actions']) as $action) {
+                if (! isset($inputPermissions[$modelKey][$action])) {
+                    continue;
+                }
+
+                $val = $inputPermissions[$modelKey][$action];
+
+                if ($val === 'inherit' || $val === null || $val === '') {
+                    continue;
+                }
+
+                $requestedBool = null;
+                if ($val === '1' || $val === 1 || $val === true || $val === 'true') {
+                    $requestedBool = true;
+                } elseif ($val === '0' || $val === 0 || $val === false || $val === 'false') {
+                    $requestedBool = false;
+                }
+
+                if ($requestedBool === null) {
+                    continue;
+                }
+
+                $roleDefaultBool = (bool) ($rolePermissions[$modelKey][$action] ?? false);
+
+                if ($requestedBool !== $roleDefaultBool) {
+                    $deltas[$modelKey][$action] = $requestedBool;
+                }
+            }
+        }
+
+        return ! empty($deltas) ? $deltas : null;
+    }
+
+    /**
      * Update the specified user account.
      */
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
@@ -285,45 +366,7 @@ class UserController extends Controller
         if ($request->has('custom_permissions')) {
             $inputPermissions = $request->input('custom_permissions', []);
             $roleId = $validated['role_id'] ?? $user->role_id;
-            $role = Role::find($roleId);
-            $rolePermissions = $role ? ($role->permissions ?? []) : [];
-
-            $deltas = [];
-
-            if (is_array($inputPermissions)) {
-                foreach ($this->modelDefinitions as $modelKey => $def) {
-                    foreach (array_keys($def['actions']) as $action) {
-                        if (! isset($inputPermissions[$modelKey][$action])) {
-                            continue;
-                        }
-
-                        $val = $inputPermissions[$modelKey][$action];
-
-                        if ($val === 'inherit' || $val === null || $val === '') {
-                            continue;
-                        }
-
-                        $requestedBool = null;
-                        if ($val === '1' || $val === 1 || $val === true || $val === 'true') {
-                            $requestedBool = true;
-                        } elseif ($val === '0' || $val === 0 || $val === false || $val === 'false') {
-                            $requestedBool = false;
-                        }
-
-                        if ($requestedBool === null) {
-                            continue;
-                        }
-
-                        $roleDefaultBool = (bool) ($rolePermissions[$modelKey][$action] ?? false);
-
-                        if ($requestedBool !== $roleDefaultBool) {
-                            $deltas[$modelKey][$action] = $requestedBool;
-                        }
-                    }
-                }
-            }
-
-            $validated['custom_permissions'] = ! empty($deltas) ? $deltas : null;
+            $validated['custom_permissions'] = $this->processCustomPermissionsDelta($inputPermissions, $roleId);
         }
 
         $user->update($validated);

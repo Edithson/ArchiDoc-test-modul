@@ -145,3 +145,37 @@ test('one click revocation route resets custom_permissions to null', function ()
     expect($targetUser->custom_permissions)->toBeNull();
     expect($targetUser->hasCustomPermissionOverrides())->toBeFalse();
 });
+
+test('dedicated permissions route renders permission matrix and saves custom deltas', function () {
+    $super = User::factory()->create(['roles' => 'super privilégé']);
+    $role = Role::firstOrCreate(
+        ['name' => 'Classic'],
+        ['permissions' => Role::defaultPermissionsFor('Classic')]
+    );
+    $targetUser = User::factory()->create([
+        'role_id' => $role->id,
+        'custom_permissions' => null,
+    ]);
+
+    // GET users.permissions
+    $getResp = $this->actingAs($super)->get(route('users.permissions', $targetUser->id));
+    $getResp->assertStatus(200);
+    $getResp->assertSee('Droits d\'Accès Personnalisés', false);
+    $getResp->assertSee('Matrice des Surcharges Individuelles');
+
+    // PUT users.permissions.update
+    $putResp = $this->actingAs($super)->put(route('users.permissions.update', $targetUser->id), [
+        'custom_permissions' => [
+            'User' => ['create' => '1'],
+            'Personnel' => ['zip_download' => '0'],
+        ],
+    ]);
+
+    $putResp->assertRedirect(route('users.permissions', $targetUser->id));
+    $putResp->assertSessionHas('success');
+
+    $targetUser->refresh();
+    expect($targetUser->hasCustomPermissionOverrides())->toBeTrue();
+    expect($targetUser->custom_permissions['User'])->toEqual(['create' => true]);
+    expect($targetUser->custom_permissions['Personnel'])->toEqual(['zip_download' => false]);
+});

@@ -37,6 +37,8 @@ Route::middleware(['auth'])->group(function () {
     // Administration Système & Habilitations (Contrôle d'accès fin géré au niveau contrôleur)
     Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
     Route::post('/users/{user}/revoke-custom-permissions', [UserController::class, 'revokeCustomPermissions'])->name('users.revoke-custom-permissions');
+    Route::get('/users/{user}/permissions', [UserController::class, 'editPermissions'])->name('users.permissions');
+    Route::put('/users/{user}/permissions', [UserController::class, 'updatePermissions'])->name('users.permissions.update');
     Route::resource('users', UserController::class);
     Route::resource('roles', RoleController::class);
 

@@ -289,12 +289,21 @@
               <td class="px-6 py-4 whitespace-nowrap text-right text-xs font-medium">
                 <div class="flex items-center justify-end gap-2">
                   
-                  <!-- Bouton Modifier -->
+                  <!-- Bouton Modifier Infos -->
                   @if(auth()->user()?->hasPermission('User', 'update'))
-                    <a href="{{ route('users.edit', $userItem->id) }}" title="Modifier le compte"
+                    <a href="{{ route('users.edit', $userItem->id) }}" title="Modifier les informations"
                       class="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
                       <svg class="h-3.5 w-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                       Éditer
+                    </a>
+
+                    <a href="{{ route('users.permissions', $userItem->id) }}" title="Gérer les droits d'accès et permissions personnalisées"
+                      class="inline-flex items-center gap-1 rounded-lg border border-brand-200 bg-brand-50 px-2.5 py-1.5 text-xs font-semibold text-brand-800 hover:bg-brand-100 transition-colors">
+                      <svg class="h-3.5 w-3.5 text-brand-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                      Habilitations
+                      @if($userItem->hasCustomPermissionOverrides())
+                        <span class="ml-0.5 h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                      @endif
                     </a>
                   @endif
 
