@@ -39,7 +39,13 @@
         <!-- 2. Menu Création -->
         @php
           $isCreationActive = request()->routeIs('archives.create') || request()->routeIs('archive-types.*') || request()->routeIs('archive-locations.*') || request()->routeIs('departments.*');
+          $hasArchiveCreateAccess = auth()->user()?->hasPermission('Archive', 'create');
+          $hasArchiveTypeReadAccess = auth()->user()?->hasPermission('ArchiveType', 'read');
+          $hasArchiveLocationReadAccess = auth()->user()?->hasPermission('ArchiveLocation', 'read');
+          $hasDepartmentReadAccess = auth()->user()?->hasPermission('Department', 'read');
+          $hasCreationAccess = $hasArchiveCreateAccess || $hasArchiveTypeReadAccess || $hasArchiveLocationReadAccess || $hasDepartmentReadAccess;
         @endphp
+        @if($hasCreationAccess)
         <div class="relative">
           <button id="creations-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="creations-menu"
             class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isCreationActive ? 'bg-brand-50 font-bold text-brand-700 shadow-xs ring-1 ring-brand-700/20' : 'font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
@@ -52,6 +58,7 @@
           <div id="creations-menu" class="absolute left-0 z-40 mt-2 hidden w-72 origin-top-left rounded-xl border border-gray-100 bg-white p-2 shadow-xl">
             <div class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">Modules de Saisie</div>
             <ul id="header-creations-list" class="space-y-0.5 text-sm">
+              @if($hasArchiveCreateAccess)
               <li>
                 <a href="{{ route('archives.create') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archives.create') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -61,6 +68,8 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endif
+              @if($hasArchiveTypeReadAccess)
               <li>
                 <a href="{{ route('archive-types.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archive-types.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -70,6 +79,8 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endif
+              @if($hasArchiveLocationReadAccess)
               <li>
                 <a href="{{ route('archive-locations.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archive-locations.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -79,6 +90,8 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endif
+              @if($hasDepartmentReadAccess)
               <li>
                 <a href="{{ route('departments.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('departments.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -88,14 +101,21 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endif
             </ul>
           </div>
         </div>
+        @endif
 
         <!-- 3. Menu Personnel -->
         @php
           $isPersonnelActive = request()->routeIs('personnels.*') || request()->routeIs('pieces.*') || request()->routeIs('activity-logs.personnel-consultations');
+          $hasPersonnelReadAccess = auth()->user()?->hasPermission('Personnel', 'read');
+          $hasPersonnelCreateAccess = auth()->user()?->hasPermission('Personnel', 'create');
+          $hasPieceReadAccess = auth()->user()?->hasPermission('Piece', 'read');
+          $hasPersonnelMenuAccess = $hasPersonnelReadAccess || $hasPieceReadAccess;
         @endphp
+        @if($hasPersonnelMenuAccess)
         <div class="relative">
           <button id="personnel-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="personnel-menu"
             class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isPersonnelActive ? 'bg-brand-50 font-bold text-brand-700 shadow-xs ring-1 ring-brand-700/20' : 'font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
@@ -108,6 +128,7 @@
           <div id="personnel-menu" class="absolute left-0 z-40 mt-2 hidden w-72 origin-top-left rounded-xl border border-gray-100 bg-white p-2 shadow-xl">
             <div class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">Dossiers & Pièces Agent</div>
             <ul id="header-personnel-list" class="space-y-0.5 text-sm">
+              @if($hasPersonnelReadAccess)
               <li>
                 <a href="{{ route('personnels.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('personnels.index') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -126,6 +147,8 @@
                   <span class="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-bold text-indigo-800">Analytics</span>
                 </a>
               </li>
+              @endif
+              @if($hasPersonnelCreateAccess)
               <li>
                 <a href="{{ route('personnels.create') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('personnels.create') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -135,6 +158,8 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endif
+              @if($hasPieceReadAccess)
               <li>
                 <a href="{{ route('pieces.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('pieces.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -144,14 +169,18 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endif
             </ul>
           </div>
         </div>
+        @endif
 
         <!-- 3. Menu Consultation -->
         @php
           $isConsultationActive = request()->routeIs('archives.search') || request()->routeIs('archives.show') || request()->routeIs('activity-logs.archives-consultations');
+          $hasArchiveReadAccess = auth()->user()?->hasPermission('Archive', 'read');
         @endphp
+        @if($hasArchiveReadAccess)
         <div class="relative">
           <button id="consultations-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="consultations-menu"
             class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isConsultationActive ? 'bg-brand-50 font-bold text-brand-700 shadow-xs ring-1 ring-brand-700/20' : 'font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
@@ -185,6 +214,7 @@
             </ul>
           </div>
         </div>
+        @endif
 
         <!-- 4. Menu Documentation -->
         <div class="relative">
@@ -256,8 +286,14 @@
 
         <!-- 5. Menu Administration -->
         @php
-          $isAdminActive = request()->routeIs('users.*') || request()->routeIs('activity-logs.index') || request()->routeIs('activity-logs.auth') || request()->routeIs('activity-logs.system') || request()->routeIs('settings.*');
+          $isAdminActive = request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('activity-logs.index') || request()->routeIs('activity-logs.auth') || request()->routeIs('activity-logs.system') || request()->routeIs('settings.*');
+          $hasUserRead = auth()->user()?->hasPermission('User', 'read');
+          $hasRoleRead = auth()->user()?->hasPermission('Role', 'read');
+          $hasSettingRead = auth()->user()?->hasPermission('Setting', 'read');
+          $isSuperUser = auth()->user()?->isSuper();
+          $hasAdminMenuAccess = $hasUserRead || $hasRoleRead || $hasSettingRead || $isSuperUser;
         @endphp
+        @if($hasAdminMenuAccess)
         <div class="relative">
           <button id="administration-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="administration-menu"
             class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isAdminActive ? 'bg-brand-50 font-bold text-brand-700 shadow-xs ring-1 ring-brand-700/20' : 'font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
@@ -272,6 +308,7 @@
             <!-- Section 1: Gestion & Sécurité -->
             <div class="px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-700">Gestion & Sécurité</div>
             <ul class="mb-3 space-y-0.5 text-sm">
+              @if($hasUserRead)
               <li>
                 <a href="{{ route('users.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('users.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -281,6 +318,19 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endif
+              @if($hasRoleRead)
+              <li>
+                <a href="{{ route('roles.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('roles.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
+                  <div class="flex items-center gap-2.5">
+                    <svg class="h-4 w-4 text-brand-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <span>Habilitations & Rôles</span>
+                  </div>
+                  <span class="rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-800">Matrice JSON</span>
+                </a>
+              </li>
+              @endif
+              @if($hasUserRead || $isSuperUser)
               <li>
                 <a href="{{ route('activity-logs.auth') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.auth') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -290,11 +340,13 @@
                   <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">Boîte Noire</span>
                 </a>
               </li>
+              @endif
             </ul>
 
             <!-- Section 2: Système & Suivi -->
             <div class="px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-700 border-t border-gray-100 pt-2">Système & Suivi</div>
             <ul class="space-y-0.5 text-sm">
+              @if($hasSettingRead)
               <li>
                 <a href="{{ route('settings.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('settings.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -304,6 +356,7 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endif
               <li>
                 <a href="{{ route('activity-logs.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.index') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -313,6 +366,7 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @if($hasSettingRead || $isSuperUser)
               <li>
                 <a href="{{ route('activity-logs.system') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.system') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -322,9 +376,11 @@
                   <span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">Actif</span>
                 </a>
               </li>
+              @endif
             </ul>
           </div>
         </div>
+        @endif
 
       </nav>
     </div>

@@ -25,6 +25,8 @@ class PersonnelController extends Controller
      */
     public function index(Request $request): View
     {
+        abort_if(! $request->user()?->hasPermission('Personnel', 'read'), 403, 'Accès non autorisé aux dossiers du personnel.');
+
         $query = Personnel::with(['department', 'subDepartment', 'personnelFiles.piece']);
 
         if ($request->filled('search')) {
@@ -90,6 +92,8 @@ class PersonnelController extends Controller
      */
     public function create(): View
     {
+        abort_if(! request()->user()?->hasPermission('Personnel', 'create'), 403, 'Accès non autorisé à la création de dossier personnel.');
+
         $obligatoryPieces = Piece::where('obligatory', true)->orderBy('name')->get();
         $optionalPieces = Piece::where('obligatory', false)->orderBy('name')->get();
         $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
@@ -106,6 +110,8 @@ class PersonnelController extends Controller
      */
     public function store(StorePersonnelRequest $request): RedirectResponse
     {
+        abort_if(! $request->user()?->hasPermission('Personnel', 'create'), 403, 'Accès non autorisé à la création de dossier personnel.');
+
         $validated = $request->validated();
 
         $personnel = Personnel::create([
@@ -150,6 +156,8 @@ class PersonnelController extends Controller
      */
     public function show(Personnel $personnel): View
     {
+        abort_if(! request()->user()?->hasPermission('Personnel', 'read'), 403, 'Accès non autorisé à la consultation du dossier du personnel.');
+
         $personnel->load(['department', 'subDepartment', 'personnelFiles.piece', 'creator', 'updater']);
         $user = auth()->user();
         $ip = request()->ip();
@@ -205,6 +213,8 @@ class PersonnelController extends Controller
      */
     public function edit(Personnel $personnel): View
     {
+        abort_if(! request()->user()?->hasPermission('Personnel', 'update'), 403, 'Accès non autorisé à la modification du dossier du personnel.');
+
         $personnel->load(['department', 'subDepartment', 'personnelFiles.piece']);
         $obligatoryPieces = Piece::where('obligatory', true)->orderBy('name')->get();
         $optionalPieces = Piece::where('obligatory', false)->orderBy('name')->get();
@@ -225,6 +235,8 @@ class PersonnelController extends Controller
      */
     public function update(UpdatePersonnelRequest $request, Personnel $personnel): RedirectResponse
     {
+        abort_if(! $request->user()?->hasPermission('Personnel', 'update'), 403, 'Accès non autorisé à la modification du dossier du personnel.');
+
         $validated = $request->validated();
 
         $personnel->update([
@@ -305,6 +317,8 @@ class PersonnelController extends Controller
      */
     public function destroy(Personnel $personnel): RedirectResponse
     {
+        abort_if(! request()->user()?->hasPermission('Personnel', 'delete'), 403, 'Accès non autorisé à la suppression du dossier du personnel.');
+
         $name = $personnel->name;
         $personnel->delete();
 
@@ -317,6 +331,7 @@ class PersonnelController extends Controller
      */
     public function downloadZip(Personnel $personnel): BinaryFileResponse|RedirectResponse
     {
+        abort_if(! request()->user()?->hasPermission('Personnel', 'zip_download'), 403, 'Accès non autorisé au téléchargement du dossier du personnel.');
         $personnel->load(['personnelFiles.piece']);
 
         $filesToZip = [];

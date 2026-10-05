@@ -8,6 +8,7 @@ use App\Models\ArchiveLocation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ArchiveLocationController extends Controller
 {
@@ -16,6 +17,8 @@ class ArchiveLocationController extends Controller
      */
     public function index(Request $request): View
     {
+        Gate::authorize('archivelocation.read');
+
         $query = ArchiveLocation::with('creator')->withCount('archives');
 
         if ($request->filled('search')) {
@@ -47,6 +50,8 @@ class ArchiveLocationController extends Controller
      */
     public function create(): View
     {
+        Gate::authorize('archivelocation.create');
+
         return view('admin.pages.archive_locations.create');
     }
 
@@ -55,8 +60,10 @@ class ArchiveLocationController extends Controller
      */
     public function store(StoreArchiveLocationRequest $request): RedirectResponse
     {
+        Gate::authorize('archivelocation.create');
+
         $validated = $request->validated();
-        $validated['created_by'] = auth()->id() ?? 1;
+        $validated['created_by'] = auth()->id();
 
         $location = ArchiveLocation::create($validated);
 
@@ -69,6 +76,8 @@ class ArchiveLocationController extends Controller
      */
     public function show(ArchiveLocation $archiveLocation): View
     {
+        Gate::authorize('archivelocation.read');
+
         $archiveLocation->load(['creator', 'archives' => fn ($q) => $q->latest()->limit(10)]);
 
         return view('admin.pages.archive_locations.show', [
@@ -81,6 +90,8 @@ class ArchiveLocationController extends Controller
      */
     public function edit(ArchiveLocation $archiveLocation): View
     {
+        Gate::authorize('archivelocation.update');
+
         return view('admin.pages.archive_locations.edit', [
             'archiveLocation' => $archiveLocation,
         ]);
@@ -91,7 +102,12 @@ class ArchiveLocationController extends Controller
      */
     public function update(UpdateArchiveLocationRequest $request, ArchiveLocation $archiveLocation): RedirectResponse
     {
-        $archiveLocation->update($request->validated());
+        Gate::authorize('archivelocation.update');
+
+        $validated = $request->validated();
+        $validated['updated_by'] = auth()->id();
+
+        $archiveLocation->update($validated);
 
         return redirect()->route('archive-locations.index')
             ->with('success', "L'emplacement « {$archiveLocation->name} » a été mis à jour avec succès !");
@@ -102,6 +118,8 @@ class ArchiveLocationController extends Controller
      */
     public function destroy(ArchiveLocation $archiveLocation): RedirectResponse
     {
+        Gate::authorize('archivelocation.delete');
+
         $name = $archiveLocation->name;
         $archiveLocation->delete();
 

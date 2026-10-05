@@ -43,12 +43,14 @@
       <p class="mt-1 text-sm text-gray-500">Définissez et gérez la liste des pièces constitutives des dossiers d'intégration administrative du personnel.</p>
     </div>
 
+    @if(auth()->user()?->hasPermission('Piece', 'create'))
     <a href="{{ route('pieces.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-700 transition-all">
       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
       </svg>
       Ajouter une Pièce
     </a>
+    @endif
   </div>
 
   <!-- Carte des Filtres de Recherche et d'Exigence -->
@@ -145,14 +147,16 @@
 
             <td class="px-6 py-4 text-right">
               <div class="flex items-center justify-end gap-2">
-                
+                @if(auth()->user()?->hasPermission('Piece', 'update'))
                 <!-- Modifier -->
                 <a href="{{ route('pieces.edit', $piece) }}" class="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-brand-700" title="Modifier la pièce">
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </a>
+                @endif
 
+                @if(auth()->user()?->hasPermission('Piece', 'delete'))
                 <!-- Supprimer -->
                 <form method="POST" action="{{ route('pieces.destroy', $piece) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer la pièce « {{ addslashes($piece->name) }} » ?');">
                   @csrf
@@ -163,7 +167,7 @@
                     </svg>
                   </button>
                 </form>
-
+                @endif
               </div>
             </td>
 

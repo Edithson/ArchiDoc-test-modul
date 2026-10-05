@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Archive;
 use App\Models\Department;
+use App\Models\Personnel;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -16,7 +18,13 @@ class ActivityLogController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Activity::with(['causer', 'subject']);
+        /** @var User $user */
+        $user = auth()->user();
+
+        $baseQuery = Activity::with(['causer', 'subject']);
+        $this->applyConsultationScopeFilter($baseQuery, $user, 'general');
+
+        $query = (clone $baseQuery);
 
         // Recherche textuelle
         if ($request->filled('search')) {
@@ -62,14 +70,14 @@ class ActivityLogController extends Controller
 
         $activities = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
-        // Statistiques globales KPI
-        $totalEventsCount = Activity::count();
-        $todayEventsCount = Activity::whereDate('created_at', now()->today())->count();
-        $authEventsCount = Activity::where('log_name', 'auth')->count();
-        $systemErrorsCount = Activity::where('event', 'system.error')->count();
+        // Statistiques globales KPI (filtrées par le périmètre autorisé)
+        $totalEventsCount = (clone $baseQuery)->count();
+        $todayEventsCount = (clone $baseQuery)->whereDate('created_at', now()->today())->count();
+        $authEventsCount = (clone $baseQuery)->where('log_name', 'auth')->count();
+        $systemErrorsCount = (clone $baseQuery)->where('event', 'system.error')->count();
 
-        // Liste des utilisateurs ayant généré des logs pour le filtre
-        $usersList = User::orderBy('name')->get();
+        // Liste des utilisateurs accessibles pour le filtre
+        $usersList = $this->getScopedUsersList($user);
 
         return view('admin.pages.activity_logs.index', [
             'activities' => $activities,
@@ -91,6 +99,8 @@ class ActivityLogController extends Controller
      */
     public function auth(Request $request): View
     {
+        abort_if(! ($request->user()?->isSuper() || $request->user()?->hasPermission('User', 'read')), 403, 'Accès non autorisé au journal de sécurité et des accès.');
+
         $query = Activity::with(['causer', 'subject'])
             ->where('log_name', 'auth');
 
@@ -141,6 +151,8 @@ class ActivityLogController extends Controller
      */
     public function system(Request $request): View
     {
+        abort_if(! ($request->user()?->isSuper() || $request->user()?->hasPermission('Setting', 'read')), 403, "Accès non autorisé au journal d'erreurs système.");
+
         $query = Activity::with(['causer', 'subject'])
             ->where(function ($q) {
                 $q->where('log_name', 'system')
@@ -183,8 +195,13 @@ class ActivityLogController extends Controller
      */
     public function archivesConsultations(Request $request)
     {
+        /** @var User $user */
+        $user = auth()->user();
+
         $baseQuery = Activity::with(['causer', 'subject'])
             ->where('event', 'archive.consultation');
+
+        $this->applyConsultationScopeFilter($baseQuery, $user, 'archive');
 
         $query = (clone $baseQuery);
 
@@ -349,8 +366,8 @@ class ActivityLogController extends Controller
         $topDepts = array_slice($deptCounts, 0, 6, true);
         $topTypes = array_slice($typeCounts, 0, 6, true);
 
-        $usersList = User::orderBy('name')->get();
-        $departmentsList = Department::orderBy('name')->pluck('name')->toArray();
+        $usersList = $this->getScopedUsersList($user);
+        $departmentsList = $this->getScopedDepartmentsList($user);
 
         return view('admin.pages.activity_logs.archives_consultations', [
             'activities' => $activities,
@@ -376,8 +393,13 @@ class ActivityLogController extends Controller
      */
     public function personnelConsultations(Request $request)
     {
+        /** @var User $user */
+        $user = auth()->user();
+
         $baseQuery = Activity::with(['causer', 'subject'])
             ->whereIn('event', ['personnel.consultation', 'personnel.download']);
+
+        $this->applyConsultationScopeFilter($baseQuery, $user, 'personnel');
 
         $query = (clone $baseQuery);
 
@@ -552,8 +574,8 @@ class ActivityLogController extends Controller
 
         $topDepts = array_slice($deptCounts, 0, 6, true);
 
-        $usersList = User::orderBy('name')->get();
-        $departmentsList = Department::orderBy('name')->pluck('name')->toArray();
+        $usersList = $this->getScopedUsersList($user);
+        $departmentsList = $this->getScopedDepartmentsList($user);
 
         return view('admin.pages.activity_logs.personnel_consultations', [
             'activities' => $activities,
@@ -579,6 +601,10 @@ class ActivityLogController extends Controller
      */
     public function show(Activity $activity): JsonResponse
     {
+        /** @var User $user */
+        $user = auth()->user();
+        $this->checkActivityScope($user, $activity);
+
         $activity->load(['causer', 'subject']);
 
         return response()->json([
@@ -608,7 +634,11 @@ class ActivityLogController extends Controller
      */
     public function export(Request $request)
     {
+        /** @var User $user */
+        $user = auth()->user();
+
         $query = Activity::with(['causer', 'subject']);
+        $this->applyConsultationScopeFilter($query, $user, 'export');
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -735,5 +765,120 @@ class ActivityLogController extends Controller
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"activity_logs_{$timestamp}.csv\"",
         ]);
+    }
+
+    /**
+     * Apply consultation history scope filters based on user role and department hierarchy:
+     * - Super Privilégié: Full access to all history.
+     * - Privilégié: History of sub-departments / users belonging to their main department.
+     * - Classique: Individual consultation history (causer_id == auth()->id()) only.
+     */
+    protected function applyConsultationScopeFilter($query, User $user, string $logType = 'general'): void
+    {
+        if ($user->isSuper()) {
+            return;
+        }
+
+        if ($user->isPrivileged() || ($user->department_id && ! $user->sub_department_id)) {
+            $deptId = $user->department_id;
+            $deptName = $user->department?->name;
+
+            if ($deptId) {
+                $query->where(function ($q) use ($deptId, $deptName) {
+                    $q->whereHasMorph('causer', [User::class], function ($userQuery) use ($deptId) {
+                        $userQuery->where('department_id', $deptId);
+                    })
+                        ->orWhereHasMorph('subject', [Archive::class], function ($archiveQuery) use ($deptId) {
+                            $archiveQuery->where('department_id', $deptId);
+                        })
+                        ->orWhereHasMorph('subject', [Personnel::class], function ($personnelQuery) use ($deptId) {
+                            $personnelQuery->where('department_id', $deptId);
+                        });
+
+                    if ($deptName) {
+                        $q->orWhere('properties->departement', $deptName);
+                    }
+                });
+            } else {
+                $query->where('causer_id', $user->id);
+            }
+
+            return;
+        }
+
+        // Classique / Agent avec sous-département : Historique individuel
+        $query->where('causer_id', $user->id);
+    }
+
+    /**
+     * Verify single activity record view permission based on user scope.
+     */
+    protected function checkActivityScope(User $user, Activity $activity): void
+    {
+        if ($user->isSuper()) {
+            return;
+        }
+
+        if ($user->isPrivileged() || ($user->department_id && ! $user->sub_department_id)) {
+            $deptId = $user->department_id;
+            $causerDeptId = $activity->causer?->department_id;
+
+            $subjectDeptId = null;
+            if ($activity->subject instanceof Archive || $activity->subject instanceof Personnel) {
+                $subjectDeptId = $activity->subject->department_id;
+            }
+
+            $propertyDept = $activity->properties['departement'] ?? null;
+            $deptName = $user->department?->name;
+
+            if (
+                ($deptId && (int) $causerDeptId === (int) $deptId) ||
+                ($deptId && (int) $subjectDeptId === (int) $deptId) ||
+                ($deptName && $propertyDept === $deptName) ||
+                (int) $activity->causer_id === (int) $user->id
+            ) {
+                return;
+            }
+
+            abort(403, 'Accès refusé : Cet événement ne concerne pas votre département.');
+        }
+
+        if ((int) $activity->causer_id !== (int) $user->id) {
+            abort(403, 'Accès refusé : Vous ne pouvez consulter que votre propre historique.');
+        }
+    }
+
+    /**
+     * Get user list for filters scoped to current user permission.
+     */
+    protected function getScopedUsersList(User $user)
+    {
+        if ($user->isSuper()) {
+            return User::orderBy('name')->get();
+        }
+
+        if ($user->isPrivileged() || ($user->department_id && ! $user->sub_department_id)) {
+            if ($user->department_id) {
+                return User::where('department_id', $user->department_id)->orderBy('name')->get();
+            }
+        }
+
+        return User::where('id', $user->id)->get();
+    }
+
+    /**
+     * Get department list for filters scoped to current user permission.
+     */
+    protected function getScopedDepartmentsList(User $user): array
+    {
+        if ($user->isSuper()) {
+            return Department::orderBy('name')->pluck('name')->toArray();
+        }
+
+        if ($user->department?->name) {
+            return [$user->department->name];
+        }
+
+        return [];
     }
 }

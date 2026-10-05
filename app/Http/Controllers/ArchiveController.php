@@ -14,6 +14,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Activity;
@@ -26,39 +27,69 @@ class ArchiveController extends Controller
      */
     public function index(): View
     {
-        // Statistiques globales dynamiques
-        $totalArchives = Archive::count();
-        $totalPersonnel = Personnel::count();
-        $totalConsultations = Activity::whereIn('event', [
+        $user = auth()->user();
+        $hasArchiveRead = $user?->hasPermission('Archive', 'read') ?? false;
+
+        // 1. Archives Totales (Scopées par département/sous-département)
+        $totalArchives = null;
+        if ($hasArchiveRead) {
+            $archivesCountQuery = Archive::query();
+            $this->applyStructuralScopeFilter($archivesCountQuery, $user);
+            $totalArchives = $archivesCountQuery->count();
+        }
+
+        // 2. Dossiers du Personnel (Selon permission Personnel:read)
+        $hasPersonnelRead = $user?->hasPermission('Personnel', 'read') ?? false;
+        $totalPersonnel = $hasPersonnelRead ? Personnel::count() : null;
+
+        // 3. Consultations Cumulées (Super = Tout, Privilégié = Département, Classique = Compte individuel)
+        $consultationsQuery = Activity::whereIn('event', [
             'archive.consultation',
             'archive.download',
             'personnel.consultation',
             'personnel.download',
-        ])->count();
-        $totalUsers = User::where('statut', true)->count();
+        ]);
+        $this->applyActivityScopeFilter($consultationsQuery, $user);
+        $totalConsultations = $consultationsQuery->count();
 
-        $archiveTypesCount = ArchiveType::count();
-        $locationsCount = ArchiveLocation::count();
+        // 4. Comptes Utilisateurs (Selon permission User:read)
+        $hasUserRead = $user?->hasPermission('User', 'read') ?? false;
+        $totalUsers = null;
+        if ($hasUserRead) {
+            $usersQuery = User::where('statut', true);
+            if (! $user->isSuper() && $user->department_id) {
+                $usersQuery->where('department_id', $user->department_id);
+            }
+            $totalUsers = $usersQuery->count();
+        }
+
+        $archiveTypesCount = $hasArchiveRead ? ArchiveType::count() : null;
+        $locationsCount = $hasArchiveRead ? ArchiveLocation::count() : null;
         $departmentsCount = Department::count();
 
-        // Récentes archives numérisées
-        $recentArchives = Archive::with(['user', 'department', 'archiveType'])
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        // Récentes archives numérisées (Filtrées par périmètre structurel)
+        $recentArchives = collect();
+        if ($hasArchiveRead) {
+            $recentArchivesQuery = Archive::with(['user', 'department', 'archiveType']);
+            $this->applyStructuralScopeFilter($recentArchivesQuery, $user);
+            $recentArchives = $recentArchivesQuery->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get();
+        }
 
-        // Récents dossiers agents personnel
-        $recentPersonnels = Personnel::orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        // Récents dossiers agents personnel (Conditionnés par permission)
+        $recentPersonnels = $hasPersonnelRead
+            ? Personnel::orderBy('created_at', 'desc')->take(5)->get()
+            : collect();
 
-        // Flux en direct de la Boîte Noire
-        $recentActivities = Activity::with(['causer', 'subject'])
-            ->orderBy('created_at', 'desc')
+        // Flux en direct de la Boîte Noire (Filtré par privilège & département)
+        $recentActivitiesQuery = Activity::with(['causer', 'subject']);
+        $this->applyActivityScopeFilter($recentActivitiesQuery, $user);
+        $recentActivities = $recentActivitiesQuery->orderBy('created_at', 'desc')
             ->take(6)
             ->get();
 
-        // Tendance sur les 14 derniers jours pour le graphique
+        // Tendance sur les 14 derniers jours (Scopée par privilège & département)
         $dailyTrend = [
             'labels' => [],
             'archives' => [],
@@ -70,27 +101,49 @@ class ArchiveController extends Controller
             $label = now()->subDays($i)->format('d/m');
 
             $dailyTrend['labels'][] = $label;
-            $dailyTrend['archives'][] = Activity::whereIn('event', ['archive.consultation', 'archive.download'])
-                ->whereDate('created_at', $date)
-                ->count();
-            $dailyTrend['personnel'][] = Activity::whereIn('event', ['personnel.consultation', 'personnel.download'])
-                ->whereDate('created_at', $date)
-                ->count();
+
+            $archQuery = Activity::whereIn('event', ['archive.consultation', 'archive.download'])
+                ->whereDate('created_at', $date);
+            $this->applyActivityScopeFilter($archQuery, $user);
+            $dailyTrend['archives'][] = $archQuery->count();
+
+            $persQuery = Activity::whereIn('event', ['personnel.consultation', 'personnel.download'])
+                ->whereDate('created_at', $date);
+            $this->applyActivityScopeFilter($persQuery, $user);
+            $dailyTrend['personnel'][] = $persQuery->count();
         }
 
-        // Répartition des archives par département
-        $archivesByDeptRaw = Archive::with('department')
-            ->selectRaw('department_id, COUNT(*) as count')
-            ->whereNotNull('department_id')
-            ->groupBy('department_id')
-            ->orderByDesc('count')
-            ->take(5)
-            ->get();
-
+        // Répartition des archives par département / sous-département
         $archivesByDept = [];
-        foreach ($archivesByDeptRaw as $item) {
-            $name = $item->department?->name ?? 'Non Spécifié';
-            $archivesByDept[$name] = $item->count;
+        if ($hasArchiveRead) {
+            if ($user->isSuper()) {
+                $archivesByDeptRaw = Archive::with('department')
+                    ->selectRaw('department_id, COUNT(*) as count')
+                    ->whereNotNull('department_id')
+                    ->groupBy('department_id')
+                    ->orderByDesc('count')
+                    ->take(5)
+                    ->get();
+
+                foreach ($archivesByDeptRaw as $item) {
+                    $name = $item->department?->name ?? 'Non Spécifié';
+                    $archivesByDept[$name] = $item->count;
+                }
+            } else {
+                // Utilisateur non-super: répartition par sous-département de sa Direction
+                $archivesByDeptRaw = Archive::with('subDepartment')
+                    ->where('department_id', $user->department_id)
+                    ->selectRaw('sub_department_id, COUNT(*) as count')
+                    ->groupBy('sub_department_id')
+                    ->orderByDesc('count')
+                    ->take(5)
+                    ->get();
+
+                foreach ($archivesByDeptRaw as $item) {
+                    $name = $item->subDepartment?->name ?? 'Direction / Tous services';
+                    $archivesByDept[$name] = $item->count;
+                }
+            }
         }
 
         return view('admin.index', [
@@ -114,7 +167,13 @@ class ArchiveController extends Controller
      */
     public function search(Request $request): View
     {
+        Gate::authorize('archive.read');
+
+        $user = auth()->user();
         $query = Archive::with(['archiveType', 'department', 'subDepartment', 'user']);
+
+        // Appliquer le filtre de périmètre structurel (Service / Direction / Global)
+        $this->applyStructuralScopeFilter($query, $user);
 
         if ($request->filled('archive_type_id')) {
             $query->where('archive_type_id', $request->input('archive_type_id'));
@@ -179,7 +238,19 @@ class ArchiveController extends Controller
      */
     public function create(): View
     {
+        Gate::authorize('archive.create');
+
+        /** @var User $user */
+        $user = auth()->user();
+        $isSuper = $user ? $user->isSuper() : false;
+
         $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
+        $userDepartmentId = $user?->department_id;
+        $userSubDepartmentId = $user?->sub_department_id;
+
+        $isDepartmentRestricted = ! $isSuper && ! empty($userDepartmentId);
+        $isSubDepartmentRestricted = ! $isSuper && ! empty($userSubDepartmentId);
 
         return view('admin.pages.archives.create', [
             'formats' => $this->getFormats(),
@@ -188,6 +259,12 @@ class ArchiveController extends Controller
             'departments' => Department::orderBy('name')->get(),
             'emplacementsPhysiques' => $this->getEmplacementsPhysiques(),
             'emplacementsVirtuels' => $this->getEmplacementsVirtuels(),
+            'user' => $user,
+            'isSuper' => $isSuper,
+            'userDepartmentId' => $userDepartmentId,
+            'userSubDepartmentId' => $userSubDepartmentId,
+            'isDepartmentRestricted' => $isDepartmentRestricted,
+            'isSubDepartmentRestricted' => $isSubDepartmentRestricted,
         ]);
     }
 
@@ -196,7 +273,57 @@ class ArchiveController extends Controller
      */
     public function store(StoreArchiveRequest $request): JsonResponse
     {
+        Gate::authorize('archive.create');
+
+        /** @var User $user */
+        $user = auth()->user();
+        $isSuper = $user ? $user->isSuper() : false;
+
         $validated = $request->validated();
+
+        // Contrôles de restriction de département & sous-département selon le rôle et le profil utilisateur
+        if (! $isSuper) {
+            if (empty($user?->department_id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Votre compte d'utilisateur n'est rattaché à aucun département. Impossible de créer une archive.",
+                    'errors' => ['department_id' => ["Aucun département d'attachement défini sur votre compte."]],
+                ], 403);
+            }
+
+            // Restriction Département Principal
+            if (empty($validated['department_id']) || (int) $validated['department_id'] !== (int) $user->department_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Vous ne pouvez enregistrer des archives que dans votre département d'attachement.",
+                    'errors' => ['department_id' => ["Vous devez sélectionner votre département d'attachement."]],
+                ], 422);
+            }
+
+            // Restriction Sous-Département / Service
+            if (! empty($user->sub_department_id)) {
+                if (empty($validated['sub_department_id']) || (int) $validated['sub_department_id'] !== (int) $user->sub_department_id) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Vous ne pouvez enregistrer des archives que dans votre sous-département d'attachement.",
+                        'errors' => ['sub_department_id' => ["Vous devez sélectionner votre sous-département d'attachement."]],
+                    ], 422);
+                }
+            } else {
+                // Si l'utilisateur est restreint au département mais n'a pas de sous-département spécifique,
+                // le sous-département choisi doit impérativement appartenir à son département.
+                if (! empty($validated['sub_department_id'])) {
+                    $subDept = Department::find($validated['sub_department_id']);
+                    if (! $subDept || (int) $subDept->parent_id !== (int) $user->department_id) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Le sous-département sélectionné n'est pas rattaché à votre département d'attachement.",
+                            'errors' => ['sub_department_id' => ['Sous-département invalide pour votre département.']],
+                        ], 422);
+                    }
+                }
+            }
+        }
 
         $filePath = null;
         if ($request->hasFile('file')) {
@@ -216,7 +343,8 @@ class ArchiveController extends Controller
             'department_id' => $validated['department_id'] ?? null,
             'sub_department_id' => $validated['sub_department_id'] ?? null,
             'filepath' => $filePath,
-            'user_id' => auth()->id() ?? 1,
+            'user_id' => auth()->id(),
+            'created_by' => auth()->id(),
         ]);
 
         return response()->json([
@@ -231,8 +359,12 @@ class ArchiveController extends Controller
      */
     public function show(Archive $archive): View
     {
-        $archive->load(['user', 'department', 'subDepartment', 'archiveType', 'creator', 'updater']);
+        Gate::authorize('archive.read');
+
         $user = auth()->user();
+        $this->checkStructuralScope($user, $archive);
+
+        $archive->load(['user', 'department', 'subDepartment', 'archiveType', 'creator', 'updater']);
         $ip = request()->ip();
         $userAgent = request()->userAgent();
 
@@ -285,12 +417,16 @@ class ArchiveController extends Controller
      */
     public function download(Archive $archive): BinaryFileResponse|RedirectResponse
     {
+        Gate::authorize('archive.download');
+
+        $user = auth()->user();
+        $this->checkStructuralScope($user, $archive);
+
         if (empty($archive->filepath) || ! Storage::disk('public')->exists($archive->filepath)) {
             return redirect()->back()
                 ->with('error', "Le fichier lié à cette archive n'est pas disponible sur le stockage.");
         }
 
-        $user = auth()->user();
         $ip = request()->ip();
         $userAgent = request()->userAgent();
 
@@ -322,23 +458,124 @@ class ArchiveController extends Controller
      */
     public function edit(Archive $archive)
     {
-        //
+        Gate::authorize('archive.update');
+
+        $user = auth()->user();
+        $this->checkStructuralScope($user, $archive);
+
+        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
+        return view('admin.pages.archives.edit', [
+            'archive' => $archive->load(['department', 'subDepartment', 'archiveType']),
+            'formats' => $this->getFormats(),
+            'archiveTypes' => ArchiveType::orderBy('name')->get(),
+            'mainDepartments' => $mainDepartments,
+            'departments' => Department::orderBy('name')->get(),
+            'emplacementsPhysiques' => $this->getEmplacementsPhysiques(),
+            'emplacementsVirtuels' => $this->getEmplacementsVirtuels(),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateArchiveRequest $request, Archive $archive)
+    public function update(UpdateArchiveRequest $request, Archive $archive): RedirectResponse
     {
-        //
+        Gate::authorize('archive.update');
+
+        $user = auth()->user();
+        $this->checkStructuralScope($user, $archive);
+
+        $validated = $request->validated();
+
+        if ($request->hasFile('file')) {
+            if ($archive->filepath && Storage::disk('public')->exists($archive->filepath)) {
+                Storage::disk('public')->delete($archive->filepath);
+            }
+            $validated['filepath'] = $request->file('file')->store('archives', 'public');
+        }
+
+        $validated['updated_by'] = auth()->id();
+
+        $archive->update($validated);
+
+        return redirect()->route('archives.search')->with('success', "L'archive « {$archive->description} » a été mise à jour avec succès.");
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Archive $archive)
+    public function destroy(Archive $archive): RedirectResponse
     {
-        //
+        Gate::authorize('archive.delete');
+
+        $user = auth()->user();
+        $this->checkStructuralScope($user, $archive);
+
+        $desc = $archive->description;
+        $archive->delete();
+
+        return redirect()->route('archives.search')->with('success', "L'archive « {$desc} » a été supprimée avec succès.");
+    }
+
+    /**
+     * Check if user has access to a specific archive according to structural scope.
+     */
+    protected function checkStructuralScope(User $user, Archive $archive): void
+    {
+        if ($user->isSuper()) {
+            return;
+        }
+
+        if ($user->isClassique() && $user->sub_department_id) {
+            if ((int) $archive->sub_department_id !== (int) $user->sub_department_id) {
+                abort(403, 'Accès refusé : Cette archive appartient à un autre service ou sous-département.');
+            }
+
+            return;
+        }
+
+        if ($user->isPrivileged() && $user->department_id) {
+            if ((int) $archive->department_id !== (int) $user->department_id) {
+                abort(403, 'Accès refusé : Cette archive appartient à une autre Direction Principale.');
+            }
+
+            return;
+        }
+    }
+
+    /**
+     * Apply structural scope query filter to archives query.
+     */
+    protected function applyStructuralScopeFilter($query, User $user): void
+    {
+        if ($user->isSuper()) {
+            return;
+        }
+
+        if ($user->isClassique() && $user->sub_department_id) {
+            $query->where('sub_department_id', $user->sub_department_id);
+        } elseif ($user->isPrivileged() && $user->department_id) {
+            $query->where('department_id', $user->department_id);
+        }
+    }
+
+    /**
+     * Apply activity/consultation log scope based on user role and department.
+     */
+    protected function applyActivityScopeFilter($query, User $user): void
+    {
+        if ($user->isSuper()) {
+            return;
+        }
+
+        if ($user->isPrivileged() && $user->department_id) {
+            $deptUserIds = User::where('department_id', $user->department_id)->pluck('id');
+            $query->whereIn('causer_id', $deptUserIds);
+        } else {
+            // Classique or default: only their own user account consultations
+            $query->where('causer_id', $user->id);
+        }
     }
 
     /**

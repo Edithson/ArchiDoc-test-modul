@@ -25,15 +25,17 @@
 
     <!-- Action de Réinitialisation -->
     <div>
-      <form method="POST" action="{{ route('settings.reset') }}" onsubmit="return confirm('Êtes-vous sûr de vouloir réinitialiser l\'ensemble des paramètres aux valeurs par défaut de la DGB Cameroun ?');">
-        @csrf
-        <button type="submit" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 shadow-xs hover:bg-gray-50 hover:text-red-700 transition">
-          <svg class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-          </svg>
-          Réinitialiser aux valeurs DGB par défaut
-        </button>
-      </form>
+      @if(auth()->user()?->hasPermission('Setting', 'update'))
+        <form method="POST" action="{{ route('settings.reset') }}" onsubmit="return confirm('Êtes-vous sûr de vouloir réinitialiser l\'ensemble des paramètres aux valeurs par défaut de la DGB Cameroun ?');">
+          @csrf
+          <button type="submit" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 shadow-xs hover:bg-gray-50 hover:text-red-700 transition">
+            <svg class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Réinitialiser aux valeurs DGB par défaut
+          </button>
+        </form>
+      @endif
     </div>
   </div>
 
@@ -308,12 +310,14 @@
       </div>
 
       <!-- Bouton d'enregistrement général -->
-      <div class="flex items-center justify-end gap-3 pt-2">
-        <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-700 px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-700 transition">
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-          Enregistrer les modifications
-        </button>
-      </div>
+      @if(auth()->user()?->hasPermission('Setting', 'update'))
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-700 px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-700 transition">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            Enregistrer les modifications
+          </button>
+        </div>
+      @endif
 
     </div>
   </form>

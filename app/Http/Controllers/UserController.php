@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\Department;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -14,11 +15,76 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     /**
+     * Map of available models and their supported actions for the permission matrix.
+     *
+     * @var array<string, array<string, mixed>>
+     */
+    protected array $modelDefinitions = [
+        'User' => [
+            'label' => 'Comptes Utilisateurs',
+            'icon' => 'users',
+            'actions' => ['read' => 'Consulter les comptes', 'create' => 'Créer des comptes', 'update' => 'Modifier les comptes', 'delete' => 'Supprimer des comptes'],
+        ],
+        'Archive' => [
+            'label' => 'Archives Numérisées',
+            'icon' => 'archive',
+            'actions' => ['read' => 'Consulter les archives', 'create' => 'Verser des archives', 'update' => 'Modifier les fiches', 'delete' => 'Supprimer les archives', 'download' => 'Télécharger les fichiers'],
+        ],
+        'ArchiveLocation' => [
+            'label' => 'Emplacements Physiques & Virtuels',
+            'icon' => 'location',
+            'actions' => ['read' => 'Consulter les emplacements', 'create' => 'Créer des emplacements', 'update' => 'Modifier les emplacements', 'delete' => 'Supprimer des emplacements'],
+        ],
+        'ArchiveType' => [
+            'label' => 'Types d\'Archives',
+            'icon' => 'tag',
+            'actions' => ['read' => 'Consulter les types', 'create' => 'Créer des types', 'update' => 'Modifier les types', 'delete' => 'Supprimer des types'],
+        ],
+        'Department' => [
+            'label' => 'Groupes d\'Accès & Structures MINFI',
+            'icon' => 'building',
+            'actions' => ['read' => 'Consulter les structures', 'create' => 'Créer des structures', 'update' => 'Modifier les structures', 'delete' => 'Supprimer des structures'],
+        ],
+        'Personnel' => [
+            'label' => 'Dossiers du Personnel',
+            'icon' => 'user-check',
+            'actions' => ['read' => 'Consulter les dossiers', 'create' => 'Créer des dossiers', 'update' => 'Modifier les dossiers', 'delete' => 'Supprimer des dossiers', 'zip_download' => 'Télécharger les archives ZIP'],
+        ],
+        'Piece' => [
+            'label' => 'Référentiel des Pièces',
+            'icon' => 'file-text',
+            'actions' => ['read' => 'Consulter les pièces', 'create' => 'Créer des pièces', 'update' => 'Modifier les pièces', 'delete' => 'Supprimer des pièces'],
+        ],
+        'Role' => [
+            'label' => 'Habilitations & Rôles',
+            'icon' => 'shield',
+            'actions' => ['read' => 'Consulter les rôles', 'create' => 'Créer des rôles', 'update' => 'Modifier les habilitations', 'delete' => 'Supprimer des rôles'],
+        ],
+        'Setting' => [
+            'label' => 'Paramètres Système & Sécurité',
+            'icon' => 'settings',
+            'actions' => ['read' => 'Consulter les paramètres', 'update' => 'Modifier la configuration'],
+        ],
+    ];
+
+    /**
      * Display a listing of user accounts.
      */
     public function index(Request $request): View
     {
-        $query = User::with(['department', 'subDepartment']);
+        abort_if(! $request->user()?->hasPermission('User', 'read'), 403, 'Accès non autorisé à la gestion des utilisateurs.');
+
+        $currentUser = $request->user();
+        $query = User::with(['department', 'subDepartment', 'role']);
+
+        if ($currentUser && ! $currentUser->isSuper()) {
+            if ($currentUser->department_id) {
+                $query->where('department_id', $currentUser->department_id);
+            }
+            if ($currentUser->sub_department_id) {
+                $query->where('sub_department_id', $currentUser->sub_department_id);
+            }
+        }
 
         if ($request->filled('search')) {
             $search = trim((string) $request->input('search'));
@@ -32,21 +98,24 @@ class UserController extends Controller
                     })
                     ->orWhereHas('subDepartment', function ($sq) use ($search) {
                         $sq->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('role', function ($rq) use ($search) {
+                        $rq->where('name', 'like', "%{$search}%");
                     });
             });
         }
 
-        if ($request->filled('roles')) {
+        if ($request->filled('role_id')) {
+            $query->where('role_id', $request->input('role_id'));
+        } elseif ($request->filled('roles')) {
             $roleVal = (string) $request->input('roles');
-            if (str_contains(strtolower($roleVal), 'super')) {
-                $query->where('roles', 'like', '%super%');
-            } elseif (str_contains(strtolower($roleVal), 'privilég') || str_contains(strtolower($roleVal), 'privileg')) {
-                $query->where('roles', 'like', '%privil%')
-                    ->where('roles', 'not like', '%super%');
-            } elseif (str_contains(strtolower($roleVal), 'class')) {
-                $query->where('roles', 'like', '%class%');
+            if (is_numeric($roleVal)) {
+                $query->where('role_id', $roleVal);
             } else {
-                $query->where('roles', 'like', "%{$roleVal}%");
+                $roleObj = Role::findByName($roleVal);
+                if ($roleObj) {
+                    $query->where('role_id', $roleObj->id);
+                }
             }
         }
 
@@ -71,16 +140,27 @@ class UserController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+        $mainDeptQuery = Department::whereNull('parent_id')->with('children')->orderBy('name');
+        if ($currentUser && ! $currentUser->isSuper() && $currentUser->department_id) {
+            $mainDeptQuery->where('id', $currentUser->department_id);
+        }
+        $mainDepartments = $mainDeptQuery->get();
+
+        $rolesQuery = Role::orderBy('name');
+        if ($currentUser && ! $currentUser->isSuper()) {
+            $rolesQuery->where('name', 'not like', '%Super%');
+        }
+        $rolesList = $rolesQuery->get();
 
         return view('admin.pages.users.index', [
             'users' => $users,
             'mainDepartments' => $mainDepartments,
             'departments' => Department::orderBy('name')->get(),
-            'roleOptions' => $this->getRoleOptions(),
+            'rolesList' => $rolesList,
+            'roleOptions' => $rolesList,
             'filters' => [
                 'search' => (string) $request->input('search', ''),
-                'roles' => (string) $request->input('roles', ''),
+                'role_id' => (string) $request->input('role_id', ''),
                 'department_id' => (string) $request->input('department_id', ''),
                 'sub_department_id' => (string) $request->input('sub_department_id', ''),
                 'statut' => (string) $request->input('statut', ''),
@@ -93,12 +173,26 @@ class UserController extends Controller
      */
     public function create(): View
     {
-        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+        $currentUser = request()->user();
+        abort_if(! $currentUser?->hasPermission('User', 'create'), 403, 'Accès non autorisé à la création de comptes utilisateurs.');
+
+        $mainDeptQuery = Department::whereNull('parent_id')->with('children')->orderBy('name');
+        if ($currentUser && ! $currentUser->isSuper() && $currentUser->department_id) {
+            $mainDeptQuery->where('id', $currentUser->department_id);
+        }
+        $mainDepartments = $mainDeptQuery->get();
+
+        $rolesQuery = Role::orderBy('name');
+        if ($currentUser && ! $currentUser->isSuper()) {
+            $rolesQuery->where('name', 'not like', '%Super%');
+        }
+        $rolesList = $rolesQuery->get();
 
         return view('admin.pages.users.create', [
             'mainDepartments' => $mainDepartments,
             'departments' => Department::orderBy('name')->get(),
-            'roleOptions' => $this->getRoleOptions(),
+            'rolesList' => $rolesList,
+            'roleOptions' => $rolesList,
         ]);
     }
 
@@ -107,7 +201,20 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): RedirectResponse
     {
+        abort_if(! $request->user()?->hasPermission('User', 'create'), 403, 'Accès non autorisé à la création de comptes utilisateurs.');
+
         $validated = $request->validated();
+
+        $currentUser = $request->user();
+        if ($currentUser && ! $currentUser->isSuper()) {
+            if ($currentUser->department_id) {
+                $validated['department_id'] = $currentUser->department_id;
+            }
+            if ($currentUser->sub_department_id) {
+                $validated['sub_department_id'] = $currentUser->sub_department_id;
+            }
+        }
+
         $validated['password'] = Hash::make($validated['password']);
 
         $user = User::create($validated);
@@ -120,14 +227,112 @@ class UserController extends Controller
      */
     public function edit(User $user): View
     {
-        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+        $currentUser = request()->user();
+        abort_if(! $currentUser?->hasPermission('User', 'update'), 403, 'Accès non autorisé à la modification des comptes utilisateurs.');
+
+        $this->checkStructuralScope($user);
+
+        $mainDeptQuery = Department::whereNull('parent_id')->with('children')->orderBy('name');
+        if ($currentUser && ! $currentUser->isSuper() && $currentUser->department_id) {
+            $mainDeptQuery->where('id', $currentUser->department_id);
+        }
+        $mainDepartments = $mainDeptQuery->get();
+
+        $rolesQuery = Role::orderBy('name');
+        if ($currentUser && ! $currentUser->isSuper()) {
+            $rolesQuery->where('name', 'not like', '%Super%');
+        }
+        $rolesList = $rolesQuery->get();
 
         return view('admin.pages.users.edit', [
-            'user' => $user->load(['department', 'subDepartment']),
+            'user' => $user->load(['department', 'subDepartment', 'role']),
             'mainDepartments' => $mainDepartments,
             'departments' => Department::orderBy('name')->get(),
-            'roleOptions' => $this->getRoleOptions(),
+            'rolesList' => $rolesList,
+            'roleOptions' => $rolesList,
+            'modelDefinitions' => $this->modelDefinitions,
         ]);
+    }
+
+    /**
+     * Show the form for editing custom permission overrides for the specified user.
+     */
+    public function editPermissions(User $user): View
+    {
+        $currentUser = request()->user();
+        abort_if(! $currentUser?->hasPermission('User', 'update'), 403, 'Accès non autorisé à la gestion des autorisations.');
+
+        $this->checkStructuralScope($user);
+
+        return view('admin.pages.users.permissions', [
+            'user' => $user->load(['department', 'subDepartment', 'role']),
+            'modelDefinitions' => $this->modelDefinitions,
+        ]);
+    }
+
+    /**
+     * Update custom permission overrides for the specified user.
+     */
+    public function updatePermissions(Request $request, User $user): RedirectResponse
+    {
+        $currentUser = $request->user();
+        abort_if(! $currentUser?->hasPermission('User', 'update'), 403, 'Accès non autorisé à la gestion des autorisations.');
+
+        $this->checkStructuralScope($user);
+
+        $inputPermissions = $request->input('custom_permissions', []);
+        $deltas = $this->processCustomPermissionsDelta($inputPermissions, $user->role_id);
+
+        $user->update(['custom_permissions' => $deltas]);
+
+        return redirect()->route('users.permissions', $user->id)->with('success', "Les autorisations personnalisées de « {$user->name} » ont été mises à jour avec succès.");
+    }
+
+    /**
+     * Helper to calculate custom permission deltas against base role permissions.
+     *
+     * @param  array<string, mixed>  $inputPermissions
+     * @return array<string, array<string, bool>>|null
+     */
+    protected function processCustomPermissionsDelta(array $inputPermissions, ?int $roleId): ?array
+    {
+        $role = $roleId ? Role::find($roleId) : null;
+        $rolePermissions = $role ? ($role->permissions ?? []) : [];
+
+        $deltas = [];
+
+        foreach ($this->modelDefinitions as $modelKey => $def) {
+            foreach (array_keys($def['actions']) as $action) {
+                if (! isset($inputPermissions[$modelKey][$action])) {
+                    continue;
+                }
+
+                $val = $inputPermissions[$modelKey][$action];
+
+                if ($val === 'inherit' || $val === null || $val === '') {
+                    continue;
+                }
+
+                $requestedBool = null;
+                if ($val === '1' || $val === 1 || $val === true || $val === 'true') {
+                    $requestedBool = true;
+                } elseif ($val === '0' || $val === 0 || $val === false || $val === 'false') {
+                    $requestedBool = false;
+                }
+
+                if ($requestedBool === null) {
+                    continue;
+                }
+
+                $roleDefaultBool = (bool) ($rolePermissions[$modelKey][$action] ?? false);
+
+                if ($requestedBool !== $roleDefaultBool) {
+                    $deltas[$modelKey][$action] = $requestedBool;
+                }
+            }
+        }
+
+        return ! empty($deltas) ? $deltas : null;
     }
 
     /**
@@ -135,12 +340,33 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
+        $currentUser = $request->user();
+        abort_if(! $currentUser?->hasPermission('User', 'update'), 403, 'Accès non autorisé à la modification des comptes utilisateurs.');
+
+        $this->checkStructuralScope($user);
+
         $validated = $request->validated();
+
+        if ($currentUser && ! $currentUser->isSuper()) {
+            if ($currentUser->department_id) {
+                $validated['department_id'] = $currentUser->department_id;
+            }
+            if ($currentUser->sub_department_id) {
+                $validated['sub_department_id'] = $currentUser->sub_department_id;
+            }
+        }
 
         if (filled($validated['password'] ?? null)) {
             $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);
+        }
+
+        // Process custom_permissions input matrix (Delta-only logic)
+        if ($request->has('custom_permissions')) {
+            $inputPermissions = $request->input('custom_permissions', []);
+            $roleId = $validated['role_id'] ?? $user->role_id;
+            $validated['custom_permissions'] = $this->processCustomPermissionsDelta($inputPermissions, $roleId);
         }
 
         $user->update($validated);
@@ -149,10 +375,28 @@ class UserController extends Controller
     }
 
     /**
+     * Revoke all custom permission overrides for a user, restoring 100% role inheritance.
+     */
+    public function revokeCustomPermissions(User $user): RedirectResponse
+    {
+        abort_if(! request()->user()?->hasPermission('User', 'update'), 403, 'Accès non autorisé à la révoquation des autorisations.');
+
+        $this->checkStructuralScope($user);
+
+        $user->update(['custom_permissions' => null]);
+
+        return back()->with('success', "Les autorisations personnalisées de « {$user->name} » ont été entièrement révoquées. L'utilisateur réhérite désormais à 100% des droits de son rôle.");
+    }
+
+    /**
      * Toggle the specified user account active/suspended status.
      */
     public function toggleStatus(User $user): RedirectResponse
     {
+        abort_if(! request()->user()?->hasPermission('User', 'update'), 403, 'Accès non autorisé à la modification du statut du compte.');
+
+        $this->checkStructuralScope($user);
+
         if ($user->id === auth()->id()) {
             return back()->with('error', 'Vous ne pouvez pas suspendre votre propre compte connecté.');
         }
@@ -170,6 +414,10 @@ class UserController extends Controller
      */
     public function destroy(User $user): RedirectResponse
     {
+        abort_if(! request()->user()?->hasPermission('User', 'delete'), 403, 'Accès non autorisé à la suppression de comptes utilisateurs.');
+
+        $this->checkStructuralScope($user);
+
         if ($user->id === auth()->id()) {
             return back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
         }
@@ -178,6 +426,26 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')->with('success', "Le compte utilisateur « {$userName} » a été supprimé.");
+    }
+
+    /**
+     * Ensure the target user falls within the structural scope of the authenticated user.
+     */
+    protected function checkStructuralScope(User $targetUser): void
+    {
+        $currentUser = auth()->user();
+
+        if (! $currentUser || $currentUser->isSuper()) {
+            return;
+        }
+
+        if ((int) $targetUser->department_id !== (int) $currentUser->department_id) {
+            abort(403, 'Accès non autorisé : Cet utilisateur appartient à une autre Direction Principale.');
+        }
+
+        if ($currentUser->sub_department_id && (int) $targetUser->sub_department_id !== (int) $currentUser->sub_department_id) {
+            abort(403, 'Accès non autorisé : Cet utilisateur appartient à un autre service / sous-département.');
+        }
     }
 
     /**

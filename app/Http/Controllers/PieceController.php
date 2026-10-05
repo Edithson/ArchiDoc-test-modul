@@ -16,6 +16,8 @@ class PieceController extends Controller
      */
     public function index(Request $request): View
     {
+        abort_if(! $request->user()?->hasPermission('Piece', 'read'), 403, "Accès non autorisé aux pièces d'intégration.");
+
         $query = Piece::withCount('files');
 
         if ($request->filled('search')) {
@@ -50,6 +52,8 @@ class PieceController extends Controller
      */
     public function create(): View
     {
+        abort_if(! request()->user()?->hasPermission('Piece', 'create'), 403, 'Accès non autorisé à la création de pièces.');
+
         return view('admin.pages.pieces.create');
     }
 
@@ -58,6 +62,8 @@ class PieceController extends Controller
      */
     public function store(StorePieceRequest $request): RedirectResponse
     {
+        abort_if(! $request->user()?->hasPermission('Piece', 'create'), 403, 'Accès non autorisé à la création de pièces.');
+
         $piece = Piece::create($request->validated());
 
         return redirect()->route('pieces.index')
@@ -69,6 +75,8 @@ class PieceController extends Controller
      */
     public function edit(Piece $piece): View
     {
+        abort_if(! request()->user()?->hasPermission('Piece', 'update'), 403, 'Accès non autorisé à la modification de pièces.');
+
         return view('admin.pages.pieces.edit', [
             'piece' => $piece,
         ]);
@@ -79,6 +87,8 @@ class PieceController extends Controller
      */
     public function update(UpdatePieceRequest $request, Piece $piece): RedirectResponse
     {
+        abort_if(! $request->user()?->hasPermission('Piece', 'update'), 403, 'Accès non autorisé à la modification de pièces.');
+
         $piece->update($request->validated());
 
         return redirect()->route('pieces.index')
@@ -91,6 +101,8 @@ class PieceController extends Controller
      */
     public function destroy(Piece $piece): RedirectResponse
     {
+        abort_if(! request()->user()?->hasPermission('Piece', 'delete'), 403, 'Accès non autorisé à la suppression de pièces.');
+
         $filesCount = $piece->files()->count();
 
         if ($filesCount > 0) {

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('matricule')->nullable()->unique();
             $table->string('email')->nullable()->unique();
             $table->string('phone')->nullable();
-            $table->string('roles')->nullable();
+            $table->foreignId('role_id')->nullable()->constrained('roles')->nullOnDelete();
             $table->boolean('statut')->nullable()->default(true);
             $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
             $table->foreignId('sub_department_id')->nullable()->constrained('departments')->nullOnDelete();

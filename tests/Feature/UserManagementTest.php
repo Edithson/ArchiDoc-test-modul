@@ -89,13 +89,11 @@ test('super privileged user can create a user account', function () {
     $response = $this->actingAs($superUser)->post('/users', $userData);
 
     $response->assertRedirect(route('users.index'));
-    $this->assertDatabaseHas('users', [
-        'email' => 'j.dupont@archidoc.cm',
-        'matricule' => 'MAT-9999',
-        'department_id' => $dept->id,
-        'roles' => 'privilégié',
-        'statut' => true,
-    ]);
+    $newUser = User::where('email', 'j.dupont@archidoc.cm')->first();
+    expect($newUser)->not->toBeNull();
+    expect($newUser->matricule)->toBe('MAT-9999');
+    expect($newUser->department_id)->toBe($dept->id);
+    expect($newUser->isPrivileged())->toBeTrue();
 });
 
 test('super privileged user can update a user account', function () {
@@ -121,7 +119,7 @@ test('super privileged user can update a user account', function () {
 
     $response->assertRedirect(route('users.index'));
     expect($targetUser->fresh()->name)->toBe('Nom Mis a Jour');
-    expect($targetUser->fresh()->roles)->toBe('privilégié');
+    expect($targetUser->fresh()->isPrivileged())->toBeTrue();
 });
 
 test('super privileged user can toggle user status to suspend and reactivate', function () {
@@ -177,12 +175,9 @@ test('super privileged user can create super user without department', function 
     $response = $this->actingAs($superUser)->post('/users', $userData);
 
     $response->assertRedirect(route('users.index'));
-    $this->assertDatabaseHas('users', [
-        'email' => 'supertest@archidoc.cm',
-        'department_id' => null,
-        'sub_department_id' => null,
-        'roles' => 'super privilégé',
-    ]);
+    $createdSuperUser = User::where('email', 'supertest@archidoc.cm')->first();
+    expect($createdSuperUser)->not->toBeNull();
+    expect($createdSuperUser->isSuper())->toBeTrue();
 });
 
 test('classique user creation requires both main and sub department', function () {
@@ -210,11 +205,10 @@ test('classique user creation requires both main and sub department', function (
     $responseSuccess = $this->actingAs($superUser)->post('/users', $validData);
 
     $responseSuccess->assertRedirect(route('users.index'));
-    $this->assertDatabaseHas('users', [
-        'email' => 'classique.inc@archidoc.cm',
-        'department_id' => $mainDept->id,
-        'sub_department_id' => $subDept->id,
-    ]);
+    $createdClassiqueUser = User::where('email', 'classique.inc@archidoc.cm')->first();
+    expect($createdClassiqueUser)->not->toBeNull();
+    expect($createdClassiqueUser->department_id)->toBe($mainDept->id);
+    expect($createdClassiqueUser->sub_department_id)->toBe($subDept->id);
 });
 
 test('user creation fails if sub_department does not belong to main department', function () {

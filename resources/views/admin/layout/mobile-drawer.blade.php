@@ -34,9 +34,18 @@
     </div>
 
     <!-- 2. Création -->
+    @php
+      $hasMobileArchiveCreate = auth()->user()?->hasPermission('Archive', 'create');
+      $hasMobileArchiveTypeRead = auth()->user()?->hasPermission('ArchiveType', 'read');
+      $hasMobileArchiveLocationRead = auth()->user()?->hasPermission('ArchiveLocation', 'read');
+      $hasMobileDepartmentRead = auth()->user()?->hasPermission('Department', 'read');
+      $hasMobileCreationAccess = $hasMobileArchiveCreate || $hasMobileArchiveTypeRead || $hasMobileArchiveLocationRead || $hasMobileDepartmentRead;
+    @endphp
+    @if($hasMobileCreationAccess)
     <div>
       <div class="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-brand-200/80">Création</div>
       <ul class="space-y-1">
+        @if($hasMobileArchiveCreate)
         <li>
           <a href="{{ route('archives.create') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archives.create') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -46,6 +55,8 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @endif
+        @if($hasMobileArchiveTypeRead)
         <li>
           <a href="{{ route('archive-types.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archive-types.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -55,6 +66,8 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @endif
+        @if($hasMobileArchiveLocationRead)
         <li>
           <a href="{{ route('archive-locations.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archive-locations.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -64,6 +77,8 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @endif
+        @if($hasMobileDepartmentRead)
         <li>
           <a href="{{ route('departments.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('departments.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -73,13 +88,22 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @endif
       </ul>
     </div>
+    @endif
 
     <!-- 3. Personnel -->
+    @php
+      $hasMobilePersonnelRead = auth()->user()?->hasPermission('Personnel', 'read');
+      $hasMobilePersonnelCreate = auth()->user()?->hasPermission('Personnel', 'create');
+      $hasMobilePieceRead = auth()->user()?->hasPermission('Piece', 'read');
+    @endphp
+    @if($hasMobilePersonnelRead || $hasMobilePersonnelCreate || $hasMobilePieceRead)
     <div>
       <div class="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-brand-200/80">Personnel</div>
       <ul class="space-y-1">
+        @if($hasMobilePersonnelRead)
         <li>
           <a href="{{ route('personnels.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('personnels.index') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -98,6 +122,8 @@
             <span class="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-bold text-indigo-900">Analytics</span>
           </a>
         </li>
+        @endif
+        @if($hasMobilePersonnelCreate)
         <li>
           <a href="{{ route('personnels.create') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('personnels.create') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -107,6 +133,8 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @endif
+        @if($hasMobilePieceRead)
         <li>
           <a href="{{ route('pieces.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('pieces.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -116,10 +144,16 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @endif
       </ul>
     </div>
+    @endif
 
     <!-- 3. Consultation -->
+    @php
+      $hasMobileArchiveRead = auth()->user()?->hasPermission('Archive', 'read');
+    @endphp
+    @if($hasMobileArchiveRead)
     <div>
       <div class="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-brand-200/80">Consultation</div>
       <ul class="space-y-1">
@@ -143,6 +177,7 @@
         </li>
       </ul>
     </div>
+    @endif
 
     <!-- 4. Documentation -->
     <div>
@@ -197,9 +232,18 @@
     </div>
 
     <!-- 5. Administration -->
+    @php
+      $hasMobileUserRead = auth()->user()?->hasPermission('User', 'read');
+      $hasMobileRoleRead = auth()->user()?->hasPermission('Role', 'read');
+      $hasMobileSettingRead = auth()->user()?->hasPermission('Setting', 'read');
+      $isMobileSuperUser = auth()->user()?->isSuper();
+      $hasMobileAdminAccess = $hasMobileUserRead || $hasMobileRoleRead || $hasMobileSettingRead || $isMobileSuperUser;
+    @endphp
+    @if($hasMobileAdminAccess)
     <div>
       <div class="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-brand-200/80">Administration</div>
       <ul class="space-y-1">
+        @if($hasMobileUserRead)
         <li>
           <a href="{{ route('users.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('users.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -208,6 +252,20 @@
             </div>
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
+        </li>
+        @endif
+        @if($hasMobileRoleRead)
+        <li>
+          <a href="{{ route('roles.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('roles.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
+            <div class="flex items-center gap-2.5">
+              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              <span>Habilitations & Rôles</span>
+            </div>
+            <span class="rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-900">Matrice JSON</span>
+          </a>
+        </li>
+        @endif
+        @if($hasMobileSettingRead)
         <li>
           <a href="{{ route('settings.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('settings.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -217,6 +275,7 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @endif
         <li>
           <a href="{{ route('activity-logs.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.index') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -226,6 +285,7 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @if($hasMobileUserRead || $isMobileSuperUser)
         <li>
           <a href="{{ route('activity-logs.auth') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.auth') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -235,6 +295,8 @@
             <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-900">Boîte Noire</span>
           </a>
         </li>
+        @endif
+        @if($hasMobileSettingRead || $isMobileSuperUser)
         <li>
           <a href="{{ route('activity-logs.system') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.system') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -244,8 +306,10 @@
             <span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">Actif</span>
           </a>
         </li>
+        @endif
       </ul>
     </div>
+    @endif
 
   </nav>
 </div>

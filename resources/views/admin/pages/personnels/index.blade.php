@@ -28,18 +28,22 @@
     </div>
 
     <div class="flex items-center gap-3">
+      @if(auth()->user()?->hasPermission('Piece', 'read'))
       <a href="{{ route('pieces.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50">
         <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
         Référentiel des pièces
       </a>
+      @endif
+      @if(auth()->user()?->hasPermission('Personnel', 'create'))
       <a href="{{ route('personnels.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-700">
         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
         </svg>
         Nouveau dossier agent
       </a>
+      @endif
     </div>
   </div>
 
@@ -281,17 +285,22 @@
               </td>
               <td class="px-6 py-4 text-right">
                 <div class="flex items-center justify-end gap-2">
+                  @if(auth()->user()?->hasPermission('Personnel', 'read'))
                   <a href="{{ route('personnels.show', $agent) }}" class="rounded-lg p-1.5 text-brand-700 hover:bg-brand-50" title="Consulter le dossier">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                       <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
                   </a>
+                  @endif
+                  @if(auth()->user()?->hasPermission('Personnel', 'update'))
                   <a href="{{ route('personnels.edit', $agent) }}" class="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-brand-700" title="Compléter / Modifier le dossier">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                     </svg>
                   </a>
+                  @endif
+                  @if(auth()->user()?->hasPermission('Personnel', 'delete'))
                   <form method="POST" action="{{ route('personnels.destroy', $agent) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer le dossier de cet agent ?');" class="inline">
                     @csrf
                     @method('DELETE')
@@ -301,6 +310,7 @@
                       </svg>
                     </button>
                   </form>
+                  @endif
                 </div>
               </td>
             </tr>

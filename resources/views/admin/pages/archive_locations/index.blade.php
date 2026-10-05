@@ -29,12 +29,14 @@
     </div>
 
     <div class="flex items-center gap-3">
+      @can('archivelocation.create')
       <a href="{{ route('archive-locations.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-700">
         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
         </svg>
         Nouvel emplacement
       </a>
+      @endcan
     </div>
   </div>
 
@@ -167,11 +169,14 @@
               </td>
               <td class="px-6 py-4 text-right">
                 <div class="flex items-center justify-end gap-2">
+                  @can('archivelocation.update')
                   <a href="{{ route('archive-locations.edit', $location) }}" class="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-brand-700" title="Modifier l'emplacement">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                     </svg>
                   </a>
+                  @endcan
+                  @can('archivelocation.delete')
                   <form method="POST" action="{{ route('archive-locations.destroy', $location) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?');" class="inline">
                     @csrf
                     @method('DELETE')
@@ -181,6 +186,7 @@
                       </svg>
                     </button>
                   </form>
+                  @endcan
                 </div>
               </td>
             </tr>
