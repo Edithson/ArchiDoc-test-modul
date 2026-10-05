@@ -28,6 +28,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'roles',
+        'custom_permissions',
         'statut',
         'department_id',
         'sub_department_id',
@@ -52,6 +53,14 @@ class User extends Authenticatable
     public function subDepartment(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'sub_department_id');
+    }
+
+    /**
+     * Get the user's role record.
+     */
+    public function roleModel(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'roles', 'name');
     }
 
     /**
@@ -86,6 +95,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'statut' => 'boolean',
+            'custom_permissions' => 'array',
         ];
     }
 
@@ -113,5 +123,28 @@ class User extends Authenticatable
     public function isClassique(): bool
     {
         return strtolower((string) $this->roles) === 'classique';
+    }
+
+    /**
+     * Check functional permission for a model and action.
+     */
+    public function hasPermission(string $model, string $action): bool
+    {
+        if ($this->isSuper()) {
+            return true;
+        }
+
+        // 1. Specific custom permission override on the user
+        if (isset($this->custom_permissions[$model][$action])) {
+            return (bool) $this->custom_permissions[$model][$action];
+        }
+
+        // 2. Fallback to Role default JSON permissions
+        $roleObj = Role::where('name', $this->roles)->first();
+        if ($roleObj && is_array($roleObj->permissions)) {
+            return (bool) ($roleObj->permissions[$model][$action] ?? false);
+        }
+
+        return false;
     }
 }

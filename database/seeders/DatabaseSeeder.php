@@ -24,8 +24,9 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Super privilégié', 'description' => 'Super administrateur du système'],
         ];
 
-        foreach ($roles as $role) {
-            Role::firstOrCreate(['name' => $role['name']], $role);
+        foreach ($roles as $roleData) {
+            $roleData['permissions'] = Role::defaultPermissionsFor($roleData['name']);
+            Role::updateOrCreate(['name' => $roleData['name']], $roleData);
         }
 
         // Création des départements (Hiérarchie MINFI)
