@@ -120,16 +120,24 @@
           <div class="relative">
             <select id="department_id" name="department_id" required onchange="handleDepartmentChange(this.value)"
               class="block w-full appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-3.5 pr-8 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
-              <option value="">-- Aucune (Accès système global pour Super Privilégié) --</option>
+              @if(auth()->user()?->isSuper())
+                <option value="">-- Aucune (Accès système global pour Super Privilégié) --</option>
+              @endif
               @foreach($mainDepartments as $mDept)
-                <option value="{{ $mDept->id }}" {{ (string) old('department_id') === (string) $mDept->id ? 'selected' : '' }}>
+                <option value="{{ $mDept->id }}" {{ (string) old('department_id', auth()->user()?->isSuper() ? '' : auth()->user()?->department_id) === (string) $mDept->id ? 'selected' : '' }}>
                   {{ $mDept->name }} — {{ $mDept->description }}
                 </option>
               @endforeach
             </select>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
           </div>
-          <p id="dept_help" class="mt-1 text-xs text-gray-500">Obligatoire pour les rôles Privilégié et Classique.</p>
+          <p id="dept_help" class="mt-1 text-xs text-gray-500">
+            @if(!auth()->user()?->isSuper())
+              Compte restreint à votre Direction d'appartenance.
+            @else
+              Obligatoire pour les rôles Privilégié et Classique.
+            @endif
+          </p>
           @error('department_id')
             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
           @enderror
@@ -141,16 +149,18 @@
             Sous-Département / Service <span id="sub_dept_asterisk" class="text-red-500">*</span>
           </label>
           <div class="relative">
-        <select id="sub_department_id" name="sub_department_id" onchange="handleSubDepartmentChange(this)"
+            <select id="sub_department_id" name="sub_department_id" onchange="handleSubDepartmentChange(this)"
               class="block w-full appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-3.5 pr-8 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
               <option value="">-- Tous les services (Accès global à la Direction) --</option>
               @foreach($mainDepartments as $mDept)
                 @if($mDept->children->isNotEmpty())
                   <optgroup label="Services rattachés à : {{ $mDept->name }}" data-parent-id="{{ $mDept->id }}">
                     @foreach($mDept->children as $sDept)
-                      <option value="{{ $sDept->id }}" data-parent-id="{{ $mDept->id }}" {{ (string) old('sub_department_id') === (string) $sDept->id ? 'selected' : '' }}>
-                        {{ $sDept->name }} — {{ $sDept->description }}
-                      </option>
+                      @if(auth()->user()?->isSuper() || !auth()->user()?->sub_department_id || (string)auth()->user()?->sub_department_id === (string)$sDept->id)
+                        <option value="{{ $sDept->id }}" data-parent-id="{{ $mDept->id }}" {{ (string) old('sub_department_id', auth()->user()?->isSuper() ? '' : auth()->user()?->sub_department_id) === (string) $sDept->id ? 'selected' : '' }}>
+                          {{ $sDept->name }} — {{ $sDept->description }}
+                        </option>
+                      @endif
                     @endforeach
                   </optgroup>
                 @endif

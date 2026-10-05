@@ -34,14 +34,24 @@
       ];
   } elseif (request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('activity-logs.index') || request()->routeIs('activity-logs.auth') || request()->routeIs('activity-logs.system') || request()->routeIs('settings.*')) {
       $sidebarTitle = 'ADMINISTRATION';
-      $sidebarNav = [
-          ['title' => 'Comptes utilisateurs', 'route' => route('users.index'), 'active' => request()->routeIs('users.*'), 'icon' => 'users', 'badge' => 'Actif'],
-          ['title' => 'Habilitations & Rôles', 'route' => route('roles.index'), 'active' => request()->routeIs('roles.*'), 'icon' => 'shield', 'badge' => 'Actif'],
-          ['title' => 'Paramètres du système', 'route' => route('settings.index'), 'active' => request()->routeIs('settings.*'), 'icon' => 'default', 'badge' => 'Actif'],
-          ['title' => 'Arbre des événements', 'route' => route('activity-logs.index'), 'active' => request()->routeIs('activity-logs.index'), 'icon' => 'default', 'badge' => 'Actif'],
-          ['title' => 'Sécurité & Accès', 'route' => route('activity-logs.auth'), 'active' => request()->routeIs('activity-logs.auth'), 'icon' => 'default', 'badge' => 'Actif'],
-          ['title' => 'Diagnostic Erreurs', 'route' => route('activity-logs.system'), 'active' => request()->routeIs('activity-logs.system'), 'icon' => 'default', 'badge' => 'Actif'],
-      ];
+      $sidebarNav = [];
+      $user = auth()->user();
+      if ($user?->hasPermission('User', 'read')) {
+          $sidebarNav[] = ['title' => 'Comptes utilisateurs', 'route' => route('users.index'), 'active' => request()->routeIs('users.*'), 'icon' => 'users', 'badge' => 'Actif'];
+      }
+      if ($user?->hasPermission('Role', 'read')) {
+          $sidebarNav[] = ['title' => 'Habilitations & Rôles', 'route' => route('roles.index'), 'active' => request()->routeIs('roles.*'), 'icon' => 'shield', 'badge' => 'Actif'];
+      }
+      if ($user?->hasPermission('Setting', 'read')) {
+          $sidebarNav[] = ['title' => 'Paramètres du système', 'route' => route('settings.index'), 'active' => request()->routeIs('settings.*'), 'icon' => 'default', 'badge' => 'Actif'];
+      }
+      $sidebarNav[] = ['title' => 'Arbre des événements', 'route' => route('activity-logs.index'), 'active' => request()->routeIs('activity-logs.index'), 'icon' => 'default', 'badge' => 'Actif'];
+      if ($user?->hasPermission('User', 'read') || $user?->isSuper()) {
+          $sidebarNav[] = ['title' => 'Sécurité & Accès', 'route' => route('activity-logs.auth'), 'active' => request()->routeIs('activity-logs.auth'), 'icon' => 'default', 'badge' => 'Actif'];
+      }
+      if ($user?->hasPermission('Setting', 'read') || $user?->isSuper()) {
+          $sidebarNav[] = ['title' => 'Diagnostic Erreurs', 'route' => route('activity-logs.system'), 'active' => request()->routeIs('activity-logs.system'), 'icon' => 'default', 'badge' => 'Actif'];
+      }
   } elseif (request()->routeIs('profile.*')) {
       $sidebarTitle = 'MON COMPTE';
       $sidebarNav = [

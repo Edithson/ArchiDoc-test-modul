@@ -210,9 +210,18 @@
     </div>
 
     <!-- 5. Administration -->
+    @php
+      $hasMobileUserRead = auth()->user()?->hasPermission('User', 'read');
+      $hasMobileRoleRead = auth()->user()?->hasPermission('Role', 'read');
+      $hasMobileSettingRead = auth()->user()?->hasPermission('Setting', 'read');
+      $isMobileSuperUser = auth()->user()?->isSuper();
+      $hasMobileAdminAccess = $hasMobileUserRead || $hasMobileRoleRead || $hasMobileSettingRead || $isMobileSuperUser;
+    @endphp
+    @if($hasMobileAdminAccess)
     <div>
       <div class="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-brand-200/80">Administration</div>
       <ul class="space-y-1">
+        @if($hasMobileUserRead)
         <li>
           <a href="{{ route('users.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('users.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -222,6 +231,8 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @endif
+        @if($hasMobileRoleRead)
         <li>
           <a href="{{ route('roles.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('roles.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -231,6 +242,9 @@
             <span class="rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-900">Matrice JSON</span>
           </a>
         </li>
+        @endif
+        @if($hasMobileSettingRead)
+        <li>
           <a href="{{ route('settings.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('settings.*') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
               <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -239,6 +253,7 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @endif
         <li>
           <a href="{{ route('activity-logs.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.index') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -248,6 +263,7 @@
             <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-900">Actif</span>
           </a>
         </li>
+        @if($hasMobileUserRead || $isMobileSuperUser)
         <li>
           <a href="{{ route('activity-logs.auth') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.auth') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -257,6 +273,8 @@
             <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-900">Boîte Noire</span>
           </a>
         </li>
+        @endif
+        @if($hasMobileSettingRead || $isMobileSuperUser)
         <li>
           <a href="{{ route('activity-logs.system') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.system') ? 'bg-white font-bold text-brand-800 shadow-sm' : 'text-brand-50 hover:bg-white/10 hover:text-white' }}">
             <div class="flex items-center gap-2.5">
@@ -266,8 +284,10 @@
             <span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">Actif</span>
           </a>
         </li>
+        @endif
       </ul>
     </div>
+    @endif
 
   </nav>
 </div>

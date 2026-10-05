@@ -72,7 +72,19 @@ class UserController extends Controller
      */
     public function index(Request $request): View
     {
+        abort_if(! $request->user()?->hasPermission('User', 'read'), 403, 'Accès non autorisé à la gestion des utilisateurs.');
+
+        $currentUser = $request->user();
         $query = User::with(['department', 'subDepartment', 'role']);
+
+        if ($currentUser && ! $currentUser->isSuper()) {
+            if ($currentUser->department_id) {
+                $query->where('department_id', $currentUser->department_id);
+            }
+            if ($currentUser->sub_department_id) {
+                $query->where('sub_department_id', $currentUser->sub_department_id);
+            }
+        }
 
         if ($request->filled('search')) {
             $search = trim((string) $request->input('search'));
@@ -128,9 +140,17 @@ class UserController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+        $mainDeptQuery = Department::whereNull('parent_id')->with('children')->orderBy('name');
+        if ($currentUser && ! $currentUser->isSuper() && $currentUser->department_id) {
+            $mainDeptQuery->where('id', $currentUser->department_id);
+        }
+        $mainDepartments = $mainDeptQuery->get();
 
-        $rolesList = Role::orderBy('name')->get();
+        $rolesQuery = Role::orderBy('name');
+        if ($currentUser && ! $currentUser->isSuper()) {
+            $rolesQuery->where('name', 'not like', '%Super%');
+        }
+        $rolesList = $rolesQuery->get();
 
         return view('admin.pages.users.index', [
             'users' => $users,
@@ -153,8 +173,20 @@ class UserController extends Controller
      */
     public function create(): View
     {
-        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
-        $rolesList = Role::orderBy('name')->get();
+        $currentUser = request()->user();
+        abort_if(! $currentUser?->hasPermission('User', 'create'), 403, 'Accès non autorisé à la création de comptes utilisateurs.');
+
+        $mainDeptQuery = Department::whereNull('parent_id')->with('children')->orderBy('name');
+        if ($currentUser && ! $currentUser->isSuper() && $currentUser->department_id) {
+            $mainDeptQuery->where('id', $currentUser->department_id);
+        }
+        $mainDepartments = $mainDeptQuery->get();
+
+        $rolesQuery = Role::orderBy('name');
+        if ($currentUser && ! $currentUser->isSuper()) {
+            $rolesQuery->where('name', 'not like', '%Super%');
+        }
+        $rolesList = $rolesQuery->get();
 
         return view('admin.pages.users.create', [
             'mainDepartments' => $mainDepartments,
@@ -169,7 +201,20 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): RedirectResponse
     {
+        abort_if(! $request->user()?->hasPermission('User', 'create'), 403, 'Accès non autorisé à la création de comptes utilisateurs.');
+
         $validated = $request->validated();
+
+        $currentUser = $request->user();
+        if ($currentUser && ! $currentUser->isSuper()) {
+            if ($currentUser->department_id) {
+                $validated['department_id'] = $currentUser->department_id;
+            }
+            if ($currentUser->sub_department_id) {
+                $validated['sub_department_id'] = $currentUser->sub_department_id;
+            }
+        }
+
         $validated['password'] = Hash::make($validated['password']);
 
         $user = User::create($validated);
@@ -182,8 +227,22 @@ class UserController extends Controller
      */
     public function edit(User $user): View
     {
-        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
-        $rolesList = Role::orderBy('name')->get();
+        $currentUser = request()->user();
+        abort_if(! $currentUser?->hasPermission('User', 'update'), 403, 'Accès non autorisé à la modification des comptes utilisateurs.');
+
+        $this->checkStructuralScope($user);
+
+        $mainDeptQuery = Department::whereNull('parent_id')->with('children')->orderBy('name');
+        if ($currentUser && ! $currentUser->isSuper() && $currentUser->department_id) {
+            $mainDeptQuery->where('id', $currentUser->department_id);
+        }
+        $mainDepartments = $mainDeptQuery->get();
+
+        $rolesQuery = Role::orderBy('name');
+        if ($currentUser && ! $currentUser->isSuper()) {
+            $rolesQuery->where('name', 'not like', '%Super%');
+        }
+        $rolesList = $rolesQuery->get();
 
         return view('admin.pages.users.edit', [
             'user' => $user->load(['department', 'subDepartment', 'role']),
@@ -200,7 +259,21 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
+        $currentUser = $request->user();
+        abort_if(! $currentUser?->hasPermission('User', 'update'), 403, 'Accès non autorisé à la modification des comptes utilisateurs.');
+
+        $this->checkStructuralScope($user);
+
         $validated = $request->validated();
+
+        if ($currentUser && ! $currentUser->isSuper()) {
+            if ($currentUser->department_id) {
+                $validated['department_id'] = $currentUser->department_id;
+            }
+            if ($currentUser->sub_department_id) {
+                $validated['sub_department_id'] = $currentUser->sub_department_id;
+            }
+        }
 
         if (filled($validated['password'] ?? null)) {
             $validated['password'] = Hash::make($validated['password']);
@@ -263,6 +336,10 @@ class UserController extends Controller
      */
     public function revokeCustomPermissions(User $user): RedirectResponse
     {
+        abort_if(! request()->user()?->hasPermission('User', 'update'), 403, 'Accès non autorisé à la révoquation des autorisations.');
+
+        $this->checkStructuralScope($user);
+
         $user->update(['custom_permissions' => null]);
 
         return back()->with('success', "Les autorisations personnalisées de « {$user->name} » ont été entièrement révoquées. L'utilisateur réhérite désormais à 100% des droits de son rôle.");
@@ -273,6 +350,10 @@ class UserController extends Controller
      */
     public function toggleStatus(User $user): RedirectResponse
     {
+        abort_if(! request()->user()?->hasPermission('User', 'update'), 403, 'Accès non autorisé à la modification du statut du compte.');
+
+        $this->checkStructuralScope($user);
+
         if ($user->id === auth()->id()) {
             return back()->with('error', 'Vous ne pouvez pas suspendre votre propre compte connecté.');
         }
@@ -290,6 +371,10 @@ class UserController extends Controller
      */
     public function destroy(User $user): RedirectResponse
     {
+        abort_if(! request()->user()?->hasPermission('User', 'delete'), 403, 'Accès non autorisé à la suppression de comptes utilisateurs.');
+
+        $this->checkStructuralScope($user);
+
         if ($user->id === auth()->id()) {
             return back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
         }
@@ -298,6 +383,26 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')->with('success', "Le compte utilisateur « {$userName} » a été supprimé.");
+    }
+
+    /**
+     * Ensure the target user falls within the structural scope of the authenticated user.
+     */
+    protected function checkStructuralScope(User $targetUser): void
+    {
+        $currentUser = auth()->user();
+
+        if (! $currentUser || $currentUser->isSuper()) {
+            return;
+        }
+
+        if ((int) $targetUser->department_id !== (int) $currentUser->department_id) {
+            abort(403, 'Accès non autorisé : Cet utilisateur appartient à une autre Direction Principale.');
+        }
+
+        if ($currentUser->sub_department_id && (int) $targetUser->sub_department_id !== (int) $currentUser->sub_department_id) {
+            abort(403, 'Accès non autorisé : Cet utilisateur appartient à un autre service / sous-département.');
+        }
     }
 
     /**

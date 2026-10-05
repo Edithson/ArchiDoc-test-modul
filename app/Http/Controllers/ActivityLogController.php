@@ -99,6 +99,8 @@ class ActivityLogController extends Controller
      */
     public function auth(Request $request): View
     {
+        abort_if(! ($request->user()?->isSuper() || $request->user()?->hasPermission('User', 'read')), 403, 'Accès non autorisé au journal de sécurité et des accès.');
+
         $query = Activity::with(['causer', 'subject'])
             ->where('log_name', 'auth');
 
@@ -149,6 +151,8 @@ class ActivityLogController extends Controller
      */
     public function system(Request $request): View
     {
+        abort_if(! ($request->user()?->isSuper() || $request->user()?->hasPermission('Setting', 'read')), 403, "Accès non autorisé au journal d'erreurs système.");
+
         $query = Activity::with(['causer', 'subject'])
             ->where(function ($q) {
                 $q->where('log_name', 'system')

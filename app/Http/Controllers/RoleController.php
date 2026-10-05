@@ -70,6 +70,8 @@ class RoleController extends Controller
      */
     public function index(Request $request): View
     {
+        abort_if(! $request->user()?->hasPermission('Role', 'read'), 403, 'Accès non autorisé à la consultation des rôles.');
+
         $roles = Role::orderBy('name', 'asc')->get();
 
         // Calculate assigned user counts per role and protection status
@@ -94,6 +96,8 @@ class RoleController extends Controller
      */
     public function create(): View
     {
+        abort_if(! request()->user()?->hasPermission('Role', 'create'), 403, 'Accès non autorisé à la création de rôles.');
+
         return view('admin.pages.roles.create', [
             'modelDefinitions' => $this->modelDefinitions,
         ]);
@@ -104,6 +108,8 @@ class RoleController extends Controller
      */
     public function store(StoreRoleRequest $request): RedirectResponse
     {
+        abort_if(! $request->user()?->hasPermission('Role', 'create'), 403, 'Accès non autorisé à la création de rôles.');
+
         $validated = $request->validated();
 
         $permissionsInput = $request->input('permissions', []);
@@ -124,6 +130,8 @@ class RoleController extends Controller
      */
     public function edit(Role $role): View
     {
+        abort_if(! request()->user()?->hasPermission('Role', 'update'), 403, 'Accès non autorisé à la modification des rôles.');
+
         return view('admin.pages.roles.edit', [
             'role' => $role,
             'modelDefinitions' => $this->modelDefinitions,
@@ -135,6 +143,8 @@ class RoleController extends Controller
      */
     public function update(UpdateRoleRequest $request, Role $role): RedirectResponse
     {
+        abort_if(! $request->user()?->hasPermission('Role', 'update'), 403, 'Accès non autorisé à la modification des rôles.');
+
         $validated = $request->validated();
 
         // Protect primary system role names from being altered
@@ -158,6 +168,8 @@ class RoleController extends Controller
      */
     public function destroy(Role $role): RedirectResponse
     {
+        abort_if(! request()->user()?->hasPermission('Role', 'delete'), 403, 'Accès non autorisé à la suppression des rôles.');
+
         if ($role->isPrimary()) {
             return redirect()->back()->with('error', "Le rôle système primaire « {$role->name} » est un rôle fondamental du système et ne peut en aucun cas être supprimé.");
         }

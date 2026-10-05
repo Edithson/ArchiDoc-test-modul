@@ -280,7 +280,13 @@
         <!-- 5. Menu Administration -->
         @php
           $isAdminActive = request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('activity-logs.index') || request()->routeIs('activity-logs.auth') || request()->routeIs('activity-logs.system') || request()->routeIs('settings.*');
+          $hasUserRead = auth()->user()?->hasPermission('User', 'read');
+          $hasRoleRead = auth()->user()?->hasPermission('Role', 'read');
+          $hasSettingRead = auth()->user()?->hasPermission('Setting', 'read');
+          $isSuperUser = auth()->user()?->isSuper();
+          $hasAdminMenuAccess = $hasUserRead || $hasRoleRead || $hasSettingRead || $isSuperUser;
         @endphp
+        @if($hasAdminMenuAccess)
         <div class="relative">
           <button id="administration-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="administration-menu"
             class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isAdminActive ? 'bg-brand-50 font-bold text-brand-700 shadow-xs ring-1 ring-brand-700/20' : 'font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
@@ -295,6 +301,7 @@
             <!-- Section 1: Gestion & Sécurité -->
             <div class="px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-700">Gestion & Sécurité</div>
             <ul class="mb-3 space-y-0.5 text-sm">
+              @if($hasUserRead)
               <li>
                 <a href="{{ route('users.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('users.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -304,6 +311,8 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endif
+              @if($hasRoleRead)
               <li>
                 <a href="{{ route('roles.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('roles.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -313,6 +322,8 @@
                   <span class="rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-800">Matrice JSON</span>
                 </a>
               </li>
+              @endif
+              @if($hasUserRead || $isSuperUser)
               <li>
                 <a href="{{ route('activity-logs.auth') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.auth') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -322,11 +333,13 @@
                   <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">Boîte Noire</span>
                 </a>
               </li>
+              @endif
             </ul>
 
             <!-- Section 2: Système & Suivi -->
             <div class="px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-700 border-t border-gray-100 pt-2">Système & Suivi</div>
             <ul class="space-y-0.5 text-sm">
+              @if($hasSettingRead)
               <li>
                 <a href="{{ route('settings.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('settings.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -336,6 +349,7 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endif
               <li>
                 <a href="{{ route('activity-logs.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.index') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -345,6 +359,7 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @if($hasSettingRead || $isSuperUser)
               <li>
                 <a href="{{ route('activity-logs.system') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('activity-logs.system') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -354,9 +369,11 @@
                   <span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">Actif</span>
                 </a>
               </li>
+              @endif
             </ul>
           </div>
         </div>
+        @endif
 
       </nav>
     </div>

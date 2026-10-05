@@ -11,7 +11,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
-use App\Http\Middleware\EnsureSuperPrivileged;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
@@ -35,22 +34,20 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Administration Système — Réservé aux Super Privilégiés
-    Route::middleware([EnsureSuperPrivileged::class])->group(function () {
-        Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
-        Route::post('/users/{user}/revoke-custom-permissions', [UserController::class, 'revokeCustomPermissions'])->name('users.revoke-custom-permissions');
-        Route::resource('users', UserController::class);
-        Route::resource('roles', RoleController::class);
+    // Administration Système & Habilitations (Contrôle d'accès fin géré au niveau contrôleur)
+    Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::post('/users/{user}/revoke-custom-permissions', [UserController::class, 'revokeCustomPermissions'])->name('users.revoke-custom-permissions');
+    Route::resource('users', UserController::class);
+    Route::resource('roles', RoleController::class);
 
-        // Journaux réservés à la sécurité système & erreurs
-        Route::get('/activity-logs/auth', [ActivityLogController::class, 'auth'])->name('activity-logs.auth');
-        Route::get('/activity-logs/system', [ActivityLogController::class, 'system'])->name('activity-logs.system');
+    // Journaux réservés à la sécurité système & erreurs
+    Route::get('/activity-logs/auth', [ActivityLogController::class, 'auth'])->name('activity-logs.auth');
+    Route::get('/activity-logs/system', [ActivityLogController::class, 'system'])->name('activity-logs.system');
 
-        // Paramètres système de l'application
-        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
-        Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
-        Route::post('/settings/reset', [SettingController::class, 'reset'])->name('settings.reset');
-    });
+    // Paramètres système de l'application
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::post('/settings/reset', [SettingController::class, 'reset'])->name('settings.reset');
 
     Route::get('/activity-logs/{activity}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
 });

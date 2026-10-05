@@ -34,12 +34,14 @@
         <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
         Gestion des utilisateurs
       </a>
-      <a href="{{ route('roles.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-700">
-        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-        </svg>
-        Nouveau rôle
-      </a>
+      @if(auth()->user()?->hasPermission('Role', 'create'))
+        <a href="{{ route('roles.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-700">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          Nouveau rôle
+        </a>
+      @endif
     </div>
   </div>
 
@@ -156,10 +158,12 @@
 
         <!-- Actions du Rôle -->
         <div class="mt-6 border-t border-gray-100 pt-4 flex items-center justify-between gap-2">
-          <a href="{{ route('roles.edit', $r) }}" class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-brand-700 px-3 py-2 text-xs font-bold text-white shadow-xs hover:bg-brand-800 transition">
-            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-            Configurer les habilitations
-          </a>
+          @if(auth()->user()?->hasPermission('Role', 'update'))
+            <a href="{{ route('roles.edit', $r) }}" class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-brand-700 px-3 py-2 text-xs font-bold text-white shadow-xs hover:bg-brand-800 transition">
+              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              Configurer les habilitations
+            </a>
+          @endif
 
           @if($isProtected)
             <span class="inline-flex items-center gap-1 rounded-xl border border-purple-200 bg-purple-50 px-2.5 py-2 text-[11px] font-extrabold text-purple-700" title="Rôle système primaire non supprimable">
@@ -171,13 +175,15 @@
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </button>
           @else
-            <form method="POST" action="{{ route('roles.destroy', $r) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer le rôle personnalisé « {{ $r->name }} » ?');" class="inline">
-              @csrf
-              @method('DELETE')
-              <button type="submit" class="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 p-2 text-red-600 hover:bg-red-100 transition" title="Supprimer ce rôle personnalisé">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-              </button>
-            </form>
+            @if(auth()->user()?->hasPermission('Role', 'delete'))
+              <form method="POST" action="{{ route('roles.destroy', $r) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer le rôle personnalisé « {{ $r->name }} » ?');" class="inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 p-2 text-red-600 hover:bg-red-100 transition" title="Supprimer ce rôle personnalisé">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </form>
+            @endif
           @endif
         </div>
 

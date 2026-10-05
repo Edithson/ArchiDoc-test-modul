@@ -16,6 +16,8 @@ class SettingController extends Controller
      */
     public function index(): View
     {
+        abort_if(! request()->user()?->hasPermission('Setting', 'read'), 403, 'Accès non autorisé aux paramètres du système.');
+
         $settingService = app(SettingService::class);
         $allSettings = $settingService->all();
 
@@ -30,6 +32,8 @@ class SettingController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+        abort_if(! $request->user()?->hasPermission('Setting', 'update'), 403, 'Accès non autorisé à la modification des paramètres.');
+
         $request->validate([
             // Branding & Identité
             'app_name' => ['nullable', 'string', 'max:100'],
@@ -120,6 +124,8 @@ class SettingController extends Controller
      */
     public function reset(Request $request): RedirectResponse
     {
+        abort_if(! $request->user()?->hasPermission('Setting', 'update'), 403, 'Accès non autorisé à la réinitialisation des paramètres.');
+
         // Exécuter le seeder pour rétablir les valeurs par défaut
         app(SettingSeeder::class)->run();
 

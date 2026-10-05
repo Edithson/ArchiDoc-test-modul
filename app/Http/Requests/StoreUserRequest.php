@@ -16,7 +16,7 @@ class StoreUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() && $this->user()->isSuper();
+        return (bool) $this->user()?->hasPermission('User', 'create');
     }
 
     /**
@@ -88,8 +88,29 @@ class StoreUserRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+            $currentUser = $this->user();
             $departmentId = $this->input('department_id');
             $subDepartmentId = $this->input('sub_department_id');
+            $roleId = $this->input('role_id');
+
+            if ($currentUser && ! $currentUser->isSuper()) {
+                // Non-super users cannot assign Super Privileged role
+                if ($roleId) {
+                    $roleObj = Role::find($roleId);
+                    if ($roleObj && str_contains(strtolower($roleObj->name), 'super')) {
+                        $validator->errors()->add('role_id', 'Seul un Super Privilégié peut attribuer le rôle Super Privilégié.');
+                    }
+                }
+
+                // Department constraint
+                if ($currentUser->department_id && (int) $departmentId !== (int) $currentUser->department_id) {
+                    $validator->errors()->add('department_id', 'Vous ne pouvez créer des utilisateurs que dans votre propre département.');
+                }
+
+                if ($currentUser->sub_department_id && (int) $subDepartmentId !== (int) $currentUser->sub_department_id) {
+                    $validator->errors()->add('sub_department_id', 'Vous ne pouvez créer des utilisateurs que dans votre propre sous-département.');
+                }
+            }
 
             if ($subDepartmentId) {
                 $subDept = Department::find($subDepartmentId);
