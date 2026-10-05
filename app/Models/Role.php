@@ -68,7 +68,7 @@ class Role extends Model
             if (str_contains($normalized, 'super') && str_contains($rName, 'super')) {
                 return true;
             }
-            if (! str_contains($normalized, 'super') && (str_contains($normalized, 'privilég') || str_contains($normalized, 'privileg')) && (str_contains($rName, 'privilég') || str_contains($rName, 'privileg'))) {
+            if (! str_contains($normalized, 'super') && ! str_contains($rName, 'super') && (str_contains($normalized, 'privilég') || str_contains($normalized, 'privileg')) && (str_contains($rName, 'privilég') || str_contains($rName, 'privileg'))) {
                 return true;
             }
             if (! str_contains($normalized, 'super') && ! str_contains($normalized, 'privilég') && ! str_contains($normalized, 'privileg') && (str_contains($rName, 'classic') || str_contains($rName, 'classique')) && (str_contains($normalized, 'classic') || str_contains($normalized, 'classique'))) {
