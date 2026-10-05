@@ -14,6 +14,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Activity;
@@ -26,6 +27,8 @@ class ArchiveController extends Controller
      */
     public function index(): View
     {
+        Gate::authorize('archive.read');
+
         // Statistiques globales dynamiques
         $totalArchives = Archive::count();
         $totalPersonnel = Personnel::count();
@@ -42,8 +45,9 @@ class ArchiveController extends Controller
         $departmentsCount = Department::count();
 
         // Récentes archives numérisées
-        $recentArchives = Archive::with(['user', 'department', 'archiveType'])
-            ->orderBy('created_at', 'desc')
+        $recentArchivesQuery = Archive::with(['user', 'department', 'archiveType']);
+        $this->applyStructuralScopeFilter($recentArchivesQuery, auth()->user());
+        $recentArchives = $recentArchivesQuery->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
@@ -114,7 +118,13 @@ class ArchiveController extends Controller
      */
     public function search(Request $request): View
     {
+        Gate::authorize('archive.read');
+
+        $user = auth()->user();
         $query = Archive::with(['archiveType', 'department', 'subDepartment', 'user']);
+
+        // Appliquer le filtre de périmètre structurel (Service / Direction / Global)
+        $this->applyStructuralScopeFilter($query, $user);
 
         if ($request->filled('archive_type_id')) {
             $query->where('archive_type_id', $request->input('archive_type_id'));
@@ -179,7 +189,19 @@ class ArchiveController extends Controller
      */
     public function create(): View
     {
+        Gate::authorize('archive.create');
+
+        /** @var User $user */
+        $user = auth()->user();
+        $isSuper = $user ? $user->isSuper() : false;
+
         $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
+        $userDepartmentId = $user?->department_id;
+        $userSubDepartmentId = $user?->sub_department_id;
+
+        $isDepartmentRestricted = ! $isSuper && ! empty($userDepartmentId);
+        $isSubDepartmentRestricted = ! $isSuper && ! empty($userSubDepartmentId);
 
         return view('admin.pages.archives.create', [
             'formats' => $this->getFormats(),
@@ -188,6 +210,12 @@ class ArchiveController extends Controller
             'departments' => Department::orderBy('name')->get(),
             'emplacementsPhysiques' => $this->getEmplacementsPhysiques(),
             'emplacementsVirtuels' => $this->getEmplacementsVirtuels(),
+            'user' => $user,
+            'isSuper' => $isSuper,
+            'userDepartmentId' => $userDepartmentId,
+            'userSubDepartmentId' => $userSubDepartmentId,
+            'isDepartmentRestricted' => $isDepartmentRestricted,
+            'isSubDepartmentRestricted' => $isSubDepartmentRestricted,
         ]);
     }
 
@@ -196,7 +224,57 @@ class ArchiveController extends Controller
      */
     public function store(StoreArchiveRequest $request): JsonResponse
     {
+        Gate::authorize('archive.create');
+
+        /** @var User $user */
+        $user = auth()->user();
+        $isSuper = $user ? $user->isSuper() : false;
+
         $validated = $request->validated();
+
+        // Contrôles de restriction de département & sous-département selon le rôle et le profil utilisateur
+        if (! $isSuper) {
+            if (empty($user?->department_id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Votre compte d'utilisateur n'est rattaché à aucun département. Impossible de créer une archive.",
+                    'errors' => ['department_id' => ["Aucun département d'attachement défini sur votre compte."]],
+                ], 403);
+            }
+
+            // Restriction Département Principal
+            if (empty($validated['department_id']) || (int) $validated['department_id'] !== (int) $user->department_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Vous ne pouvez enregistrer des archives que dans votre département d'attachement.",
+                    'errors' => ['department_id' => ["Vous devez sélectionner votre département d'attachement."]],
+                ], 422);
+            }
+
+            // Restriction Sous-Département / Service
+            if (! empty($user->sub_department_id)) {
+                if (empty($validated['sub_department_id']) || (int) $validated['sub_department_id'] !== (int) $user->sub_department_id) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Vous ne pouvez enregistrer des archives que dans votre sous-département d'attachement.",
+                        'errors' => ['sub_department_id' => ["Vous devez sélectionner votre sous-département d'attachement."]],
+                    ], 422);
+                }
+            } else {
+                // Si l'utilisateur est restreint au département mais n'a pas de sous-département spécifique,
+                // le sous-département choisi doit impérativement appartenir à son département.
+                if (! empty($validated['sub_department_id'])) {
+                    $subDept = Department::find($validated['sub_department_id']);
+                    if (! $subDept || (int) $subDept->parent_id !== (int) $user->department_id) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Le sous-département sélectionné n'est pas rattaché à votre département d'attachement.",
+                            'errors' => ['sub_department_id' => ['Sous-département invalide pour votre département.']],
+                        ], 422);
+                    }
+                }
+            }
+        }
 
         $filePath = null;
         if ($request->hasFile('file')) {
@@ -216,7 +294,8 @@ class ArchiveController extends Controller
             'department_id' => $validated['department_id'] ?? null,
             'sub_department_id' => $validated['sub_department_id'] ?? null,
             'filepath' => $filePath,
-            'user_id' => auth()->id() ?? 1,
+            'user_id' => auth()->id(),
+            'created_by' => auth()->id(),
         ]);
 
         return response()->json([
@@ -231,8 +310,12 @@ class ArchiveController extends Controller
      */
     public function show(Archive $archive): View
     {
-        $archive->load(['user', 'department', 'subDepartment', 'archiveType', 'creator', 'updater']);
+        Gate::authorize('archive.read');
+
         $user = auth()->user();
+        $this->checkStructuralScope($user, $archive);
+
+        $archive->load(['user', 'department', 'subDepartment', 'archiveType', 'creator', 'updater']);
         $ip = request()->ip();
         $userAgent = request()->userAgent();
 
@@ -285,12 +368,16 @@ class ArchiveController extends Controller
      */
     public function download(Archive $archive): BinaryFileResponse|RedirectResponse
     {
+        Gate::authorize('archive.download');
+
+        $user = auth()->user();
+        $this->checkStructuralScope($user, $archive);
+
         if (empty($archive->filepath) || ! Storage::disk('public')->exists($archive->filepath)) {
             return redirect()->back()
                 ->with('error', "Le fichier lié à cette archive n'est pas disponible sur le stockage.");
         }
 
-        $user = auth()->user();
         $ip = request()->ip();
         $userAgent = request()->userAgent();
 
@@ -322,23 +409,106 @@ class ArchiveController extends Controller
      */
     public function edit(Archive $archive)
     {
-        //
+        Gate::authorize('archive.update');
+
+        $user = auth()->user();
+        $this->checkStructuralScope($user, $archive);
+
+        $mainDepartments = Department::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
+        return view('admin.pages.archives.edit', [
+            'archive' => $archive->load(['department', 'subDepartment', 'archiveType']),
+            'formats' => $this->getFormats(),
+            'archiveTypes' => ArchiveType::orderBy('name')->get(),
+            'mainDepartments' => $mainDepartments,
+            'departments' => Department::orderBy('name')->get(),
+            'emplacementsPhysiques' => $this->getEmplacementsPhysiques(),
+            'emplacementsVirtuels' => $this->getEmplacementsVirtuels(),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateArchiveRequest $request, Archive $archive)
+    public function update(UpdateArchiveRequest $request, Archive $archive): RedirectResponse
     {
-        //
+        Gate::authorize('archive.update');
+
+        $user = auth()->user();
+        $this->checkStructuralScope($user, $archive);
+
+        $validated = $request->validated();
+
+        if ($request->hasFile('file')) {
+            if ($archive->filepath && Storage::disk('public')->exists($archive->filepath)) {
+                Storage::disk('public')->delete($archive->filepath);
+            }
+            $validated['filepath'] = $request->file('file')->store('archives', 'public');
+        }
+
+        $validated['updated_by'] = auth()->id();
+
+        $archive->update($validated);
+
+        return redirect()->route('archives.search')->with('success', "L'archive « {$archive->description} » a été mise à jour avec succès.");
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Archive $archive)
+    public function destroy(Archive $archive): RedirectResponse
     {
-        //
+        Gate::authorize('archive.delete');
+
+        $user = auth()->user();
+        $this->checkStructuralScope($user, $archive);
+
+        $desc = $archive->description;
+        $archive->delete();
+
+        return redirect()->route('archives.search')->with('success', "L'archive « {$desc} » a été supprimée avec succès.");
+    }
+
+    /**
+     * Check if user has access to a specific archive according to structural scope.
+     */
+    protected function checkStructuralScope(User $user, Archive $archive): void
+    {
+        if ($user->isSuper()) {
+            return;
+        }
+
+        if ($user->isClassique() && $user->sub_department_id) {
+            if ((int) $archive->sub_department_id !== (int) $user->sub_department_id) {
+                abort(403, 'Accès refusé : Cette archive appartient à un autre service ou sous-département.');
+            }
+
+            return;
+        }
+
+        if ($user->isPrivileged() && $user->department_id) {
+            if ((int) $archive->department_id !== (int) $user->department_id) {
+                abort(403, 'Accès refusé : Cette archive appartient à une autre Direction Principale.');
+            }
+
+            return;
+        }
+    }
+
+    /**
+     * Apply structural scope query filter to archives query.
+     */
+    protected function applyStructuralScopeFilter($query, User $user): void
+    {
+        if ($user->isSuper()) {
+            return;
+        }
+
+        if ($user->isClassique() && $user->sub_department_id) {
+            $query->where('sub_department_id', $user->sub_department_id);
+        } elseif ($user->isPrivileged() && $user->department_id) {
+            $query->where('department_id', $user->department_id);
+        }
     }
 
     /**

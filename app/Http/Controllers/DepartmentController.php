@@ -8,6 +8,7 @@ use App\Models\Department;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class DepartmentController extends Controller
 {
@@ -16,6 +17,8 @@ class DepartmentController extends Controller
      */
     public function index(Request $request): View
     {
+        Gate::authorize('department.read');
+
         $query = Department::with(['parent', 'children'])->withCount('children');
 
         if ($request->filled('search')) {
@@ -65,6 +68,8 @@ class DepartmentController extends Controller
      */
     public function create(): View
     {
+        Gate::authorize('department.create');
+
         $parentDepartments = Department::whereNull('parent_id')->orderBy('name')->get();
 
         return view('admin.pages.departments.create', [
@@ -77,7 +82,12 @@ class DepartmentController extends Controller
      */
     public function store(StoreDepartmentRequest $request): RedirectResponse
     {
-        $department = Department::create($request->validated());
+        Gate::authorize('department.create');
+
+        $validated = $request->validated();
+        $validated['created_by'] = auth()->id();
+
+        $department = Department::create($validated);
 
         return redirect()->route('departments.index')
             ->with('success', "Le département « {$department->name} » a été créé avec succès !");
@@ -88,6 +98,8 @@ class DepartmentController extends Controller
      */
     public function show(Department $department): RedirectResponse
     {
+        Gate::authorize('department.update');
+
         return redirect()->route('departments.edit', $department);
     }
 
@@ -96,6 +108,8 @@ class DepartmentController extends Controller
      */
     public function edit(Department $department): View
     {
+        Gate::authorize('department.update');
+
         $parentDepartments = Department::whereNull('parent_id')
             ->where('id', '!=', $department->id)
             ->orderBy('name')
@@ -112,7 +126,12 @@ class DepartmentController extends Controller
      */
     public function update(UpdateDepartmentRequest $request, Department $department): RedirectResponse
     {
-        $department->update($request->validated());
+        Gate::authorize('department.update');
+
+        $validated = $request->validated();
+        $validated['updated_by'] = auth()->id();
+
+        $department->update($validated);
 
         return redirect()->route('departments.index')
             ->with('success', "Le département « {$department->name} » a été mis à jour avec succès !");
@@ -123,6 +142,8 @@ class DepartmentController extends Controller
      */
     public function destroy(Department $department): RedirectResponse
     {
+        Gate::authorize('department.delete');
+
         $name = $department->name;
         $department->delete();
 

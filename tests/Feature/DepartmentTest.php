@@ -10,7 +10,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    $this->user = User::factory()->create([
+        'roles' => 'super privilégé',
+    ]);
 });
 
 test('user can view department list page', function () {

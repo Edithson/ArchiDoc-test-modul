@@ -249,14 +249,30 @@
                   Direction Principale MINFI <span class="text-red-500" aria-hidden="true">*</span><span class="sr-only">(obligatoire)</span>
                 </label>
                 <div class="relative">
-                  <select id="department_id" name="department_id" required aria-required="true"
-                    class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm font-semibold text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
-                    <option value="" disabled selected>Sélectionner la Direction Principale...</option>
-                    @foreach($mainDepartments as $mDept)
-                      <option value="{{ $mDept->id }}">{{ $mDept->name }} — {{ $mDept->description }}</option>
-                    @endforeach
-                  </select>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                  @if($isDepartmentRestricted)
+                    <select id="department_id_display" disabled aria-required="true"
+                      class="block w-full appearance-none rounded-lg border border-brand-200 bg-brand-50/50 py-2 pl-3 pr-9 text-sm font-bold text-brand-900 shadow-sm cursor-not-allowed">
+                      @foreach($mainDepartments as $mDept)
+                        @if((int) $mDept->id === (int) $userDepartmentId)
+                          <option value="{{ $mDept->id }}" selected>{{ $mDept->name }} — {{ $mDept->description }}</option>
+                        @endif
+                      @endforeach
+                    </select>
+                    <input type="hidden" id="department_id" name="department_id" value="{{ $userDepartmentId }}">
+                    <p class="mt-1 text-xs font-semibold text-brand-700 flex items-center gap-1">
+                      <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                      Fixé selon votre département d'attachement.
+                    </p>
+                  @else
+                    <select id="department_id" name="department_id" required aria-required="true"
+                      class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm font-semibold text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+                      <option value="" disabled selected>Sélectionner la Direction Principale...</option>
+                      @foreach($mainDepartments as $mDept)
+                        <option value="{{ $mDept->id }}">{{ $mDept->name }} — {{ $mDept->description }}</option>
+                      @endforeach
+                    </select>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                  @endif
                 </div>
                 <p id="department_id-error" class="mt-1 hidden text-sm text-red-600" role="alert"></p>
               </div>
@@ -267,24 +283,58 @@
                   Sous-Département / Service rattaché <span class="text-gray-400">(optionnel)</span>
                 </label>
                 <div class="relative">
-                  <select id="sub_department_id" name="sub_department_id"
-                    class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
-                    <option value="">Tous les sous-départements (Accès global à la Direction)</option>
-                    @foreach($mainDepartments as $mDept)
-                      @if($mDept->children->isNotEmpty())
-                        <optgroup label="Services rattachés à : {{ $mDept->name }}" data-parent-id="{{ $mDept->id }}">
+                  @if($isSubDepartmentRestricted)
+                    <select id="sub_department_id_display" disabled
+                      class="block w-full appearance-none rounded-lg border border-brand-200 bg-brand-50/50 py-2 pl-3 pr-9 text-sm font-bold text-brand-900 shadow-sm cursor-not-allowed">
+                      @foreach($mainDepartments as $mDept)
+                        @foreach($mDept->children as $sDept)
+                          @if((int) $sDept->id === (int) $userSubDepartmentId)
+                            <option value="{{ $sDept->id }}" selected>{{ $sDept->name }} — {{ $sDept->description }}</option>
+                          @endif
+                        @endforeach
+                      @endforeach
+                    </select>
+                    <input type="hidden" id="sub_department_id" name="sub_department_id" value="{{ $userSubDepartmentId }}">
+                    <p class="mt-1 text-xs font-semibold text-brand-700 flex items-center gap-1">
+                      <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                      Fixé selon votre sous-département d'attachement.
+                    </p>
+                  @elseif($isDepartmentRestricted)
+                    <select id="sub_department_id" name="sub_department_id"
+                      class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+                      <option value="">Tous les sous-départements de votre direction</option>
+                      @foreach($mainDepartments as $mDept)
+                        @if((int) $mDept->id === (int) $userDepartmentId)
                           @foreach($mDept->children as $sDept)
-                            <option value="{{ $sDept->id }}" data-parent-id="{{ $mDept->id }}">
+                            <option value="{{ $sDept->id }}">
                               {{ $sDept->name }} — {{ $sDept->description }}
                             </option>
                           @endforeach
-                        </optgroup>
-                      @endif
-                    @endforeach
-                  </select>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                        @endif
+                      @endforeach
+                    </select>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    <p class="mt-1 text-xs text-gray-500">Sélectionnez le sous-département de votre direction pour cette archive.</p>
+                  @else
+                    <select id="sub_department_id" name="sub_department_id"
+                      class="block w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+                      <option value="">Tous les sous-départements (Accès global à la Direction)</option>
+                      @foreach($mainDepartments as $mDept)
+                        @if($mDept->children->isNotEmpty())
+                          <optgroup label="Services rattachés à : {{ $mDept->name }}" data-parent-id="{{ $mDept->id }}">
+                            @foreach($mDept->children as $sDept)
+                              <option value="{{ $sDept->id }}" data-parent-id="{{ $mDept->id }}">
+                                {{ $sDept->name }} — {{ $sDept->description }}
+                              </option>
+                            @endforeach
+                          </optgroup>
+                        @endif
+                      @endforeach
+                    </select>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    <p class="mt-1 text-xs text-gray-500">Laissez vide si l'archive est accessible à l'ensemble de la Direction Principale.</p>
+                  @endif
                 </div>
-                <p class="mt-1 text-xs text-gray-500">Laissez vide si l'archive est accessible à l'ensemble de la Direction Principale.</p>
                 <p id="sub_department_id-error" class="mt-1 hidden text-sm text-red-600" role="alert"></p>
               </div>
 

@@ -39,7 +39,9 @@
         <!-- 2. Menu Création -->
         @php
           $isCreationActive = request()->routeIs('archives.create') || request()->routeIs('archive-types.*') || request()->routeIs('archive-locations.*') || request()->routeIs('departments.*');
+          $hasCreationAccess = auth()->user()->can('archive.create') || auth()->user()->can('archivetype.read') || auth()->user()->can('archivelocation.read') || auth()->user()->can('department.read');
         @endphp
+        @if($hasCreationAccess)
         <div class="relative">
           <button id="creations-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="creations-menu"
             class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 {{ $isCreationActive ? 'bg-brand-50 font-bold text-brand-700 shadow-xs ring-1 ring-brand-700/20' : 'font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
@@ -52,6 +54,7 @@
           <div id="creations-menu" class="absolute left-0 z-40 mt-2 hidden w-72 origin-top-left rounded-xl border border-gray-100 bg-white p-2 shadow-xl">
             <div class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400">Modules de Saisie</div>
             <ul id="header-creations-list" class="space-y-0.5 text-sm">
+              @can('archive.create')
               <li>
                 <a href="{{ route('archives.create') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archives.create') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -61,6 +64,8 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endcan
+              @can('archivetype.read')
               <li>
                 <a href="{{ route('archive-types.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archive-types.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -70,6 +75,8 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endcan
+              @can('archivelocation.read')
               <li>
                 <a href="{{ route('archive-locations.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('archive-locations.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -79,6 +86,8 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endcan
+              @can('department.read')
               <li>
                 <a href="{{ route('departments.index') }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ request()->routeIs('departments.*') ? 'bg-brand-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-gray-50' }}">
                   <div class="flex items-center gap-2.5">
@@ -88,9 +97,11 @@
                   <span class="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-bold text-brand-800">Actif</span>
                 </a>
               </li>
+              @endcan
             </ul>
           </div>
         </div>
+        @endif
 
         <!-- 3. Menu Personnel -->
         @php

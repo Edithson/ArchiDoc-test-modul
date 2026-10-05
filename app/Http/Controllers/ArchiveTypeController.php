@@ -8,6 +8,7 @@ use App\Models\ArchiveType;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ArchiveTypeController extends Controller
 {
@@ -16,6 +17,8 @@ class ArchiveTypeController extends Controller
      */
     public function index(Request $request): View
     {
+        Gate::authorize('archivetype.read');
+
         $query = ArchiveType::with('creator')->withCount('archives');
 
         if ($request->filled('search')) {
@@ -41,6 +44,8 @@ class ArchiveTypeController extends Controller
      */
     public function create(): View
     {
+        Gate::authorize('archivetype.create');
+
         return view('admin.pages.archive_types.create');
     }
 
@@ -49,8 +54,10 @@ class ArchiveTypeController extends Controller
      */
     public function store(StoreArchiveTypeRequest $request): RedirectResponse
     {
+        Gate::authorize('archivetype.create');
+
         $validated = $request->validated();
-        $validated['created_by'] = auth()->id() ?? 1;
+        $validated['created_by'] = auth()->id();
 
         $archiveType = ArchiveType::create($validated);
 
@@ -63,6 +70,8 @@ class ArchiveTypeController extends Controller
      */
     public function show(ArchiveType $archiveType): View
     {
+        Gate::authorize('archivetype.read');
+
         $archiveType->load(['creator', 'archives' => fn ($q) => $q->latest()->limit(10)]);
 
         return view('admin.pages.archive_types.show', [
@@ -75,6 +84,8 @@ class ArchiveTypeController extends Controller
      */
     public function edit(ArchiveType $archiveType): View
     {
+        Gate::authorize('archivetype.update');
+
         return view('admin.pages.archive_types.edit', [
             'archiveType' => $archiveType,
         ]);
@@ -85,7 +96,12 @@ class ArchiveTypeController extends Controller
      */
     public function update(UpdateArchiveTypeRequest $request, ArchiveType $archiveType): RedirectResponse
     {
-        $archiveType->update($request->validated());
+        Gate::authorize('archivetype.update');
+
+        $validated = $request->validated();
+        $validated['updated_by'] = auth()->id();
+
+        $archiveType->update($validated);
 
         return redirect()->route('archive-types.index')
             ->with('success', "Le type d'archive « {$archiveType->name} » a été mis à jour avec succès !");
@@ -96,6 +112,8 @@ class ArchiveTypeController extends Controller
      */
     public function destroy(ArchiveType $archiveType): RedirectResponse
     {
+        Gate::authorize('archivetype.delete');
+
         $name = $archiveType->name;
         $archiveType->delete();
 

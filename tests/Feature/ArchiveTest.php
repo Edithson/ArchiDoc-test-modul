@@ -35,9 +35,12 @@ test('create page returns success and passes dynamic dataset', function () {
 test('storing an archive saves file and creates database record with main and sub department', function () {
     Storage::fake('public');
 
-    $user = User::factory()->create();
     $mainDept = Department::factory()->create(['name' => 'DGB', 'parent_id' => null]);
     $subDept = Department::factory()->create(['name' => 'DI', 'parent_id' => $mainDept->id]);
+    $user = User::factory()->create([
+        'department_id' => $mainDept->id,
+        'sub_department_id' => $subDept->id,
+    ]);
     $type = ArchiveType::factory()->create();
     $file = UploadedFile::fake()->create('ARRETE_01022026.pdf', 500, 'application/pdf');
 

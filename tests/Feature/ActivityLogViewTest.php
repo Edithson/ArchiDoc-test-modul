@@ -28,10 +28,10 @@ test('non authenticated user cannot access activity log pages', function () {
     $this->get(route('activity-logs.system'))->assertRedirect(route('login'));
 });
 
-test('standard non-super-privileged user is forbidden from accessing activity logs', function () {
+test('standard non-super-privileged user can view scoped activity log but is forbidden from system and security logs', function () {
     $this->actingAs($this->standardUser);
 
-    $this->get(route('activity-logs.index'))->assertStatus(403);
+    $this->get(route('activity-logs.index'))->assertStatus(200);
     $this->get(route('activity-logs.auth'))->assertStatus(403);
     $this->get(route('activity-logs.system'))->assertStatus(403);
 });
