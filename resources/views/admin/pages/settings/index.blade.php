@@ -24,7 +24,7 @@
     </div>
 
     <!-- Action de Réinitialisation -->
-    <div>
+    {{-- <div>
       @if(auth()->user()?->hasPermission('Setting', 'update'))
         <form method="POST" action="{{ route('settings.reset') }}" onsubmit="return confirm('Êtes-vous sûr de vouloir réinitialiser l\'ensemble des paramètres aux valeurs par défaut de la DGB Cameroun ?');">
           @csrf
@@ -36,7 +36,7 @@
           </button>
         </form>
       @endif
-    </div>
+    </div> --}}
   </div>
 
   <!-- Messages Flash Success / Error -->
