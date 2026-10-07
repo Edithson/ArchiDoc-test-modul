@@ -13,10 +13,10 @@ class SettingService
      * Dictionnaire des valeurs par défaut par groupe pour DGB Cameroun.
      */
     protected array $defaults = [
-        // Groupe Branding / Identité
+        // Groupe Branding / Identité Générique
         'branding.app_name' => 'ArchiDoc',
-        'branding.structure_name' => 'Direction Générale du Budget',
-        'branding.structure_acronym' => 'DGB',
+        'branding.structure_name' => 'Entreprise Générale',
+        'branding.structure_acronym' => 'ARCHIDOC',
         'branding.logo' => null,
         'branding.favicon' => null,
         'branding.login_image' => null,
@@ -25,10 +25,10 @@ class SettingService
         'branding.accent_color' => '#40beb7',    // brand-500
         'branding.success_color' => '#10b981',   // emerald-500
         'branding.error_color' => '#f43f5e',     // rose-500
-        'branding.footer_text' => '© 2026 Direction Générale du Budget — MINFI Cameroun. Tous droits réservés.',
-        'branding.contact_email' => 'contact@dgb.cm',
-        'branding.contact_phone' => '+237 222 22 00 00',
-        'branding.contact_address' => 'Yaoundé, Cameroun — Ministère des Finances',
+        'branding.footer_text' => '© 2026 ArchiDoc — Solution d\'Archivage Numérique d\'Entreprise. Tous droits réservés.',
+        'branding.contact_email' => 'contact@archidoc.com',
+        'branding.contact_phone' => '+33 1 23 45 67 89',
+        'branding.contact_address' => 'Siège Social — Paris, France',
 
         // Groupe Archivage
         'archivage.max_upload_size_mb' => 20,

@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Modifier emplacement — ArchiDoc DGB')
-@section('meta_description', 'Formulaire de modification d\'un emplacement d\'archivage — ArchiDoc DGB')
+@section('title', 'Modifier emplacement — ' . setting('app_name', 'ArchiDoc'))
+@section('meta_description', 'Formulaire de modification d\'un emplacement d\'archivage')
 
 @section('content')
 <div class="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -82,8 +82,8 @@
           Nom ou Sigle de l'emplacement <span class="text-red-500">*</span>
         </label>
         <input type="text" name="name" id="name" value="{{ old('name', $archiveLocation->name) }}"
-          placeholder="Ex: MAGASIN-FOUDA, SERVEUR-NAS-01..."
-          :placeholder="selectedType == '2' ? 'Ex: SERVEUR-NAS-01, CLOUD-DGB...' : 'Ex: MAGASIN-FOUDA, SALLE-02...'"
+          placeholder="Ex: MAGASIN-CENTRAL, SERVEUR-NAS-01..."
+          :placeholder="selectedType == '2' ? 'Ex: SERVEUR-NAS-01, CLOUD-NAS...' : 'Ex: MAGASIN-CENTRAL, SALLE-02...'"
           required
           class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm uppercase font-bold focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 @error('name') border-red-500 @enderror">
         <p class="mt-1 text-xs text-gray-500">Sigle ou libellé d'identification de l'emplacement.</p>
@@ -98,8 +98,8 @@
           <span x-text="selectedType == '2' ? 'Adresse IP ou Chemin Réseau Serveur' : 'Adresse physique ou Bâtiment'">Adresse physique ou Adresse IP</span>
         </label>
         <input type="text" name="location" id="location" value="{{ old('location', $archiveLocation->location) }}"
-          placeholder="Ex: Quartier Messa, Immeuble DGB, Yaoundé ou 192.168.1.100"
-          :placeholder="selectedType == '2' ? 'Ex: 192.168.1.100 ou \\NAS-ARCHIDOC\archives' : 'Ex: Quartier Messa, Immeuble DGB, Yaoundé'"
+          placeholder="Ex: Siège Principal, Bâtiment A, Salle 102 ou 192.168.1.100"
+          :placeholder="selectedType == '2' ? 'Ex: 192.168.1.100 ou \\\\NAS-ARCHIDOC\\archives' : 'Ex: Siège Principal, Bâtiment A, Salle 102'"
           class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 @error('location') border-red-500 @enderror">
         <p class="mt-1 text-xs text-gray-500">Précisez l'adresse géographique ou l'identifiant réseau (IP/Chemin NAS).</p>
         @error('location')

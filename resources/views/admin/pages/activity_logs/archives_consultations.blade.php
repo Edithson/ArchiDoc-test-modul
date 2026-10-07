@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Tableau de bord des Consultations d\'Archives — ArchiDoc DGB')
-@section('meta_description', 'Analyse statistique et journal d\'audit complet des consultations de documents d\'archives — ArchiDoc DGB.')
+@section('title', 'Tableau de bord des Consultations d\'Archives — ' . setting('app_name', 'ArchiDoc'))
+@section('meta_description', 'Analyse statistique et journal d\'audit complet des consultations de documents d\'archives.')
 
 @section('content')
 <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -18,7 +18,7 @@
         </span>
         <div>
           <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">Consultations d'Archives — Analytics & Traçabilité</h1>
-          <p class="text-xs text-gray-500 font-medium">Tableau de bord statistique et suivi individuel des accès aux pièces d'archives de la DGB.</p>
+          <p class="text-xs text-gray-500 font-medium">Tableau de bord statistique et suivi individuel des accès aux pièces d'archives de la structure.</p>
         </div>
       </div>
     </div>
@@ -154,7 +154,7 @@
             <svg class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             Consultations par Direction / Département
           </h2>
-          <p class="text-xs text-gray-500 font-medium">Répartition des accès par entité de la DGB</p>
+          <p class="text-xs text-gray-500 font-medium">Répartition des accès par entité de la structure</p>
         </div>
         <span class="rounded-lg bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-800 border border-indigo-200">Top 6</span>
       </div>

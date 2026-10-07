@@ -83,7 +83,7 @@
           <label for="email" class="block text-sm font-semibold text-gray-800 mb-1">
             Adresse email <span class="text-red-500">*</span>
           </label>
-          <input type="email" id="email" name="email" value="{{ old('email') }}" required placeholder="p.njoya@minfi.cm"
+          <input type="email" id="email" name="email" value="{{ old('email') }}" required placeholder="jean.dupont@entreprise.com"
             class="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
           @error('email')
             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -112,10 +112,10 @@
           @enderror
         </div>
 
-        <!-- Direction Principale MINFI -->
+        <!-- Direction Principale -->
         <div>
           <label for="department_id" class="block text-sm font-semibold text-gray-800 mb-1">
-            Direction Principale MINFI <span id="dept_asterisk" class="text-red-500">*</span>
+            Direction Principale <span id="dept_asterisk" class="text-red-500">*</span>
           </label>
           <div class="relative">
             <select id="department_id" name="department_id" required onchange="handleDepartmentChange(this.value)"

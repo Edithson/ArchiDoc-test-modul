@@ -654,9 +654,9 @@ class ArchiveController extends Controller
 
         if ($locations->isEmpty()) {
             return [
-                'FOUDA' => "FOUDA — Centre d'excellence DGB",
-                'DGB' => 'DGB — Direction Générale du Budget',
-                'IMPRIMERIE NATIONALE' => 'Imprimerie Nationale',
+                'ARCH-CENTRAL' => 'ARCH-CENTRAL — Salle d\'Archivage Centrale',
+                'STOCK-ANNEXE' => 'STOCK-ANNEXE — Dépôt d\'Archivage Annexe',
+                'LOCAL-SECURE' => 'LOCAL-SECURE — Local d\'Archives Sécurisé',
             ];
         }
 
@@ -696,20 +696,19 @@ class ArchiveController extends Controller
      */
     protected function getGroupesAcces(): array
     {
-        return [
-            ['sigle' => 'CAB DGB', 'nom' => 'Cabinet DGB'],
-            ['sigle' => 'DCOB', 'nom' => "Division du Contrôle Budgétaire, de l'Audit et de la Qualité de la Dépense"],
-            ['sigle' => 'DDPP', 'nom' => 'Direction de la Dépense du Personnel et des Pensions'],
-            ['sigle' => 'DI', 'nom' => 'Division Informatique'],
-            ['sigle' => 'DPB', 'nom' => 'Division de la Préparation du Budget'],
-            ['sigle' => 'DPC', 'nom' => 'Division de Participation et Contribution'],
-            ['sigle' => 'DREF', 'nom' => 'Division de la Réforme Budgétaire'],
-            ['sigle' => 'PUBLIC', 'nom' => 'Public'],
-            ['sigle' => 'S-DAG', 'nom' => 'Sous-Direction des Affaires Générales'],
-            ['sigle' => 'S-DCF', 'nom' => 'Sous-Direction du Contrôle Financier'],
-            ['sigle' => 'SGCCC', 'nom' => 'Service de Gestion des Crédits des Chapitres Communs'],
-            ['sigle' => 'SGDB', 'nom' => 'Service de Gestion des Documents Budgétaires'],
-            ['sigle' => 'SO', 'nom' => "Service d'Ordre"],
-        ];
+        $departments = Department::whereNull('parent_id')->orderBy('name')->get();
+        if ($departments->isEmpty()) {
+            return [
+                ['sigle' => 'DG', 'nom' => 'Direction Générale'],
+                ['sigle' => 'DRH', 'nom' => 'Direction des Ressources Humaines'],
+                ['sigle' => 'DFC', 'nom' => 'Direction Financière et Comptable'],
+                ['sigle' => 'DSI', 'nom' => 'Direction des Systèmes d\'Information'],
+                ['sigle' => 'DCM', 'nom' => 'Direction Commerciale et Marketing'],
+                ['sigle' => 'DOL', 'nom' => 'Direction des Opérations et Logistique'],
+                ['sigle' => 'PUBLIC', 'nom' => 'Public'],
+            ];
+        }
+
+        return $departments->map(fn ($d) => ['sigle' => $d->name, 'nom' => $d->description ?: $d->name])->toArray();
     }
 }

@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Recherche d\'archives — ArchiDoc DGB')
-@section('meta_description', 'Recherche multicritère, consultation et filtrage des archives numériques — ArchiDoc DGB')
+@section('title', 'Recherche d\'archives — ' . setting('app_name', 'ArchiDoc'))
+@section('meta_description', 'Recherche multicritère, consultation et filtrage des archives numériques')
 
 @section('content')
 <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -102,7 +102,7 @@
           </div>
         </div>
 
-        <!-- 5. Direction Principale MINFI -->
+        <!-- 5. Direction Principale -->
         <div>
           <label for="department_id" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-700">
             Direction Principale
@@ -282,7 +282,7 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex flex-col gap-1 items-start">
                   <span class="inline-flex items-center rounded border border-purple-200 bg-purple-50 px-2 py-0.5 text-xs font-bold text-purple-700">
-                    {{ $archive->department?->name ?? 'MINFI' }}
+                    {{ $archive->department?->name ?? setting('structure_acronym', 'Organisation') }}
                   </span>
                   @if($archive->subDepartment)
                     <span class="inline-flex items-center gap-1 rounded border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">

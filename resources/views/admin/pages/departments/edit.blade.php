@@ -55,7 +55,7 @@
           Direction Principale de rattachement (Optionnel)
         </label>
         <select name="parent_id" id="parent_id" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 @error('parent_id') border-red-500 @enderror">
-          <option value="">-- Aucune (Il s'agit d'une Direction Principale du MINFI) --</option>
+          <option value="">-- Aucune (Il s'agit d'une Direction Principale) --</option>
           @foreach($parentDepartments as $pDept)
             <option value="{{ $pDept->id }}" @selected(old('parent_id', $department->parent_id) == $pDept->id)>
               {{ $pDept->name }} — {{ $pDept->description }}

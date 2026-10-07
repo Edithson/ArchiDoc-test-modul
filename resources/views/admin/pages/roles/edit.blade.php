@@ -37,7 +37,7 @@
       <svg class="h-5 w-5 text-purple-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       <div>
         <strong class="font-extrabold">Notice Rôle Super Privilégié :</strong>
-        <p class="mt-0.5 leading-relaxed">Le rôle Super Privilégié bénéficie d'un privilège d'accès absolu sur l'intégralité du système MINFI. Toutes les permissions ci-dessous lui sont implicitement accordées à 100%.</p>
+        <p class="mt-0.5 leading-relaxed">Le rôle Super Privilégié bénéficie d'un privilège d'accès absolu sur l'intégralité du système. Toutes les permissions ci-dessous lui sont implicitement accordées à 100%.</p>
       </div>
     </div>
   @endif

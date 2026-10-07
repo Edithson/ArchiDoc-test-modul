@@ -1,8 +1,8 @@
 @php
     try {
         $appName = setting('app_name', 'ArchiDoc');
-        $structureAcronym = setting('structure_acronym', 'DGB');
-        $structureName = setting('structure_name', 'Direction Générale du Budget');
+        $structureAcronym = setting('structure_acronym', 'ARCHIDOC');
+        $structureName = setting('structure_name', 'Entreprise Générale');
         $logo = setting('logo');
         $favicon = setting('favicon');
         $primaryColor = setting('primary_color', '#297a75');
@@ -12,8 +12,8 @@
         $errorColor = setting('error_color', '#f43f5e');
     } catch (\Throwable $e) {
         $appName = 'ArchiDoc';
-        $structureAcronym = 'DGB';
-        $structureName = 'Direction Générale du Budget';
+        $structureAcronym = 'ARCHIDOC';
+        $structureName = 'Entreprise Générale';
         $logo = null;
         $favicon = null;
         $primaryColor = '#297a75';
@@ -85,7 +85,7 @@
             </span>
             <span class="flex flex-col leading-none">
                 <span class="text-lg font-extrabold tracking-tight text-white">{{ strtoupper($appName) }}</span>
-                <span class="text-[10px] font-bold tracking-widest text-brand-500 uppercase">{{ $structureAcronym }} CAMEROUN</span>
+                <span class="text-[10px] font-bold tracking-widest text-brand-500 uppercase">{{ $structureAcronym }}</span>
             </span>
         </a>
 
@@ -142,14 +142,14 @@
             </div>
 
             <p class="mt-6 text-xs text-gray-400">
-                {{ $appName }} {{ $structureAcronym }} · Système de Gestion des Archives Numériques du {{ $structureName }}
+                {{ $appName }} · Système de Gestion des Archives Numériques de {{ $structureName }}
             </p>
         </div>
     </main>
 
     <!-- Pied de page -->
     <footer class="relative z-10 py-4 text-center text-xs text-gray-500">
-        &copy; {{ date('Y') }} {{ $structureName }} — République du Cameroun.
+        &copy; {{ date('Y') }} {{ $structureName }}. Tous droits réservés.
     </footer>
 
 </body>

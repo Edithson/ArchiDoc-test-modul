@@ -120,7 +120,7 @@ class SettingController extends Controller
     }
 
     /**
-     * Réinitialiser tous les paramètres aux valeurs par défaut DGB Cameroun.
+     * Réinitialiser tous les paramètres aux valeurs par défaut de l'application.
      */
     public function reset(Request $request): RedirectResponse
     {
@@ -129,6 +129,6 @@ class SettingController extends Controller
         // Exécuter le seeder pour rétablir les valeurs par défaut
         app(SettingSeeder::class)->run();
 
-        return redirect()->route('settings.index')->with('success', 'Tous les paramètres ont été réinitialisés avec succès aux valeurs par défaut de la DGB Cameroun.');
+        return redirect()->route('settings.index')->with('success', 'Tous les paramètres ont été réinitialisés avec succès aux valeurs par défaut.');
     }
 }

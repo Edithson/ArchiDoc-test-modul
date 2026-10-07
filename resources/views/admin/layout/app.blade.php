@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', setting('app_name', 'ArchiDoc') . ' ' . setting('structure_acronym', 'DGB'))</title>
-    <meta name="description" content="@yield('meta_description', 'Système d\'archivage — ' . setting('app_name', 'ArchiDoc') . ', ' . setting('structure_name', 'Direction Générale du Budget'))">
+    <title>@yield('title', setting('app_name', 'ArchiDoc') . (setting('structure_acronym') ? ' — ' . setting('structure_acronym') : ''))</title>
+    <meta name="description" content="@yield('meta_description', 'Système d\'archivage — ' . setting('app_name', 'ArchiDoc') . ', ' . setting('structure_name', 'Entreprise Générale'))">
 
     @if(setting('favicon'))
         <link rel="icon" href="{{ setting('favicon') }}">

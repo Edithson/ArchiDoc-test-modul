@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Modifier type d\'archive — ArchiDoc DGB')
-@section('meta_description', 'Formulaire de modification d\'un type d\'archive — ArchiDoc DGB')
+@section('title', 'Modifier type d\'archive — ' . setting('app_name', 'ArchiDoc'))
+@section('meta_description', 'Formulaire de modification d\'un type d\'archive')
 
 @section('content')
 <div class="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">

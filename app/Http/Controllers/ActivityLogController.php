@@ -271,8 +271,9 @@ class ActivityLogController extends Controller
 
             if ($format === 'txt') {
                 return response()->streamDownload(function () use ($exportItems) {
+                    $title = strtoupper(setting('app_name', 'ARCHIDOC')).' — HISTORIQUE DES CONSULTATIONS D\'ARCHIVES';
                     echo "========================================================================\n";
-                    echo "      ARCHIDOC DGB — HISTORIQUE DES CONSULTATIONS D'ARCHIVES           \n";
+                    echo "      {$title}           \n";
                     echo '      Généré le : '.now()->format('d/m/Y H:i:s')."\n";
                     echo "========================================================================\n\n";
 
@@ -473,8 +474,9 @@ class ActivityLogController extends Controller
 
             if ($format === 'txt') {
                 return response()->streamDownload(function () use ($exportItems) {
+                    $title = strtoupper(setting('app_name', 'ARCHIDOC')).' — HISTORIQUE DES CONSULTATIONS DOSSIERS PERSONNEL';
                     echo "========================================================================\n";
-                    echo "    ARCHIDOC DGB — HISTORIQUE DES CONSULTATIONS DOSSIERS PERSONNEL     \n";
+                    echo "    {$title}     \n";
                     echo '      Généré le : '.now()->format('d/m/Y H:i:s')."\n";
                     echo "========================================================================\n\n";
 
@@ -717,8 +719,9 @@ class ActivityLogController extends Controller
 
         if ($format === 'txt') {
             return response()->streamDownload(function () use ($activities) {
+                $title = strtoupper(setting('app_name', 'ARCHIDOC')).' — JOURNAL DES ÉVÉNEMENTS (BOÎTE NOIRE)';
                 echo "========================================================================\n";
-                echo "           ARCHIDOC DGB — JOURNAL DES ÉVÉNEMENTS (BOÎTE NOIRE)           \n";
+                echo "           {$title}           \n";
                 echo '           Généré le : '.now()->format('d/m/Y H:i:s')."\n";
                 echo "========================================================================\n\n";
 

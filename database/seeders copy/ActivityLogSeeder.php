@@ -42,7 +42,7 @@ class ActivityLogSeeder extends Seeder
         $authScenarios = [
             ['event' => 'auth.login', 'desc' => 'Connexion réussie de l\'utilisateur au système', 'status' => 'success'],
             ['event' => 'auth.login', 'desc' => 'Connexion récurrente de l\'agent sur le portail', 'status' => 'success'],
-            ['event' => 'auth.failed_login', 'desc' => 'Échec d\'authentification : mot de passe incorrect', 'status' => 'failed', 'attempted' => 'agent.invalide@entreprise.com'],
+            ['event' => 'auth.failed_login', 'desc' => 'Échec d\'authentification : mot de passe incorrect', 'status' => 'failed', 'attempted' => 'agent.invalide@minfi.cm'],
             ['event' => 'auth.failed_login', 'desc' => 'Échec d\'authentification : matricule introuvable', 'status' => 'failed', 'attempted' => 'hacker@externe.cm'],
             ['event' => 'auth.logout', 'desc' => 'Déconnexion volontaire de la session utilisateur', 'status' => 'logout'],
             ['event' => 'auth.lockout', 'desc' => 'Verrouillage temporaire IP : trop de tentatives infructueuses', 'status' => 'lockout'],
@@ -212,16 +212,17 @@ class ActivityLogSeeder extends Seeder
         }
 
         $departmentsListNames = [
-            'DG', 'DRH', 'DFC', 'DSI', 'DCM', 'DOL', 'DIRECTION GENERAL',
+            'CAB DGB', 'DCOB', 'DDPP', 'DI', 'DPB', 'DPC',
+            'DREF', 'S-DAG', 'SGDB', 'SO', 'CABINET MINFI',
         ];
 
         $documentTypes = [
-            'Rapport d\'Activité Mensuel',
-            'Arrêté d\'Affectation',
+            'Rapport d\'Exécution Budgétaire',
+            'Arrêté Ministériel',
             'Fiche de Solde & Traitement',
             'Bordereau d\'Expédition',
             'Note de Service Organique',
-            'Décision d\'Habilitation',
+            'Décret d\'Habilitation DGB',
             'Procès-Verbal de Recette',
             'Dossier de Cadre Budgétaire',
         ];

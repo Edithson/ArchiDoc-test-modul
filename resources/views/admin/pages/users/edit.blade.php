@@ -155,10 +155,10 @@
           @enderror
         </div>
 
-        <!-- Direction Principale MINFI -->
+        <!-- Direction Principale -->
         <div>
           <label for="department_id" class="block text-sm font-semibold text-gray-800 mb-1">
-            Direction Principale MINFI <span id="dept_asterisk" class="text-red-500">*</span>
+            Direction Principale <span id="dept_asterisk" class="text-red-500">*</span>
           </label>
           <div class="relative">
             <select id="department_id" name="department_id" onchange="handleDepartmentChange(this.value)"

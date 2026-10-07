@@ -1,6 +1,6 @@
 @extends('admin.layout.app')
 
-@section('title', 'Journal de Sécurité & Accès — ArchiDoc DGB')
+@section('title', 'Journal de Sécurité & Accès — ' . setting('app_name', 'ArchiDoc'))
 @section('meta_description', 'Suivi avancé de la sécurité, des tentatives d\'authentification, connexions et déconnexions de la plateforme.')
 
 @section('content')

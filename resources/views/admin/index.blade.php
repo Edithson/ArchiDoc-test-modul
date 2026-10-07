@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Tableau de bord Général — ' . setting('app_name', 'ArchiDoc') . ' ' . setting('structure_acronym', 'DGB'))
-@section('meta_description', 'Tableau de bord exécutif et suivi en temps réel des archives et dossiers du personnel — ' . setting('structure_name', 'Direction Générale du Budget'))
+@section('title', 'Tableau de bord Général — ' . setting('app_name', 'ArchiDoc'))
+@section('meta_description', 'Tableau de bord exécutif et suivi en temps réel des archives et dossiers du personnel — ' . setting('structure_name', 'Organisation'))
 
 @section('content')
 <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -23,7 +23,7 @@
           Bienvenue sur {{ setting('app_name', 'ArchiDoc') }}, <span class="text-brand-200">{{ auth()->user()->name ?? 'Utilisateur' }}</span>
         </h1>
         <p class="mt-2 text-sm sm:text-base text-brand-100/90 leading-relaxed font-medium">
-          Plateforme centrale de gestion, de numérisation, d'archivage rigoureux et de suivi analytique de la {{ setting('structure_name', 'Direction Générale du Budget') }}.
+          Plateforme centrale de gestion, de numérisation, d'archivage rigoureux et de suivi analytique de la {{ setting('structure_name', 'structure') }}.
         </p>
 
         <!-- Recherche Rapide Integrée -->
@@ -98,7 +98,7 @@
             <h3 class="mt-1 text-2xl font-black tracking-tight text-gray-900 group-hover:text-indigo-700 transition-colors">
               {{ number_format($totalPersonnel, 0, ',', ' ') }}
             </h3>
-            <p class="mt-1 text-[11px] font-medium text-indigo-600">Agents DGB enregistrés</p>
+            <p class="mt-1 text-[11px] font-medium text-indigo-600">Agents enregistrés</p>
           </div>
           <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-700 transition-transform group-hover:scale-110">
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -193,7 +193,7 @@
           </h3>
           <p class="text-xs text-gray-500 font-medium">Répartition des archives numérisées accessible à votre profil.</p>
         </div>
-        <span class="rounded-full bg-purple-50 px-2.5 py-1 text-[11px] font-bold text-purple-700">Périmètre DGB</span>
+        <span class="rounded-full bg-purple-50 px-2.5 py-1 text-[11px] font-bold text-purple-700">Périmètre Organisation</span>
       </div>
       <div class="h-64 w-full flex items-center justify-center">
         <canvas id="deptDistributionChart"></canvas>
@@ -222,7 +222,7 @@
             <div class="min-w-0 flex-1">
               <p class="font-extrabold text-xs text-gray-900 truncate">{{ $arch->description }}</p>
               <p class="text-[10px] text-gray-500 font-medium">
-                {{ $arch->archiveType?->name ?? 'Document' }} · <span class="font-bold text-brand-700">{{ $arch->department?->name ?? 'DGB' }}</span>
+                {{ $arch->archiveType?->name ?? 'Document' }} · <span class="font-bold text-brand-700">{{ $arch->department?->name ?? setting('structure_acronym', 'Organisation') }}</span>
               </p>
             </div>
             <a href="{{ route('archives.show', $arch) }}" class="shrink-0 rounded-lg bg-gray-100 px-2.5 py-1 text-[11px] font-bold text-gray-700 hover:bg-brand-100 hover:text-brand-800 transition">
@@ -320,7 +320,7 @@
           <h3 class="text-sm font-extrabold text-gray-900">Modules de Nomenclature & Administration</h3>
           <p class="text-xs text-gray-500 font-medium">Accès rapide aux tables de référence autorisées pour votre profil.</p>
         </div>
-        <span class="rounded-md bg-gray-100 px-2.5 py-1 text-[10px] font-bold text-gray-700">Infrastructure DGB</span>
+        <span class="rounded-md bg-gray-100 px-2.5 py-1 text-[10px] font-bold text-gray-700">Infrastructure Système</span>
       </div>
 
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
@@ -358,7 +358,7 @@
             </div>
             <div>
               <h4 class="text-xs font-extrabold text-gray-900">Groupes d'Accès</h4>
-              <p class="text-[11px] font-bold text-sky-700">{{ $departmentsCount }} directions DGB</p>
+              <p class="text-[11px] font-bold text-sky-700">{{ $departmentsCount }} départements</p>
             </div>
           </a>
         @endif

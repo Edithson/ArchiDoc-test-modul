@@ -40,7 +40,7 @@ test('standard non-super-privileged user is forbidden from settings management',
     $this->post(route('settings.update'), ['app_name' => 'HackedAppName'])->assertStatus(403);
 });
 
-test('super administrator can view settings page with default DGB Cameroun values', function () {
+test('super administrator can view settings page with default enterprise values', function () {
     $this->actingAs($this->adminUser);
 
     $this->seed(SettingSeeder::class);
@@ -49,7 +49,7 @@ test('super administrator can view settings page with default DGB Cameroun value
 
     $response->assertStatus(200);
     $response->assertSee('Paramètres du Système');
-    $response->assertSee('Direction Générale du Budget');
+    $response->assertSee('Entreprise Générale');
     $response->assertSee('#297a75');
 });
 
@@ -58,12 +58,12 @@ test('super administrator can update settings and cache is invalidated immediate
 
     $this->seed(SettingSeeder::class);
 
-    expect(setting('branding.structure_name'))->toBe('Direction Générale du Budget');
+    expect(setting('branding.structure_name'))->toBe('Entreprise Générale');
 
     $response = $this->post(route('settings.update'), [
         'app_name' => 'ArchiDoc Pro',
-        'structure_name' => 'Ministère des Finances du Cameroun',
-        'structure_acronym' => 'MINFI',
+        'structure_name' => 'Nouvelle Société Anonyme',
+        'structure_acronym' => 'NSA',
         'primary_color' => '#194c49',
         'max_upload_size_mb' => 50,
     ]);
@@ -73,7 +73,7 @@ test('super administrator can update settings and cache is invalidated immediate
 
     // Vérifier l'invalidation du cache et les nouvelles valeurs
     expect(setting('branding.app_name'))->toBe('ArchiDoc Pro');
-    expect(setting('branding.structure_name'))->toBe('Ministère des Finances du Cameroun');
+    expect(setting('branding.structure_name'))->toBe('Nouvelle Société Anonyme');
     expect(setting('branding.primary_color'))->toBe('#194c49');
     expect(setting('archivage.max_upload_size_mb'))->toBe(50);
 });
@@ -82,7 +82,7 @@ test('setting helper returns fallback defaults when database has missing key', f
     Cache::forget(SettingService::CACHE_KEY);
 
     expect(setting('branding.app_name'))->toBe('ArchiDoc');
-    expect(setting('branding.structure_name'))->toBe('Direction Générale du Budget');
+    expect(setting('branding.structure_name'))->toBe('Entreprise Générale');
     expect(setting('branding.primary_color'))->toBe('#297a75');
     expect(setting('non_existing_key', 'fallback_custom'))->toBe('fallback_custom');
 });

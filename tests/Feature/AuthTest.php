@@ -6,7 +6,7 @@ test('login screen can be rendered', function () {
     $response = $this->get('/login');
 
     $response->assertStatus(200);
-    $response->assertSee('Connexion — ArchiDoc DGB');
+    $response->assertSee('Connexion — ArchiDoc');
 });
 
 test('active user can authenticate using the login screen', function () {

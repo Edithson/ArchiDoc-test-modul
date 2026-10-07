@@ -128,10 +128,10 @@
           <input type="text" name="address" id="address" value="{{ old('address', $personnel->address) }}" class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 @error('address') border-red-500 @enderror">
         </div>
 
-        <!-- Direction Principale (MINFI) -->
+        <!-- Direction Principale -->
         <div>
           <label for="department_id" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
-            Direction Principale (MINFI) <span class="text-xs text-gray-400 font-normal">(Optionnel)</span>
+            Direction Principale <span class="text-xs text-gray-400 font-normal">(Optionnel)</span>
           </label>
           <div class="relative">
             <select id="department_id" name="department_id" onchange="handleDepartmentChange(this.value)"

@@ -467,7 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'date_doc', message: 'Veuillez indiquer la date de signature.' },
         { id: 'emplacement', message: "Veuillez sélectionner l'emplacement physique." },
         { id: 'emplacement2', message: "Veuillez sélectionner l'emplacement virtuel." },
-        { id: 'department_id', message: "Veuillez sélectionner une Direction Principale MINFI." },
+        { id: 'department_id', message: "Veuillez sélectionner une Direction Principale." },
     ];
 
     const deptSelect = document.getElementById('department_id');

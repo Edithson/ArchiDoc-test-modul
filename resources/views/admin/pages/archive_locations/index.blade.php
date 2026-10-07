@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Gestion des Emplacements — ArchiDoc DGB')
-@section('meta_description', 'Administration et gestion des emplacements physiques (magasins) et virtuels (serveurs) d\'archivage — ArchiDoc DGB')
+@section('title', 'Gestion des Emplacements — ' . setting('app_name', 'ArchiDoc'))
+@section('meta_description', 'Administration et gestion des emplacements physiques (magasins) et virtuels (serveurs) d\'archivage')
 
 @section('content')
 <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -75,7 +75,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
             </span>
-            <input type="text" name="search" id="search" value="{{ $search }}" placeholder="Ex: FOUDA, DGB, Serveur, NAS..." class="w-full rounded-xl border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600">
+            <input type="text" name="search" id="search" value="{{ $search }}" placeholder="Ex: Magasin, Serveur, NAS, Salle..." class="w-full rounded-xl border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600">
           </div>
         </div>
 
@@ -164,7 +164,7 @@
                 </span>
               </td>
               <td class="px-6 py-4 text-xs text-gray-500">
-                {{ $location->creator->name ?? 'Système DGB' }}
+                {{ $location->creator->name ?? 'Système' }}
                 <div class="text-[10px] text-gray-400">{{ $location->created_at ? $location->created_at->format('d/m/Y') : '' }}</div>
               </td>
               <td class="px-6 py-4 text-right">

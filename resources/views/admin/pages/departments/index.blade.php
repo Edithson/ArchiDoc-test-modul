@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Gestion des Départements & Sous-Départements MINFI — ArchiDoc')
-@section('meta_description', 'Administration des départements principaux et sous-départements rattachés au Ministère des Finances (MINFI) — ArchiDoc')
+@section('title', 'Gestion des Départements & Sous-Départements — ArchiDoc')
+@section('meta_description', 'Administration des départements principaux et sous-départements rattachés — ArchiDoc')
 
 @section('content')
 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -12,7 +12,7 @@
     <span>/</span>
     <span class="text-gray-500">Administration</span>
     <span>/</span>
-    <span class="text-gray-900 font-bold">Groupes d'accès & Départements MINFI</span>
+    <span class="text-gray-900 font-bold">Groupes d'accès & Départements</span>
   </nav>
 
   <!-- Notification de succès -->
@@ -35,8 +35,8 @@
   <!-- En-tête de section -->
   <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">Groupes d'accès & Départements MINFI</h1>
-      <p class="mt-1 text-sm text-gray-500">Administrez la structure hiérarchique du Ministère des Finances : Directions Générales principales et Sous-départements rattachés.</p>
+      <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">Groupes d'accès & Départements</h1>
+      <p class="mt-1 text-sm text-gray-500">Administrez la structure hiérarchique de l'organisation : Directions Générales principales et Sous-départements rattachés.</p>
     </div>
     <div>
       @can('department.create')
@@ -57,7 +57,7 @@
       <div>
         <p class="text-xs font-bold uppercase tracking-wider text-gray-500">Total Structures</p>
         <p class="mt-1 text-2xl font-extrabold text-gray-900">{{ number_format($totalDepartments, 0, ',', ' ') }}</p>
-        <p class="mt-0.5 text-xs text-gray-500">Organigramme global MINFI</p>
+        <p class="mt-0.5 text-xs text-gray-500">Organigramme global de la structure</p>
       </div>
       <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -107,7 +107,7 @@
       <div class="sm:col-span-3">
         <select name="type" onchange="this.form.submit()" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-brand-600 focus:outline-none">
           <option value="all" {{ $typeFilter === 'all' ? 'selected' : '' }}>Tous les niveaux</option>
-          <option value="main" {{ $typeFilter === 'main' ? 'selected' : '' }}>Directions Principales MINFI</option>
+          <option value="main" {{ $typeFilter === 'main' ? 'selected' : '' }}>Directions Principales</option>
           <option value="sub" {{ $typeFilter === 'sub' ? 'selected' : '' }}>Sous-Départements / Services</option>
         </select>
       </div>
@@ -191,7 +191,7 @@
                     <div class="flex flex-col gap-1 items-start">
                       <span class="inline-flex items-center gap-1 rounded-md bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-700 border border-purple-200">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                        Direction Principale MINFI
+                        Direction Principale
                       </span>
                       @if($dept->children_count > 0)
                         <span class="text-[11px] text-purple-600 font-medium">

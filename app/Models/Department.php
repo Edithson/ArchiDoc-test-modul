@@ -27,7 +27,7 @@ class Department extends Model
     ];
 
     /**
-     * Parent department (e.g. Direction Générale MINFI).
+     * Parent department (e.g. Direction Générale).
      */
     public function parent(): BelongsTo
     {
@@ -51,7 +51,7 @@ class Department extends Model
     }
 
     /**
-     * Check if department is a main top-level MINFI department.
+     * Check if department is a main top-level department.
      */
     public function isMain(): bool
     {

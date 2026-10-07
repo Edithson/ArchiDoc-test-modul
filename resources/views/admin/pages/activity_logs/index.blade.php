@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Journal d\'activités & Arbre des événements — ArchiDoc DGB')
-@section('meta_description', 'Boîte noire et traçabilité avancée de l\'ensemble des opérations, modifications et événements de la plateforme ArchiDoc DGB.')
+@section('title', 'Journal d\'activités & Arbre des événements — ' . setting('app_name', 'ArchiDoc'))
+@section('meta_description', 'Boîte noire et traçabilité avancée de l\'ensemble des opérations, modifications et événements de la plateforme.')
 
 @section('content')
 <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">

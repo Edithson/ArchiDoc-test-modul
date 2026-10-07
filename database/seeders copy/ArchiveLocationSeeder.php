@@ -8,45 +8,45 @@ use Illuminate\Database\Seeder;
 class ArchiveLocationSeeder extends Seeder
 {
     /**
-     * Run the database seeds for generic enterprise archive locations.
+     * Run the database seeds.
      */
     public function run(): void
     {
         $locations = [
             // Emplacements Physiques (Type = 1)
             [
-                'name' => 'ARCH-CENTRAL',
-                'description' => 'Salle d\'Archivage Centrale — Bâtiment Principal',
-                'location' => 'Bâtiment A, Niveau -1, Salle 004',
+                'name' => 'FOUDA',
+                'description' => "FOUDA — Centre d'excellence DGB",
+                'location' => 'Quartier Fouda, Yaoundé',
                 'type' => ArchiveLocation::TYPE_PHYSICAL,
                 'created_by' => 1,
             ],
             [
-                'name' => 'STOCK-ANNEXE',
-                'description' => 'Dépôt d\'Archivage Annexe',
-                'location' => 'Zone Logistique, Hangar 2',
+                'name' => 'DGB',
+                'description' => 'DGB — Direction Générale du Budget',
+                'location' => 'Centre Administratif, Yaoundé',
                 'type' => ArchiveLocation::TYPE_PHYSICAL,
                 'created_by' => 1,
             ],
             [
-                'name' => 'LOCAL-SECURE',
-                'description' => 'Local d\'Archives Sécurisé (Documents Confidentiels)',
-                'location' => 'Bâtiment Principal, Étage 3, Coffre A',
+                'name' => 'IMPRIMERIE NATIONALE',
+                'description' => 'Imprimerie Nationale',
+                'location' => 'Quartier Messa, Yaoundé',
                 'type' => ArchiveLocation::TYPE_PHYSICAL,
                 'created_by' => 1,
             ],
             // Emplacements Virtuels (Type = 2)
             [
-                'name' => 'Serveur NAS',
-                'description' => 'Serveur de Stockage Réseau Central NAS-ARCHIVE',
-                'location' => '192.168.1.100 / NAS-ENTERPRISE',
+                'name' => 'Serveur',
+                'description' => 'Serveur de Stockage Central DGB',
+                'location' => '192.168.1.100 / NAS-ARCHIDOC',
                 'type' => ArchiveLocation::TYPE_VIRTUAL,
                 'created_by' => 1,
             ],
             [
-                'name' => 'Cloud Enterprise',
-                'description' => 'Espace d\'Archivage Virtuel Cloud Sécurisé',
-                'location' => 'Cloud Enterprise Storage / Backup Drive',
+                'name' => 'Cloud DGB',
+                'description' => 'Serveur de Sauvegarde et d\'Archivage Cloud',
+                'location' => 'Cloud DGB / Backup Storage',
                 'type' => ArchiveLocation::TYPE_VIRTUAL,
                 'created_by' => 1,
             ],

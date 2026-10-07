@@ -8,32 +8,42 @@ use Illuminate\Database\Seeder;
 class ArchiveTypeSeeder extends Seeder
 {
     /**
-     * Run the database seeds for generic enterprise archive types.
+     * Run the database seeds.
      */
     public function run(): void
     {
         $types = [
+            'ARRETE',
             'ATTESTATION',
-            'AUDIT',
-            'AUTRES DOCUMENTS ADMINISTRATIFS',
-            'BORDEREAU',
+            'AUTRES TYPES DE DOCUMENTS',
+            "BONS D'ENGAGEMENT",
+            'BORDEREAUX',
+            "CARNETS D'ENGAGEMENT",
+            'CERTIFICATS',
             'CIRCULAIRE',
+            'COMMUNIQUES',
+            'COMPTE ADMINISTRATIF',
+            "COMPTE D'EMPLOI",
             'COMPTE-RENDU',
-            'CONTRAT',
-            'CONVATION',
-            'CONVOCATION',
-            'COURRIER',
-            'DECISION',
-            'DEVIS',
-            'FACTURE',
-            'FICHE DE PAIE',
+            'CONSTITUTION',
+            'CONVOCATIONS',
+            'COURRIERS',
+            'DECISIONS',
+            'DECRET',
+            'ETATS DE SOMMES DUES',
             'FONDS DE DOSSIER',
-            'INVITATION',
+            'INVITATIONS',
+            'LETTRE CIRCULAIRE',
             'LETTRE DE MISSION',
+            'LOI',
             'MEMO',
+            'MEMOIRES DE DEPENSE',
+            'MESSAGE-FAX',
+            'MESSAGE-PORTE',
+            'NOTE',
             'NOTE DE SERVICE',
+            'ORDONNANCES',
             'PROCES-VERBAL',
-            'RAPPORT D\'ACTIVITE',
             'SOIT-TRANSMIS',
         ];
 
@@ -42,7 +52,7 @@ class ArchiveTypeSeeder extends Seeder
                 ['name' => $type],
                 [
                     'description' => ucfirst(strtolower($type)),
-                    'dua' => 10,
+                    'dua' => 99,
                     'created_by' => 1,
                 ]
             );
