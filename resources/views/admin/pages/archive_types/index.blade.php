@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Gestion des Types d\'Archives — ArchiDoc DGB')
-@section('meta_description', 'Administration et gestion des types d\'archives réglementaires et de leur DUA — ArchiDoc DGB')
+@section('title', 'Gestion des Types d\'Archives — ' . setting('app_name', 'ArchiDoc'))
+@section('meta_description', 'Administration et gestion des types d\'archives réglementaires et de leur DUA')
 
 @section('content')
 <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -128,7 +128,7 @@
                 </span>
               </td>
               <td class="px-6 py-4 text-xs text-gray-500">
-                {{ $type->creator->name ?? 'Système DGB' }}
+                {{ $type->creator->name ?? 'Système' }}
                 <div class="text-[10px] text-gray-400">{{ $type->created_at ? $type->created_at->format('d/m/Y') : '' }}</div>
               </td>
               <td class="px-6 py-4 text-right">

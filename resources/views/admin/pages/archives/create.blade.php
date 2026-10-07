@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Nouvelle archive — ARCHIDOC DGB')
-@section('meta_description', 'Création et numérisation d\'une nouvelle archive — ARCHIDOC, Direction Générale du Budget')
+@section('title', 'Nouvelle archive — ' . setting('app_name', 'ArchiDoc'))
+@section('meta_description', 'Création et numérisation d\'une nouvelle archive.')
 
 @section('content')
 <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -246,7 +246,7 @@
               <!-- Direction Principale (Groupe d'Accès Général) -->
               <div>
                 <label for="department_id" class="mb-1.5 block text-sm font-medium text-gray-700">
-                  Direction Principale MINFI <span class="text-red-500" aria-hidden="true">*</span><span class="sr-only">(obligatoire)</span>
+                  Direction Principale <span class="text-red-500" aria-hidden="true">*</span><span class="sr-only">(obligatoire)</span>
                 </label>
                 <div class="relative">
                   @if($isDepartmentRestricted)

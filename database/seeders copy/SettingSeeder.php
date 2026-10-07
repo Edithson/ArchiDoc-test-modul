@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 class SettingSeeder extends Seeder
 {
     /**
-     * Seed application default settings for a generic enterprise.
+     * Seed application default settings for DGB Cameroun.
      */
     public function run(): void
     {
@@ -20,7 +20,7 @@ class SettingSeeder extends Seeder
         $adminId = $admin ? $admin->id : null;
 
         $settings = [
-            // Groupe Branding & Identité Générique
+            // Groupe Branding & Identité DGB Cameroun
             [
                 'group' => 'branding',
                 'key' => 'app_name',
@@ -31,14 +31,14 @@ class SettingSeeder extends Seeder
             [
                 'group' => 'branding',
                 'key' => 'structure_name',
-                'value' => 'Entreprise Générale',
+                'value' => 'Direction Générale du Budget',
                 'type' => 'string',
                 'is_public' => true,
             ],
             [
                 'group' => 'branding',
                 'key' => 'structure_acronym',
-                'value' => 'ARCHIDOC',
+                'value' => 'DGB',
                 'type' => 'string',
                 'is_public' => true,
             ],
@@ -66,7 +66,7 @@ class SettingSeeder extends Seeder
             [
                 'group' => 'branding',
                 'key' => 'primary_color',
-                'value' => '#297a75', // brand-700 (Conservation stricte de la charte graphique)
+                'value' => '#297a75', // brand-700
                 'type' => 'color',
                 'is_public' => true,
             ],
@@ -101,28 +101,28 @@ class SettingSeeder extends Seeder
             [
                 'group' => 'branding',
                 'key' => 'footer_text',
-                'value' => '© 2026 ArchiDoc — Solution d\'Archivage Numérique d\'Entreprise. Tous droits réservés.',
+                'value' => '© 2026 Direction Générale du Budget — MINFI Cameroun. Tous droits réservés.',
                 'type' => 'string',
                 'is_public' => true,
             ],
             [
                 'group' => 'branding',
                 'key' => 'contact_email',
-                'value' => 'contact@archidoc.com',
+                'value' => 'contact@dgb.cm',
                 'type' => 'string',
                 'is_public' => true,
             ],
             [
                 'group' => 'branding',
                 'key' => 'contact_phone',
-                'value' => '+33 1 23 45 67 89',
+                'value' => '+237 222 22 00 00',
                 'type' => 'string',
                 'is_public' => true,
             ],
             [
                 'group' => 'branding',
                 'key' => 'contact_address',
-                'value' => 'Siège Social — Paris, France',
+                'value' => 'Yaoundé, Cameroun — Ministère des Finances',
                 'type' => 'string',
                 'is_public' => true,
             ],

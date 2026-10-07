@@ -95,7 +95,7 @@
             <div class="relative">
               <input id="email" name="email" type="email" autocomplete="email" required
                 value="{{ old('email') }}"
-                placeholder="nom.prenom@minfi.cm"
+                placeholder="nom.prenom@entreprise.com"
                 class="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 pl-10 text-sm text-gray-900 placeholder-gray-400 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
               <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

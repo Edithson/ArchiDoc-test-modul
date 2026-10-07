@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Diagnostic & Erreurs Système — ArchiDoc DGB')
-@section('meta_description', 'Journal d\'exceptions et diagnostics d\'erreurs système capturés par la boîte noire d\'ArchiDoc DGB.')
+@section('title', 'Diagnostic & Erreurs Système — ' . setting('app_name', 'ArchiDoc'))
+@section('meta_description', 'Journal d\'exceptions et diagnostics d\'erreurs système capturés par la boîte noire.')
 
 @section('content')
 <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">

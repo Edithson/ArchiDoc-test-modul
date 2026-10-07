@@ -14,7 +14,7 @@
           <img src="{{ asset('media/img/logo_archidoc_dgb.png') }}" alt="Logo {{ setting('app_name', 'ArchiDoc') }}" class="h-9 w-9 rounded-full object-cover">
         @endif
       </span>
-      {{ strtoupper(setting('app_name', 'ARCHIDOC')) }} {{ setting('structure_acronym', 'DGB') }}
+      {{ strtoupper(setting('app_name', 'ARCHIDOC')) }} {{ setting('structure_acronym') ? '— ' . setting('structure_acronym') : '' }}
     </span>
     <button id="mobile-drawer-close" type="button" class="rounded-lg p-2 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white" aria-label="Fermer le menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -214,7 +214,7 @@
           <a href="{{ asset('document/ORGANIGRAMME_DGB.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-brand-50 hover:bg-white/10">
             <div class="flex items-center gap-2.5 truncate">
               <svg class="h-4 w-4 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-              <span class="truncate">Organigramme DGB</span>
+              <span class="truncate">Organigramme de la Structure</span>
             </div>
             <span class="rounded bg-red-900/40 px-1.5 py-0.5 text-[10px] font-bold text-red-200 shrink-0">PDF</span>
           </a>

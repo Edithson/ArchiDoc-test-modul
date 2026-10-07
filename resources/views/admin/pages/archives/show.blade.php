@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
 @section('title', 'Consultation archive — ' . ($archive->archiveType?->name ?? 'ArchiDoc'))
-@section('meta_description', 'Consultation détaillée et visualisation du document d\'archive — ArchiDoc DGB')
+@section('meta_description', 'Consultation détaillée et visualisation du document d\'archive.')
 
 @section('content')
 <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -131,7 +131,7 @@
               </div>
               <div>
                 <span class="block text-xs text-gray-400">Direction Principale</span>
-                <span class="font-semibold text-gray-800">{{ $archive->department?->name ?? 'MINFI' }}</span>
+                <span class="font-semibold text-gray-800">{{ $archive->department?->name ?? setting('structure_acronym', 'Organisation') }}</span>
                 @if($archive->department?->description)
                   <span class="block text-[11px] text-gray-500">{{ $archive->department->description }}</span>
                 @endif

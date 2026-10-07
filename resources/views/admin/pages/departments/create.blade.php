@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Nouveau Département / Service — ArchiDoc DGB')
-@section('meta_description', 'Formulaire de création d\'un nouveau département ou groupe d\'accès — ArchiDoc DGB')
+@section('title', 'Nouveau Département / Service — ArchiDoc')
+@section('meta_description', 'Formulaire de création d\'un nouveau département ou groupe d\'accès — ArchiDoc')
 
 @section('content')
 <div class="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -42,7 +42,7 @@
         <label for="name" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
           Intitulé ou Sigle du département <span class="text-red-500">*</span>
         </label>
-        <input type="text" name="name" id="name" value="{{ old('name') }}" placeholder="Ex: DI, DDPP, DCOB, CAB DGB..." required class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-bold text-gray-900 focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 @error('name') border-red-500 @enderror">
+        <input type="text" name="name" id="name" value="{{ old('name') }}" placeholder="Ex: DSI, DRH, DFC, CAB..." required class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-bold text-gray-900 focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 @error('name') border-red-500 @enderror">
         @error('name')
           <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
         @enderror
@@ -54,14 +54,14 @@
           Direction Principale de rattachement (Optionnel)
         </label>
         <select name="parent_id" id="parent_id" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 @error('parent_id') border-red-500 @enderror">
-          <option value="">-- Aucune (Il s'agit d'une Direction Principale du MINFI) --</option>
+          <option value="">-- Aucune (Il s'agit d'une Direction Principale) --</option>
           @foreach($parentDepartments as $pDept)
             <option value="{{ $pDept->id }}" @selected(old('parent_id') == $pDept->id)>
               {{ $pDept->name }} — {{ $pDept->description }}
             </option>
           @endforeach
         </select>
-        <p class="mt-1 text-xs text-gray-500">Laissez vide si ce département est une Direction Générale/Principale (ex: DGB, DGI, DGD...). Choisissez une Direction si c'est un sous-département ou service rattaché.</p>
+        <p class="mt-1 text-xs text-gray-500">Laissez vide si ce département est une Direction Générale/Principale (ex: DG, DRH, DSI...). Choisissez une Direction si c'est un sous-département ou service rattaché.</p>
         @error('parent_id')
           <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
         @enderror

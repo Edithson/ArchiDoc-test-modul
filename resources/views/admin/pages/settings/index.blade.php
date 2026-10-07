@@ -243,13 +243,13 @@
             </div>
             <div>
               <label for="contact_address" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Adresse physique</label>
-              <input type="text" name="contact_address" id="contact_address" value="{{ setting('branding.contact_address', 'Yaoundé, Cameroun — Ministère des Finances') }}" class="form-input-styled block w-full">
+              <input type="text" name="contact_address" id="contact_address" value="{{ setting('branding.contact_address', 'Siège Social — Service des Archives') }}" class="form-input-styled block w-full">
             </div>
           </div>
 
           <div>
             <label for="footer_text" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Texte du Pied de page (Footer)</label>
-            <input type="text" name="footer_text" id="footer_text" value="{{ setting('branding.footer_text', '© 2026 Direction Générale du Budget — MINFI Cameroun. Tous droits réservés.') }}" class="form-input-styled block w-full">
+            <input type="text" name="footer_text" id="footer_text" value="{{ setting('branding.footer_text', '© 2026 ' . setting('app_name', 'ArchiDoc') . '. Tous droits réservés.') }}" class="form-input-styled block w-full">
           </div>
 
         </div>

@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Tableau de bord des Consultations Dossiers Personnel — ArchiDoc DGB')
-@section('meta_description', 'Analyse statistique et journal d\'audit complet des consultations des dossiers d\'agents du personnel — ArchiDoc DGB.')
+@section('title', 'Tableau de bord des Consultations Dossiers Personnel — ' . setting('app_name', 'ArchiDoc'))
+@section('meta_description', 'Analyse statistique et journal d\'audit complet des consultations des dossiers d\'agents du personnel.')
 
 @section('content')
 <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -17,7 +17,7 @@
         </span>
         <div>
           <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">Consultations Dossiers Personnel — Analytics & Traçabilité</h1>
-          <p class="text-xs text-gray-500 font-medium">Tableau de bord statistique et suivi individuel des consultations des dossiers d'agents du personnel DGB.</p>
+          <p class="text-xs text-gray-500 font-medium">Tableau de bord statistique et suivi individuel des consultations des dossiers d'agents du personnel.</p>
         </div>
       </div>
     </div>
@@ -170,7 +170,7 @@
         <h3 class="text-sm font-extrabold tracking-tight text-gray-900">Consultations par Direction / Département</h3>
         <p class="text-xs text-gray-500 font-medium">Origine des demandes de consultation de dossiers du personnel.</p>
       </div>
-      <span class="rounded-full bg-purple-50 px-2.5 py-1 text-[11px] font-bold text-purple-700">Organigramme DGB</span>
+      <span class="rounded-full bg-purple-50 px-2.5 py-1 text-[11px] font-bold text-purple-700">Organigramme Organisation</span>
     </div>
     <div class="h-56 w-full">
       <canvas id="topDeptsChart"></canvas>
@@ -290,7 +290,7 @@
               <!-- Département -->
               <td class="px-6 py-4">
                 <span class="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-bold text-gray-700">
-                  {{ $activity->properties['departement'] ?? ($activity->causer->departement ?? 'DGB') }}
+                  {{ $activity->properties['departement'] ?? ($activity->causer->departement ?? setting('structure_acronym', 'GE')) }}
                 </span>
               </td>
 

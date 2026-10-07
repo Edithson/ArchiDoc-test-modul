@@ -8,7 +8,7 @@ test('404 custom error page renders with ArchiDoc design layout', function () {
     $response->assertStatus(404);
     $response->assertSee('Code Erreur 404', false);
     $response->assertSee('Page ou Document Introuvable', false);
-    $response->assertSee('ArchiDoc DGB', false);
+    $response->assertSee('ArchiDoc', false);
 });
 
 test('403 custom error page renders when unauthorized action occurs', function () {

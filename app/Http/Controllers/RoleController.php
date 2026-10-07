@@ -39,7 +39,7 @@ class RoleController extends Controller
             'actions' => ['read' => 'Consulter les types', 'create' => 'Créer des types', 'update' => 'Modifier les types', 'delete' => 'Supprimer des types'],
         ],
         'Department' => [
-            'label' => 'Groupes d\'Accès & Structures MINFI',
+            'label' => 'Groupes d\'Accès & Structures Organisationnelles',
             'icon' => 'building',
             'actions' => ['read' => 'Consulter les structures', 'create' => 'Créer des structures', 'update' => 'Modifier les structures', 'delete' => 'Supprimer des structures'],
         ],

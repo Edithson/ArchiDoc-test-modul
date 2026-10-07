@@ -1,7 +1,7 @@
 @extends('admin.layout.app')
 
-@section('title', 'Nouveau type d\'archive — ArchiDoc DGB')
-@section('meta_description', 'Formulaire de création d\'un nouveau type d\'archive réglementaire — ArchiDoc DGB')
+@section('title', 'Nouveau type d\'archive — ' . setting('app_name', 'ArchiDoc'))
+@section('meta_description', 'Formulaire de création d\'un nouveau type d\'archive réglementaire')
 
 @section('content')
 <div class="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -19,7 +19,7 @@
   <div class="mb-6 flex items-center justify-between">
     <div>
       <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">Créer un Type d'Archive</h1>
-      <p class="mt-1 text-sm text-gray-500">Ajoutez un nouveau type d'archive au référentiel système de la DGB.</p>
+      <p class="mt-1 text-sm text-gray-500">Ajoutez un nouveau type d'archive au référentiel système.</p>
     </div>
     <a href="{{ route('archive-types.index') }}" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-300 px-3.5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

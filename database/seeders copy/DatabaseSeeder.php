@@ -31,33 +31,28 @@ class DatabaseSeeder extends Seeder
             $createdRoles[$roleData['name']] = $r;
         }
 
-        // Ancien Seeder Spécifique MINFI (Commenté au profit du seeder entreprise générique)
-        // $this->call(DepartmentSeeder::class);
-
-        // NOUVEAU Seeder Générique d'Entreprise
-        $this->call(GenericDepartmentSeeder::class);
+        // Création des départements (Hiérarchie MINFI)
+        $this->call(DepartmentSeeder::class);
 
         // Création de l'utilisateur administrateur principal
-        $mainDept = Department::where('name', 'DG')->whereNull('parent_id')->first()
-            ?? Department::whereNull('parent_id')->first();
-        $subDept = Department::where('name', 'CAB-DG')->first()
-            ?? Department::whereNotNull('parent_id')->first();
+        $dgbMain = Department::where('name', 'DGB')->whereNull('parent_id')->first();
+        $cabDept = Department::where('name', 'CAB DGB')->first();
 
         User::firstOrCreate(
-            ['email' => 'admin@arche.com'],
+            ['email' => 'admin@archidoc.cm'],
             [
-                'name' => 'Admin Arche',
+                'name' => 'Admin ArchiDoc',
                 'matricule' => 'MAT-0001',
-                'phone' => '+33 1 23 45 67 89',
+                'phone' => '+237 699 00 00 01',
                 'role_id' => $createdRoles['Super privilégié']->id,
                 'statut' => true,
-                'department_id' => $mainDept?->id,
-                'sub_department_id' => $subDept?->id,
+                'department_id' => $dgbMain?->id,
+                'sub_department_id' => $cabDept?->id,
                 'password' => 'c@rabine21',
             ]
         );
 
-        // Création des types d'archives, emplacements et données de démo
+        // Création des types d'archives et emplacements
         $this->call([
             ArchiveTypeSeeder::class,
             ArchiveLocationSeeder::class,

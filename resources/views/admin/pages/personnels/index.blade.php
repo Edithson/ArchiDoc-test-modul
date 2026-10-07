@@ -119,7 +119,7 @@
           </div>
         </div>
 
-        <!-- Direction Principale MINFI -->
+        <!-- Direction Principale -->
         <div>
           <label for="department_id" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Direction Principale</label>
           <select name="department_id" id="department_id" onchange="handleFilterDeptChange(this)" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600">
@@ -225,7 +225,7 @@
                     <a href="{{ route('personnels.show', $agent) }}" class="font-extrabold text-brand-900 hover:underline">
                       {{ $agent->name }}
                     </a>
-                    <div class="text-xs font-normal text-gray-500">{{ $agent->address ?? 'MINFI' }}</div>
+                    <div class="text-xs font-normal text-gray-500">{{ $agent->address ?? 'Siège' }}</div>
                   </div>
                 </div>
               </td>

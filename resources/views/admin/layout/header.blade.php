@@ -20,7 +20,7 @@
         </span>
         <span class="hidden flex-col leading-none sm:flex">
           <span class="text-sm font-extrabold tracking-tight text-gray-900">{{ strtoupper(setting('app_name', 'ARCHIDOC')) }}</span>
-          <span class="text-[10px] font-bold tracking-widest text-brand-700 uppercase">{{ setting('structure_acronym', 'DGB') }} CAMEROUN</span>
+          <span class="text-[10px] font-bold tracking-widest text-brand-700 uppercase">{{ setting('structure_acronym', 'ARCHIDOC') }}</span>
         </span>
       </a>
 
@@ -266,7 +266,7 @@
                 <a href="{{ asset('document/ORGANIGRAMME_DGB.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
                   <div class="flex items-center gap-2.5">
                     <svg class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                    <span class="truncate">Organigramme Général DGB</span>
+                    <span class="truncate">Organigramme Général de la Structure</span>
                   </div>
                   <span class="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700 shrink-0">PDF</span>
                 </a>
@@ -421,7 +421,7 @@
           <div id="avatar-menu" class="absolute right-0 z-40 mt-2 hidden w-60 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl">
             <div class="border-b border-gray-100 px-3 py-2.5">
               <p class="text-sm font-bold text-gray-900 truncate">{{ auth()->user()->name }}</p>
-              <p class="text-xs text-gray-500 truncate">{{ auth()->user()->department?->name ?? 'DGB' }} · {{ ucfirst(auth()->user()->roles ?? 'Classique') }}</p>
+              <p class="text-xs text-gray-500 truncate">{{ auth()->user()->department?->name ?? setting('structure_acronym', 'Direction') }} · {{ ucfirst(auth()->user()->roles ?? 'Classique') }}</p>
               @if(auth()->user()->matricule)
                 <p class="mt-0.5 text-[10px] font-mono text-brand-700">Matricule: {{ auth()->user()->matricule }}</p>
               @endif
