@@ -260,7 +260,7 @@
             </ul>
 
             <!-- Groupe 2: Organisation & Gouvernance -->
-            <div class="px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-700 border-t border-gray-100 pt-2">Organisation & Gouvernance</div>
+            {{-- <div class="px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-700 border-t border-gray-100 pt-2">Organisation & Gouvernance</div>
             <ul class="space-y-0.5 text-sm">
               <li>
                 <a href="{{ asset('document/ORGANIGRAMME_DGB.pdf') }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
@@ -280,7 +280,7 @@
                   <span class="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700 shrink-0">PDF</span>
                 </a>
               </li>
-            </ul>
+            </ul> --}}
           </div>
         </div>
 
