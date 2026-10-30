@@ -19,19 +19,18 @@ class ArchiveSeeder extends Seeder
         $archiveTypes = ArchiveType::all();
         $user = User::first();
 
-        Archive::factory(40)->make()->each(function ($archive) use ($mainDepartments, $archiveTypes, $user) {
-            if ($mainDepartments->isNotEmpty()) {
-                $main = $mainDepartments->random();
-                $archive->department_id = $main->id;
-                if ($main->children->isNotEmpty() && fake()->boolean(65)) {
-                    $archive->sub_department_id = $main->children->random()->id;
-                } else {
-                    $archive->sub_department_id = null;
-                }
-            }
-            $archive->archive_type_id = $archiveTypes->isNotEmpty() ? $archiveTypes->random()->id : null;
-            $archive->user_id = $user?->id;
-            $archive->save();
-        });
+        for ($i = 0; $i < 40; $i++) {
+            $main = $mainDepartments->isNotEmpty() ? $mainDepartments->random() : null;
+            $subDeptId = ($main && $main->children->isNotEmpty() && fake()->boolean(65))
+                ? $main->children->random()->id
+                : null;
+
+            Archive::factory()->create([
+                'department_id' => $main?->id,
+                'sub_department_id' => $subDeptId,
+                'archive_type_id' => $archiveTypes->isNotEmpty() ? $archiveTypes->random()->id : null,
+                'user_id' => $user?->id,
+            ]);
+        }
     }
 }

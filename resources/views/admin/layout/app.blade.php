@@ -58,13 +58,18 @@
     @include('admin.layout.mobile-drawer')
 
     <!-- Corps de page -->
-    <div class="mx-auto flex max-w-[1600px]">
+    <div class="mx-auto flex max-w-[1600px] min-h-[calc(100vh-4.25rem)]">
         <!-- Barre latérale desktop -->
         @include('admin.layout.sidebar')
 
         <!-- Zone de contenu principal -->
-        <main id="main-content" tabindex="-1" class="min-w-0 flex-1 focus:outline-none">
-            @yield('content')
+        <main id="main-content" tabindex="-1" class="min-w-0 flex-1 focus:outline-none flex flex-col justify-between">
+            <div class="flex-1 pb-6">
+                @yield('content')
+            </div>
+
+            <!-- Pied de page global -->
+            @include('admin.layout.footer')
         </main>
     </div>
 

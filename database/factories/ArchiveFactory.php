@@ -21,23 +21,23 @@ class ArchiveFactory extends Factory
     public function definition(): array
     {
         $formats = ['Document PDF', 'Image', 'Document Papier'];
-        $emplacements = ['FOUDA', 'DGB', 'IMPRIMERIE NATIONALE'];
+        $emplacements = ['MAGASIN-CENTRAL', 'SALLE-ARCHIVES-01', 'DEPOT-PRINCIPAL'];
 
         $descriptions = [
-            'Portant nomination de responsables dans les services centraux du Ministère des Finances',
-            'Relatif à la gestion et au suivi du budget de fonctionnement exercice 2026',
-            'Procès-verbal de la réunion du comité de pilotage informatique',
+            'Portant nomination de responsables de département et chefs de service',
+            'Relatif à la gestion et au suivi du budget d exploitation exercice 2026',
+            'Procès-verbal de la réunion du comité de pilotage stratégique',
             'Attestation de prise de service du personnel administratif',
             'Note d engagement des dépenses relatives aux travaux d équipement',
-            'Circulaire d application des nouvelles dispositions sur la dépense publique',
-            'Décision fixant l organisation des contrôles financiers régionaux',
+            'Circulaire d application des nouvelles procédures opérationnelles',
+            'Décision fixant l organisation des contrôles et audits internes',
             'Bordereau de transmission des pièces comptables et justificatives',
-            'Rapport trimestriel d exécution des crédits des chapitres communs',
-            'Lettre de mission pour l audit de la chaîne solde et pensions',
+            'Rapport trimestriel d exécution des objectifs et indicateurs clés',
+            'Lettre de mission pour l audit des processus opérationnels',
         ];
 
         return [
-            'archive_type_id' => ArchiveType::factory(),
+            'archive_type_id' => ArchiveType::query()->inRandomOrder()->value('id') ?? ArchiveType::factory(),
             'description' => fake()->randomElement($descriptions).' '.fake()->unique()->numberBetween(100, 999),
             'date_doc' => fake()->dateTimeBetween('-2 years', 'now')->format('Y-m-d'),
             'emplacement' => fake()->randomElement($emplacements),

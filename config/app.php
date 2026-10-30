@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Developer Information
+    |--------------------------------------------------------------------------
+    |
+    | Information regarding the developer/maintainer of the application.
+    | These values are retrieved from the environment variables DEV_NAME and DEV_ADR.
+    |
+    */
+
+    'dev_name' => env('DEV_NAME', 'MOAFO GAÜS'),
+    'dev_adr' => env('DEV_ADR', 'https://moafogaus.abndns.com'),
+
 ];

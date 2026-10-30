@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connexion — {{ setting('app_name', 'ArchiDoc') }} {{ setting('structure_acronym', 'DGB') }}</title>
-  <meta name="description" content="Connexion au logiciel de gestion d'archivage numérique {{ setting('app_name', 'ArchiDoc') }}, {{ setting('structure_name', 'Direction Générale du Budget') }}">
+  <title>Connexion — {{ setting('app_name', 'ArchiDoc') }}{{ setting('structure_acronym') ? ' ' . setting('structure_acronym') : '' }}</title>
+  <meta name="description" content="Connexion au logiciel de gestion d'archivage numérique {{ setting('app_name', 'ArchiDoc') }}, {{ setting('structure_name', 'Entreprise Générale') }}">
 
   @if(setting('favicon'))
       <link rel="icon" href="{{ setting('favicon') }}">
@@ -111,6 +111,11 @@
               <label for="password" class="block text-sm font-semibold text-gray-800">
                 Mot de passe <span class="text-red-500">*</span>
               </label>
+              @if (Route::has('password.request'))
+                <a href="{{ route('password.request') }}" class="text-xs font-semibold text-brand-700 hover:text-brand-800 hover:underline transition-colors">
+                  Mot de passe oublié ?
+                </a>
+              @endif
             </div>
             <div class="relative">
               <input id="password" name="password" type="password" autocomplete="current-password" required
@@ -151,9 +156,36 @@
       </div>
 
       <!-- Pied de carte -->
-      <p class="mt-6 text-center text-xs text-gray-400">
-        {{ setting('footer_text', '© 2026 ArchiDoc — Direction Générale du Budget, Cameroun') }}
-      </p>
+      <div class="mt-6 text-center space-y-2">
+        <p class="text-xs text-gray-500 font-medium">
+          {{ setting('footer_text', '© ' . date('Y') . ' ' . setting('app_name', 'ArchiDoc') . '. Tous droits réservés.') }}
+        </p>
+
+        @php
+          $devName = config('app.dev_name') ?? config('developer.name') ?? env('DEV_NAME');
+          $devAdr = config('app.dev_adr') ?? config('developer.adr') ?? env('DEV_ADR');
+          $isUrl = $devAdr && filter_var($devAdr, FILTER_VALIDATE_URL);
+        @endphp
+
+        @if($devName || $devAdr)
+          <div class="text-[11px] text-gray-400 flex items-center justify-center gap-1.5 flex-wrap">
+            <span>Développé par</span>
+            @if($isUrl)
+              <a href="{{ $devAdr }}" target="_blank" rel="noopener noreferrer" class="font-extrabold text-brand-700 hover:text-brand-800 hover:underline inline-flex items-center gap-1 transition-colors">
+                <span>{{ $devName ?? $devAdr }}</span>
+                <svg class="h-3 w-3 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            @elseif($devAdr)
+              <span class="font-bold text-gray-700">{{ $devName }}</span>
+              <span class="text-gray-400">({{ $devAdr }})</span>
+            @else
+              <span class="font-bold text-gray-700">{{ $devName }}</span>
+            @endif
+          </div>
+        @endif
+      </div>
     </div>
 
   </div>
