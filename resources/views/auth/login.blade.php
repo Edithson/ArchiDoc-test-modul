@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connexion — {{ setting('app_name', 'ArchiDoc') }} {{ setting('structure_acronym', 'DGB') }}</title>
-  <meta name="description" content="Connexion au logiciel de gestion d'archivage numérique {{ setting('app_name', 'ArchiDoc') }}, {{ setting('structure_name', 'Direction Générale du Budget') }}">
+  <title>Connexion — {{ setting('app_name', 'ArchiDoc') }}{{ setting('structure_acronym') ? ' ' . setting('structure_acronym') : '' }}</title>
+  <meta name="description" content="Connexion au logiciel de gestion d'archivage numérique {{ setting('app_name', 'ArchiDoc') }}, {{ setting('structure_name', 'Entreprise Générale') }}">
 
   @if(setting('favicon'))
       <link rel="icon" href="{{ setting('favicon') }}">
@@ -111,6 +111,11 @@
               <label for="password" class="block text-sm font-semibold text-gray-800">
                 Mot de passe <span class="text-red-500">*</span>
               </label>
+              @if (Route::has('password.request'))
+                <a href="{{ route('password.request') }}" class="text-xs font-semibold text-brand-700 hover:text-brand-800 hover:underline transition-colors">
+                  Mot de passe oublié ?
+                </a>
+              @endif
             </div>
             <div class="relative">
               <input id="password" name="password" type="password" autocomplete="current-password" required
