@@ -76,6 +76,18 @@
           </div>
         @endif
 
+        <!-- Information / Demande déjà en cours -->
+        @if (session('info'))
+          <div class="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs font-semibold text-amber-800 flex items-start gap-2.5 shadow-xs" role="status">
+            <svg class="h-5 w-5 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div class="flex-1 leading-relaxed">
+              {{ session('info') }}
+            </div>
+          </div>
+        @endif
+
         @if ($errors->any())
           <div class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-700" role="alert">
             <div class="flex items-center gap-2 font-bold mb-1">

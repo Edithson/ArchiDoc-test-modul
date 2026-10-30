@@ -64,6 +64,29 @@
     <div class="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
       <div class="bg-white py-8 px-6 shadow-xl rounded-2xl border border-gray-100 sm:px-10">
 
+        <!-- Statut de session -->
+        @if (session('status'))
+          <div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800 flex items-start gap-2.5 shadow-xs" role="status">
+            <svg class="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div class="flex-1">
+              {{ session('status') }}
+            </div>
+          </div>
+        @endif
+
+        @if (session('info'))
+          <div class="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs font-semibold text-amber-800 flex items-start gap-2.5 shadow-xs" role="status">
+            <svg class="h-5 w-5 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div class="flex-1 leading-relaxed">
+              {{ session('info') }}
+            </div>
+          </div>
+        @endif
+
         @if ($errors->any())
           <div class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-700" role="alert">
             <div class="flex items-center gap-2 font-bold mb-1">
@@ -84,7 +107,7 @@
           @csrf
 
           <!-- Password Reset Token -->
-          <input type="hidden" name="token" value="{{ $request->route('token') }}">
+          <input type="hidden" name="token" value="{{ $token ?? $request->route('token') ?? request('token') ?? old('token') }}">
 
           <!-- Adresse e-mail -->
           <div>
@@ -93,7 +116,7 @@
             </label>
             <div class="relative">
               <input id="email" name="email" type="email" autocomplete="email" required
-                value="{{ old('email', $request->email) }}"
+                value="{{ old('email', $email ?? $request->email) }}"
                 placeholder="votre.email@entreprise.com"
                 class="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 pl-10 text-sm text-gray-900 placeholder-gray-400 shadow-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
               <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
