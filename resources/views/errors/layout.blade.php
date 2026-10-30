@@ -148,8 +148,25 @@
     </main>
 
     <!-- Pied de page -->
-    <footer class="relative z-10 py-4 text-center text-xs text-gray-500">
-        &copy; {{ date('Y') }} {{ $structureName }}. Tous droits réservés.
+    <footer class="relative z-10 py-4 text-center text-xs text-gray-500 space-y-1">
+        <p>&copy; {{ date('Y') }} {{ $structureName }}. Tous droits réservés.</p>
+        @php
+            $devName = config('app.dev_name') ?? config('developer.name') ?? env('DEV_NAME');
+            $devAdr = config('app.dev_adr') ?? config('developer.adr') ?? env('DEV_ADR');
+            $isUrl = $devAdr && filter_var($devAdr, FILTER_VALIDATE_URL);
+        @endphp
+        @if($devName || $devAdr)
+            <p class="text-[11px] text-gray-400">
+                Développé par
+                @if($isUrl)
+                    <a href="{{ $devAdr }}" target="_blank" rel="noopener noreferrer" class="font-bold text-brand-600 hover:text-brand-700 hover:underline">
+                        {{ $devName ?? $devAdr }}
+                    </a>
+                @else
+                    <span class="font-bold text-gray-600">{{ $devName }}</span>
+                @endif
+            </p>
+        @endif
     </footer>
 
 </body>
